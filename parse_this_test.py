@@ -12,8 +12,6 @@ class TestParseThis(unittest.TestCase):
     self.assertItemsEqual(args_and_defaults, [("first", NoDefault),
                                               ("second", "default_value"),
                                               ("third", "other_default")])
-
-  def test_get_args_and_default_empty(self):
     self.assertItemsEqual(_get_args_and_defaults([], ()), [])
 
   def test_get_args_to_parse(self):
