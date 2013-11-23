@@ -25,21 +25,24 @@ def _get_args_and_defaults(args, defaults):
   return args_and_defaults[::-1]
 
 
-def _get_arg_parser(func, args_and_defaults):
+def _get_arg_parser(func, types, args_and_defaults):
   """Return an ArgumentParser for the given function. Arguments are defined
     from the method arguments and their associated defaults.
 
   Args:
     func: method for which we want an ArgumentParser
+    types: types to which the command line arguments should be converted to
     args_and_defaults: list of 2-tuples (arg_name, arg_default)
   """
   parser = ArgumentParser(description="Description for '%s'" % func.__name__)
-  for (arg, default) in args_and_defaults:
+  identity_type = lambda x:x
+  for ((arg, default), arg_type) in izip_longest(args_and_defaults, types):
+    arg_type = arg_type or identity_type
     if default is NoDefault:
-      parser.add_argument(arg, help="Help for %s" % arg)
+      parser.add_argument(arg, help="Help for %s" % arg, type=arg_type)
     else:
       parser.add_argument("--%s" % arg, help="Help for %s" % arg,
-                          default=default)
+                          default=default, type=arg_type)
   return parser
 
 
@@ -76,7 +79,7 @@ def parse_this(func, types, args=None):
   (func_args, varargs, keywords, defaults) = getargspec(func)
   _check_types(types, func_args, defaults)
   args_and_default = _get_args_and_defaults(func_args, defaults)
-  parser = _get_arg_parser(func, args_and_default)
+  parser = _get_arg_parser(func, types, args_and_default)
   arguments = parser.parse_args(_get_args_to_parse(args, sys.argv[1:]))
   return arguments
 
