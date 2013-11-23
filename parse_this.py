@@ -56,7 +56,7 @@ def _get_args_to_parse(args, sys_argv):
     sys_argv: arguments of the command line i.e. sys.argv[1:]
   """
   if args is None:
-    command_line_arguments = sys_argv
+    command_line_arguments = sys_argv[1:]
     if command_line_arguments:
       return command_line_arguments
     return []
@@ -76,11 +76,18 @@ def _check_types(types, func_args, defaults):
   if len(types) < len(func_args) - len(defaults):
     raise AssertionError("Not enough types provided for conversion")
 
+
+def _call(func, func_args, arguments):
+  args = []
+  for argument in func_args:
+    args.append(getattr(arguments, argument))
+  return func(*args)
+
+
 def parse_this(func, types, args=None):
   (func_args, varargs, keywords, defaults) = getargspec(func)
   _check_types(types, func_args, defaults)
   args_and_default = _get_args_and_defaults(func_args, defaults)
   parser = _get_arg_parser(func, types, args_and_default)
-  arguments = parser.parse_args(_get_args_to_parse(args, sys.argv[1:]))
-  return arguments
-
+  arguments = parser.parse_args(_get_args_to_parse(args, sys.argv))
+  return _call(func, func_args, arguments)

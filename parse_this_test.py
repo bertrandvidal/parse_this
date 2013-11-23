@@ -2,11 +2,11 @@ import sys
 import unittest
 
 from parse_this import (_get_args_and_defaults, NoDefault, _get_args_to_parse,
-                        _check_types, _get_arg_parser)
+                        _check_types, _get_arg_parser, parse_this)
 
 
 def parse_me(one, two, three=12):
-  pass
+  return one * two, three*three
 
 
 class TestParseThis(unittest.TestCase):
@@ -21,12 +21,12 @@ class TestParseThis(unittest.TestCase):
 
   def test_get_args_to_parse(self):
     self.assertItemsEqual(_get_args_to_parse(None, []), [])
-    self.assertItemsEqual(_get_args_to_parse(None, ["arg"]), ["arg"])
-    self.assertItemsEqual(_get_args_to_parse(None, ["arg", "--kwargs=12"]),
+    self.assertItemsEqual(_get_args_to_parse(None, ["prog", "arg"]), ["arg"])
+    self.assertItemsEqual(_get_args_to_parse(None, ["prog", "arg", "--kwargs=12"]),
                           ["arg", "--kwargs=12"])
     self.assertItemsEqual(_get_args_to_parse([], []), [])
-    self.assertItemsEqual(_get_args_to_parse(["arg", "--kwargs=12"], []),
-                                             ["arg", "--kwargs=12"])
+    self.assertItemsEqual(_get_args_to_parse(["prog", "arg", "--kwargs=12"], []),
+                                             ["prog", "arg", "--kwargs=12"])
 
   def test_check_types(self):
     self.assertRaises(AssertionError, _check_types, [], ["arg_one"], ())
@@ -57,6 +57,12 @@ class TestParseThis(unittest.TestCase):
     self.assertEquals(namespace.one, "no")
     self.assertEquals(namespace.two, 12)
     self.assertEquals(namespace.three, 23)
+
+  def test_return_value(self):
+    self.assertEquals(parse_this(parse_me, [str, int], "yes 2".split()),
+                      ("yesyes", 144))
+    self.assertEquals(parse_this(parse_me, [str, int], "no 3 --three 2".split()),
+                      ("nonono", 4))
 
 
 if __name__ == "__main__":
