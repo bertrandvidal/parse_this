@@ -59,9 +59,24 @@ def _get_args_to_parse(args, sys_argv):
   return args
 
 
-def parse_this(func, args=None):
+def _check_types(types, func_args, defaults):
+  """Make sure that enough types were given to ensure conversion
+
+  Args:
+    types: a list of Python types to which the argument should be converted
+    func_args: list of function arguments name
+    defaults: tuple of default values for the function argument
+  """
+  if len(types) > len(func_args):
+    raise AssertionError("To many types provided for conversion.")
+  if len(types) < len(func_args) - len(defaults):
+    raise AssertionError("Not enough types provided for conversion")
+
+def parse_this(func, types, args=None):
   (func_args, varargs, keywords, defaults) = getargspec(func)
-  parser = _get_arg_parser(func, _get_args_and_defaults(func_args, defaults))
+  _check_types(types, func_args, defaults)
+  args_and_default = _get_args_and_defaults(func_args, defaults)
+  parser = _get_arg_parser(func, args_and_default)
   arguments = parser.parse_args(_get_args_to_parse(args, sys.argv[1:]))
   return arguments
 
