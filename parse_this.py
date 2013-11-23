@@ -37,10 +37,11 @@ def _get_arg_parser(func, types, args_and_defaults):
   parser = ArgumentParser(description="Description for '%s'" % func.__name__)
   identity_type = lambda x:x
   for ((arg, default), arg_type) in izip_longest(args_and_defaults, types):
-    arg_type = arg_type or identity_type
     if default is NoDefault:
+      arg_type = arg_type or identity_type
       parser.add_argument(arg, help="Help for %s" % arg, type=arg_type)
     else:
+      arg_type = arg_type or type(default)
       parser.add_argument("--%s" % arg, help="Help for %s" % arg,
                           default=default, type=arg_type)
   return parser
