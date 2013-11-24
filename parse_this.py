@@ -48,16 +48,17 @@ def _get_arg_parser(func, types, args_and_defaults):
     types: types to which the command line arguments should be converted to
     args_and_defaults: list of 2-tuples (arg_name, arg_default)
   """
-  parser = ArgumentParser(description="Description for '%s'" % func.__name__)
+  (description, arg_help) = _prepare_doc(func.__doc__, [x for (x,y) in args_and_defaults])
+  parser = ArgumentParser(description=description)
   identity_type = lambda x:x
-  for ((arg, default), arg_type) in izip_longest(args_and_defaults, types):
+  for ((arg, default), arg_type, help_msg) in izip_longest(args_and_defaults, types, arg_help):
     if default is NoDefault:
       arg_type = arg_type or identity_type
-      parser.add_argument(arg, help="Help for %s" % arg, type=arg_type)
+      parser.add_argument(arg, help=help_msg, type=arg_type)
     else:
       arg_type = arg_type or type(default)
-      parser.add_argument("--%s" % arg, help="Help for %s" % arg,
-                          default=default, type=arg_type)
+      parser.add_argument("--%s" % arg, help=help_msg, default=default,
+                          type=arg_type)
   return parser
 
 
