@@ -26,6 +26,13 @@ def _get_args_and_defaults(args, defaults):
 
 
 def _prepare_doc(func_doc, args):
+  """From the function docstring get the arg parse description and arguments
+    help message.
+
+  Args:
+    func_doc: the method docstring
+    args: name of the function arguments
+  """
   description = []
   args_help = []
   for line in func_doc.split("\n"):
@@ -93,6 +100,13 @@ def _check_types(types, func_args, defaults):
 
 
 def _call(func, func_args, arguments):
+  """Actually calls the function with the arguments parsed from the command line.
+
+  Args:
+    func: the function to called
+    func_args: name of the function arguments
+    arguments: the namespace object parse from the command line
+  """
   args = []
   for argument in func_args:
     args.append(getattr(arguments, argument))
@@ -100,6 +114,15 @@ def _call(func, func_args, arguments):
 
 
 def parse_this(func, types, args=None):
+  """Create an ArgumentParser for the given function converting the command line
+    arguments according to the list of types.
+
+  Args:
+    func: the method for which the command line arguments to be parsed
+    types: a list of types - as accepted by argparse - that will be used to
+      convert the command line arguments
+    args: a list of arguments to be parsed if None sys.argv is used
+  """
   (func_args, varargs, keywords, defaults) = getargspec(func)
   _check_types(types, func_args, defaults)
   args_and_default = _get_args_and_defaults(func_args, defaults)
