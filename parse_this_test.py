@@ -2,10 +2,17 @@ import sys
 import unittest
 
 from parse_this import (_get_args_and_defaults, NoDefault, _get_args_to_parse,
-                        _check_types, _get_arg_parser, parse_this)
+                        _check_types, _get_arg_parser, parse_this, _prepare_doc)
 
 
 def parse_me(one, two, three=12):
+  """Could use some parsing.
+
+  Args:
+    one: some stuff shouldn't be written down
+    two: I can turn 2 syllables words into 6 syllables words
+    three: I don't like the number three
+  """
   return one * two, three*three
 
 
@@ -27,6 +34,14 @@ class TestParseThis(unittest.TestCase):
     self.assertItemsEqual(_get_args_to_parse([], []), [])
     self.assertItemsEqual(_get_args_to_parse(["prog", "arg", "--kwargs=12"], []),
                                              ["prog", "arg", "--kwargs=12"])
+
+  def test_prepare_doc(self):
+    (description, help_msg) = _prepare_doc(parse_me.__doc__,
+                                           ["one","two","three"])
+    self.assertEquals(description, "Could use some parsing.")
+    self.assertItemsEqual(help_msg, ["some stuff shouldn't be written down",
+                                     "I can turn 2 syllables words into 6 syllables words",
+                                     "I don't like the number three"])
 
   def test_check_types(self):
     self.assertRaises(AssertionError, _check_types, [], ["arg_one"], ())

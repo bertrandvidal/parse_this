@@ -25,6 +25,20 @@ def _get_args_and_defaults(args, defaults):
   return args_and_defaults[::-1]
 
 
+def _prepare_doc(func_doc, args):
+  description = []
+  args_help = []
+  for line in func_doc.split("\n"):
+    if line.strip():
+      description.append(line.strip())
+    else:
+      break
+  for argument in args:
+    args_help.append(" ".join([line[line.index(":") + 1:].strip()
+                               for line in func_doc.split("\n")
+                               if line.strip().startswith("%s:" % argument)]))
+  return (" ".join(description), args_help)
+
 def _get_arg_parser(func, types, args_and_defaults):
   """Return an ArgumentParser for the given function. Arguments are defined
     from the method arguments and their associated defaults.
