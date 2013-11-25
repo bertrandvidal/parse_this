@@ -12,6 +12,11 @@ class NoDefault(object):
   pass
 
 
+class Self(object):
+  """Special value to use as the type of the self parameter of a method."""
+  pass
+
+
 def _get_args_and_defaults(args, defaults):
   """Return a list of 2-tuples - the argument name and its default value or
      a special value that indicates there is no default value.
@@ -127,6 +132,11 @@ def parse_this(func, types, args=None):
   """
   (func_args, varargs, keywords, defaults) = getargspec(func)
   _check_types(types, func_args, defaults)
+  # Remove self from the the arguments to avoid parsing it instead of an
+  # other argument
+  if types[0] == Self:
+    func_args = func_args[1:]
+    types = types[1:]
   args_and_defaults = _get_args_and_defaults(func_args, defaults)
   parser = _get_arg_parser(func, types, args_and_defaults)
   arguments = parser.parse_args(_get_args_to_parse(args, sys.argv))
@@ -153,6 +163,9 @@ class create_parser(object):
     if not hasattr(func, "parser"):
       (func_args, _, _, defaults) = getargspec(func)
       _check_types(self.types, func_args, defaults)
+      if self.types[0] == Self:
+        func_args = func_args[1:]
+        self.types = self.types[1:]
       args_and_defaults = _get_args_and_defaults(func_args, defaults)
       func.parser = _get_arg_parser(func, self.types, args_and_defaults)
     @wraps(func)

@@ -3,7 +3,7 @@ import unittest
 
 from parse_this import (_get_args_and_defaults, NoDefault, _get_args_to_parse,
                         _check_types, _get_arg_parser, parse_this, _prepare_doc,
-                        create_parser)
+                        create_parser, Self)
 
 
 def parse_me(one, two, three=12):
@@ -14,7 +14,7 @@ def parse_me(one, two, three=12):
     two: I can turn 2 syllables words into 6 syllables words
     three: I don't like the number three
   """
-  return one * two, three*three
+  return one * two, three * three
 
 
 class TestParseThis(unittest.TestCase):
@@ -53,8 +53,9 @@ class TestParseThis(unittest.TestCase):
       _check_types([int, int], ["arg_one", "arg_two"], ())
       _check_types([int, int], ["arg_one", "arg_two"], (12,))
       _check_types([int], ["arg_one", "arg_two"], (12,))
+      _check_types([Self, int, int], ["self", "arg_one", "arg_two"], ())
     except Exception, exception:
-      self.fail("_check_types should have raised: %s" % exception)
+      self.fail("_check_types should not have raised: %s" % exception)
 
   def test_namespace_no_option(self):
     parser = _get_arg_parser(parse_me, [str, int], [("one", NoDefault),
@@ -81,6 +82,7 @@ class TestParseThis(unittest.TestCase):
                       ("nonono", 4))
 
 
+
 @create_parser(str, int)
 def iam_parseable(one, two, three=12):
   """I too want to be parseable.
@@ -93,6 +95,20 @@ def iam_parseable(one, two, three=12):
   return one * two, three * three
 
 
+class NeedParsing(object):
+
+  @create_parser(Self, str, int)
+  def could_you_parse_me(self, one, two, three=12):
+    """I would like some arg parsing please.
+
+    Args:
+      one: and only one
+      two: will never be first
+      three: I don't like the number three
+    """
+    return one * two, three * three
+
+
 class TestParseable(unittest.TestCase):
 
   def test_parseable(self):
@@ -102,6 +118,16 @@ class TestParseable(unittest.TestCase):
     self.assertEquals(namespace.two, 2)
     self.assertEquals(namespace.three, 3)
     self.assertEquals(iam_parseable("yes", 2, 3), ("yesyes", 9))
+
+  def test_parseable_method(self):
+    need_parsing = NeedParsing()
+    parser = need_parsing.could_you_parse_me.parser
+    namespace = parser.parse_args("yes 2 --three 3".split())
+    self.assertEquals(namespace.one, "yes")
+    self.assertEquals(namespace.two, 2)
+    self.assertEquals(namespace.three, 3)
+    self.assertEquals(need_parsing.could_you_parse_me("yes", 2, 3), ("yesyes", 9))
+
 
 if __name__ == "__main__":
   unittest.main()
