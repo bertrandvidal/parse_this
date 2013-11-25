@@ -133,11 +133,22 @@ def parse_this(func, types, args=None):
 
 
 class create_parser(object):
+  """Decorator that creates an argument parser for the decorated function."""
 
   def __init__(self, *types):
+    """
+    Args:
+      type: vargs list of types to which the command line arguments should be
+        converted to
+    """
     self.types = types
 
   def __call__(self, func):
+    """Add an argument parser attribute `parser` to the decorated function.
+
+    Args:
+      func: the function for which we want to create an argument parser
+    """
     if not hasattr(func, "parser"):
       (func_args, _, _, defaults) = getargspec(func)
       _check_types(self.types, func_args, defaults)
