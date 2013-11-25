@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+from functools import wraps
 from inspect import getargspec
 from itertools import izip_longest
 import sys
@@ -125,7 +126,26 @@ def parse_this(func, types, args=None):
   """
   (func_args, varargs, keywords, defaults) = getargspec(func)
   _check_types(types, func_args, defaults)
-  args_and_default = _get_args_and_defaults(func_args, defaults)
-  parser = _get_arg_parser(func, types, args_and_default)
+  args_and_defaults = _get_args_and_defaults(func_args, defaults)
+  parser = _get_arg_parser(func, types, args_and_defaults)
   arguments = parser.parse_args(_get_args_to_parse(args, sys.argv))
   return _call(func, func_args, arguments)
+
+
+class create_parser(object):
+
+  def __init__(self, *types):
+    self.types = types
+
+  def __call__(self, func):
+    if not hasattr(func, "parser"):
+      (func_args, _, _, defaults) = getargspec(func)
+      _check_types(self.types, func_args, defaults)
+      args_and_defaults = _get_args_and_defaults(func_args, defaults)
+      func.parser = _get_arg_parser(func, self.types, args_and_defaults)
+    @wraps(func)
+    def decorated(*args, **kwargs):
+      return func(*args, **kwargs)
+    return decorated
+
+

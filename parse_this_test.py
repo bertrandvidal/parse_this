@@ -2,7 +2,8 @@ import sys
 import unittest
 
 from parse_this import (_get_args_and_defaults, NoDefault, _get_args_to_parse,
-                        _check_types, _get_arg_parser, parse_this, _prepare_doc)
+                        _check_types, _get_arg_parser, parse_this, _prepare_doc,
+                        create_parser)
 
 
 def parse_me(one, two, three=12):
@@ -79,6 +80,28 @@ class TestParseThis(unittest.TestCase):
     self.assertEquals(parse_this(parse_me, [str, int], "no 3 --three 2".split()),
                       ("nonono", 4))
 
+
+@create_parser(str, int)
+def iam_parseable(one, two, three=12):
+  """I too want to be parseable.
+
+  Args:
+    one: the one and only
+    two: for the money
+    three: don't like the number three
+  """
+  return one * two, three * three
+
+
+class TestParseable(unittest.TestCase):
+
+  def test_parseable(self):
+    parser = iam_parseable.parser
+    namespace = parser.parse_args("yes 2 --three 3".split())
+    self.assertEquals(namespace.one, "yes")
+    self.assertEquals(namespace.two, 2)
+    self.assertEquals(namespace.three, 3)
+    self.assertEquals(iam_parseable("yes", 2, 3), ("yesyes", 9))
 
 if __name__ == "__main__":
   unittest.main()
