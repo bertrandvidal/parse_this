@@ -5,7 +5,6 @@ Makes it easy to parse command line arguments for any function.
 
 Usage
 -----
-parse_this can be in two ways:
 
 ### Decorator
 As a decorator that will create an argument parser for the decorated function.
