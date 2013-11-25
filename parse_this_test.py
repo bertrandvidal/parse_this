@@ -17,6 +17,10 @@ def parse_me(one, two, three=12):
   return one * two, three * three
 
 
+def parse_me_no_doc(one, two, three):
+  return one * two, three * three
+
+
 class TestParseThis(unittest.TestCase):
 
   def test_get_args_and_default(self):
@@ -37,12 +41,20 @@ class TestParseThis(unittest.TestCase):
                                              ["prog", "arg", "--kwargs=12"])
 
   def test_prepare_doc(self):
-    (description, help_msg) = _prepare_doc(parse_me.__doc__,
+    (description, help_msg) = _prepare_doc(parse_me,
                                            ["one","two","three"])
     self.assertEquals(description, "Could use some parsing.")
     self.assertItemsEqual(help_msg, ["some stuff shouldn't be written down",
                                      "I can turn 2 syllables words into 6 syllables words",
                                      "I don't like the number three"])
+
+  def test_prepare_doc_no_docstring(self):
+    (description, help_msg) = _prepare_doc(parse_me_no_doc,
+                                           ["one", "two", "three"])
+    self.assertEquals(description, "Argument parsing for parse_me_no_doc")
+    self.assertItemsEqual(help_msg, ["Help message for one",
+                                     "Help message for two",
+                                     "Help message for three"])
 
   def test_check_types(self):
     self.assertRaises(AssertionError, _check_types, [], ["arg_one"], ())

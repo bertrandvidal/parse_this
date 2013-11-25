@@ -31,24 +31,28 @@ def _get_args_and_defaults(args, defaults):
   return args_and_defaults[::-1]
 
 
-def _prepare_doc(func_doc, args):
+def _prepare_doc(func, args):
   """From the function docstring get the arg parse description and arguments
-    help message.
+    help message. If no there is no docstring simple description and help
+    message are created.
 
   Args:
-    func_doc: the function docstring
+    func: the function that needs argument parsin
     args: name of the function arguments
   """
+  if not func.__doc__:
+    return ("Argument parsing for %s" % func.__name__, ["Help message for %s"
+                                                        % arg for arg in args])
   description = []
   args_help = []
-  for line in func_doc.split("\n"):
+  for line in func.__doc__.split("\n"):
     if line.strip():
       description.append(line.strip())
     else:
       break
   for argument in args:
     args_help.append(" ".join([line[line.index(":") + 1:].strip()
-                               for line in func_doc.split("\n")
+                               for line in func.__doc__.split("\n")
                                if line.strip().startswith("%s:" % argument)]))
   return (" ".join(description), args_help)
 
@@ -62,7 +66,7 @@ def _get_arg_parser(func, types, args_and_defaults):
     types: types to which the command line arguments should be converted to
     args_and_defaults: list of 2-tuples (arg_name, arg_default)
   """
-  (description, arg_help) = _prepare_doc(func.__doc__, [x for (x,y) in args_and_defaults])
+  (description, arg_help) = _prepare_doc(func, [x for (x,y) in args_and_defaults])
   parser = ArgumentParser(description=description)
   identity_type = lambda x:x
   for ((arg, default), arg_type, help_msg) in izip_longest(args_and_defaults, types, arg_help):
