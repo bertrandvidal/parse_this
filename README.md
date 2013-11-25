@@ -37,7 +37,7 @@ Note that the function can still be called as any other function.
 As a function that will handle the command line arguments directly.
 
 ```python
-from parse_this import create_parser
+from parse_this import parse_this
 
 
 def concatenate_str(one, two=2):
