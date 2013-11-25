@@ -47,6 +47,7 @@ def _prepare_doc(func_doc, args):
                                if line.strip().startswith("%s:" % argument)]))
   return (" ".join(description), args_help)
 
+
 def _get_arg_parser(func, types, args_and_defaults):
   """Return an ArgumentParser for the given function. Arguments are defined
     from the function arguments and their associated defaults.
@@ -158,5 +159,4 @@ class create_parser(object):
     def decorated(*args, **kwargs):
       return func(*args, **kwargs)
     return decorated
-
 
