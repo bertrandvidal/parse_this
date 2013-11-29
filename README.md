@@ -1,7 +1,7 @@
 parse_this
 ==========
 
-Makes it easy to parse command line arguments for any function.
+Makes it easy to parse command line arguments for any function, method or classmethod.
 
 Usage
 -----
@@ -31,6 +31,7 @@ if __name__ == "__main__":
   namespace_args = parser.parse_args()
   print concatenate_str(namespace_args.one, namespace_args.two)
 ```
+
 Note that the function can still be called as any other function.
 
 ### Function
@@ -53,6 +54,35 @@ def concatenate_str(one, two=2):
 if __name__ == "__main__":
   print parse_this(concatenate_str, [str, int])
 ```
+
+Arguments and types
+-------------------
+
+Both `parse_this` and `create_parser` need a list of types to which
+arguments will be converted to. Any Python type can be used, two
+special values are used for the `self` and `cls` respectively `Self`
+and `Class`. There is no need to provide a type for keyword agurment
+since it is infered from the default value of the argument.
+
+```python
+from parse_this import create_parser
+
+
+class INeedParsing(object):
+
+  @create_parser(int, str)
+  def parse_me_if_you_can(self, an_int, a_string, default=12):
+   return a_string * an_int, default * default
+
+
+if __name__ == "__main__":
+  need_parsing = INeedParsing()
+  parser = need_parsing.parse_me_if_you_can.parser
+  namespace_args = parser.parse_args()
+  print need_parsing.parse_me_if_you_can(namespace_args.an_int,
+					 namespace_args.a_string)
+```
+
 
 TODO
 ----
