@@ -57,7 +57,6 @@ if __name__ == "__main__":
 TODO
 ----
  * Docstring parsing doesn't handle multiline for argument
- * Handle method rather than just function
  * Handle vargs and kwargs
 
 
