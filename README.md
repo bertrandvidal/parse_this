@@ -73,6 +73,13 @@ class INeedParsing(object):
 
   @create_parser(Self, int, str)
   def parse_me_if_you_can(self, an_int, a_string, default=12):
+   """I dare you to parse me !!!
+
+   Args:q:"
+     an_int: int are pretty cool
+     a_string: string aren't that nice
+     default: guess what I got a default value
+   """
    return a_string * an_int, default * default
 
 
@@ -81,7 +88,7 @@ if __name__ == "__main__":
   parser = need_parsing.parse_me_if_you_can.parser
   namespace_args = parser.parse_args()
   print need_parsing.parse_me_if_you_can(namespace_args.an_int,
-					 namespace_args.a_string)
+                     namespace_args.a_string)
 ```
 
 The following would be the output of the command line `python test.py --help`:
@@ -89,22 +96,21 @@ The following would be the output of the command line `python test.py --help`:
 ```bash
 usage: test.py [-h] [--default DEFAULT] an_int a_string
 
-Argument parsing for parse_me_if_you_can
+I dare you to parse me !!!
 
 positional arguments:
-  an_int             Help message for an_int
-  a_string           Help message for a_string
+  an_int             int are pretty cool
+  a_string           string aren't that nice
 
 optional arguments:
   -h, --help         show this help message and exit
-  --default DEFAULT  Help message for default
-
+  --default DEFAULT  guess what I got a default value
 ```
 
 TODO
 ----
  * Docstring parsing doesn't handle multiline for argument
  * Handle vargs and kwargs
-
+ * Make a package and upload it to pypy
 
 
