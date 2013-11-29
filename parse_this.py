@@ -33,7 +33,7 @@ def _get_args_and_defaults(args, defaults):
 
 def _prepare_doc(func, args):
   """From the function docstring get the arg parse description and arguments
-    help message. If no there is no docstring simple description and help
+    help message. If there is no docstring simple description and help
     message are created.
 
   Args:
@@ -81,7 +81,7 @@ def _get_arg_parser(func, types, args_and_defaults):
 
 
 def _get_args_to_parse(args, sys_argv):
-  """Return the given argument if it is not None else sys.argv if it contains
+  """Return the given arguments if it is not None else sys.argv if it contains
     something, an empty list otherwise.
 
   Args:
@@ -100,7 +100,7 @@ def _check_types(types, func_args, defaults):
   """Make sure that enough types were given to ensure conversion
 
   Args:
-    types: a list of Python types to which the argument should be converted
+    types: a list of Python types to which the argument should be converted to
     func_args: list of function arguments name
     defaults: tuple of default values for the function argument
   """
@@ -136,8 +136,7 @@ def parse_this(func, types, args=None):
   """
   (func_args, varargs, keywords, defaults) = getargspec(func)
   _check_types(types, func_args, defaults)
-  # Remove self from the the arguments to avoid parsing it instead of an
-  # other argument
+  # Remove self from the arguments
   if types[0] == Self:
     func_args = func_args[1:]
     types = types[1:]
@@ -148,7 +147,7 @@ def parse_this(func, types, args=None):
 
 
 class create_parser(object):
-  """Decorator that creates an argument parser for the decorated function."""
+  """Creates an argument parser for the decorated function."""
 
   def __init__(self, *types):
     """
