@@ -65,12 +65,12 @@ and `Class`. There is no need to provide a type for keyword agurment
 since it is infered from the default value of the argument.
 
 ```python
-from parse_this import create_parser
+from parse_this import create_parser, Self
 
 
 class INeedParsing(object):
 
-  @create_parser(int, str)
+  @create_parser(Self, int, str)
   def parse_me_if_you_can(self, an_int, a_string, default=12):
    return a_string * an_int, default * default
 
