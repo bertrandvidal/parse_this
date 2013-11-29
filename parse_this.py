@@ -97,7 +97,8 @@ def _get_args_to_parse(args, sys_argv):
 
 
 def _check_types(types, func_args, defaults):
-  """Make sure that enough types were given to ensure conversion
+  """Make sure that enough types were given to ensure conversion. Also remove
+    a potentiel Self arguments.
 
   Args:
     types: a list of Python types to which the argument should be converted to
@@ -108,7 +109,10 @@ def _check_types(types, func_args, defaults):
     raise AssertionError("To many types provided for conversion.")
   if len(types) < len(func_args) - len(defaults):
     raise AssertionError("Not enough types provided for conversion")
-
+  if types and types[0] == Self:
+    types = types[1:]
+    func_args = func_args[1:]
+  return (types, func_args)
 
 def _call(func, func_args, arguments):
   """Actually calls the function with the arguments parsed from the command line.
@@ -135,11 +139,7 @@ def parse_this(func, types, args=None):
     args: a list of arguments to be parsed if None sys.argv is used
   """
   (func_args, varargs, keywords, defaults) = getargspec(func)
-  _check_types(types, func_args, defaults)
-  # Remove self from the arguments
-  if types[0] == Self:
-    func_args = func_args[1:]
-    types = types[1:]
+  types, func_args =_check_types(types, func_args, defaults)
   args_and_defaults = _get_args_and_defaults(func_args, defaults)
   parser = _get_arg_parser(func, types, args_and_defaults)
   arguments = parser.parse_args(_get_args_to_parse(args, sys.argv))
@@ -165,10 +165,7 @@ class create_parser(object):
     """
     if not hasattr(func, "parser"):
       (func_args, _, _, defaults) = getargspec(func)
-      _check_types(self.types, func_args, defaults)
-      if self.types[0] == Self:
-        func_args = func_args[1:]
-        self.types = self.types[1:]
+      self.types, func_args = _check_types(self.types, func_args, defaults)
       args_and_defaults = _get_args_and_defaults(func_args, defaults)
       func.parser = _get_arg_parser(func, self.types, args_and_defaults)
     @wraps(func)
