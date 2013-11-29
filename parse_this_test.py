@@ -3,7 +3,7 @@ import unittest
 
 from parse_this import (_get_args_and_defaults, NoDefault, _get_args_to_parse,
                         _check_types, _get_arg_parser, parse_this, _prepare_doc,
-                        create_parser, Self)
+                        create_parser, Self, Class)
 
 
 def parse_me(one, two, three=12):
@@ -120,6 +120,11 @@ class NeedParsing(object):
     """
     return one * two, three * three
 
+  @classmethod
+  @create_parser(Class, str, int)
+  def parse_me_if_you_can(cls, one, two, three=12):
+    return one * two, three * three
+
 
 class TestParseable(unittest.TestCase):
 
@@ -139,6 +144,14 @@ class TestParseable(unittest.TestCase):
     self.assertEquals(namespace.two, 2)
     self.assertEquals(namespace.three, 3)
     self.assertEquals(need_parsing.could_you_parse_me("yes", 2, 3), ("yesyes", 9))
+
+  def test_parseable_class(self):
+    parser = NeedParsing.parse_me_if_you_can.parser
+    namespace = parser.parse_args("yes 2 --three 3".split())
+    self.assertEquals(namespace.one, "yes")
+    self.assertEquals(namespace.two, 2)
+    self.assertEquals(namespace.three, 3)
+    self.assertEquals(NeedParsing.parse_me_if_you_can("yes", 2, 3), ("yesyes", 9))
 
 
 if __name__ == "__main__":

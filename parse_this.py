@@ -17,6 +17,11 @@ class Self(object):
   pass
 
 
+class Class(object):
+  """Special value to use as the type of the class parameter of a classmethod."""
+  pass
+
+
 def _get_args_and_defaults(args, defaults):
   """Return a list of 2-tuples - the argument name and its default value or
      a special value that indicates there is no default value.
@@ -109,7 +114,7 @@ def _check_types(types, func_args, defaults):
     raise AssertionError("To many types provided for conversion.")
   if len(types) < len(func_args) - len(defaults):
     raise AssertionError("Not enough types provided for conversion")
-  if types and types[0] == Self:
+  if types and types[0] in [Self, Class]:
     types = types[1:]
     func_args = func_args[1:]
   return (types, func_args)
