@@ -64,6 +64,7 @@ special values are used for the `self` and `cls` respectively `Self`
 and `Class`. There is no need to provide a type for keyword agurment
 since it is infered from the default value of the argument.
 
+If this is the containt of `test.py`:
 ```python
 from parse_this import create_parser, Self
 
@@ -83,6 +84,22 @@ if __name__ == "__main__":
 					 namespace_args.a_string)
 ```
 
+The following would be the output of the command line `python test.py --help`:
+
+```bash
+usage: test.py [-h] [--default DEFAULT] an_int a_string
+
+Argument parsing for parse_me_if_you_can
+
+positional arguments:
+  an_int             Help message for an_int
+  a_string           Help message for a_string
+
+optional arguments:
+  -h, --help         show this help message and exit
+  --default DEFAULT  Help message for default
+
+```
 
 TODO
 ----
