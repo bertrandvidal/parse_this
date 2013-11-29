@@ -75,7 +75,7 @@ class INeedParsing(object):
   def parse_me_if_you_can(self, an_int, a_string, default=12):
    """I dare you to parse me !!!
 
-   Args:q:"
+   Args:"
      an_int: int are pretty cool
      a_string: string aren't that nice
      default: guess what I got a default value
