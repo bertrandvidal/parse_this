@@ -109,6 +109,7 @@ optional arguments:
 
 TODO
 ----
+ * Add and example for classmethod
  * Docstring parsing doesn't handle multiline for argument
  * Handle vargs and kwargs
  * Make a package and upload it to pypy
