@@ -42,7 +42,7 @@ def _prepare_doc(func, args):
     message are created.
 
   Args:
-    func: the function that needs argument parsin
+    func: the function that needs argument parsing
     args: name of the function arguments
   """
   if not func.__doc__:
