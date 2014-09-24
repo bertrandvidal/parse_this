@@ -56,6 +56,7 @@ def _prepare_doc(func, args):
     else:
       break
   for argument in args:
+    # TODO: Make this more explicit
     args_help.append(" ".join([line[line.index(":") + 1:].strip()
                                for line in func.__doc__.split("\n")
                                if line.strip().startswith("%s:" % argument)]))
@@ -93,6 +94,8 @@ def _get_args_to_parse(args, sys_argv):
     args: argument to be parsed
     sys_argv: arguments of the command line i.e. sys.argv[1:]
   """
+  # TODO: The structure of the method could reflect what the docstring
+  # says
   if args is None:
     command_line_arguments = sys_argv[1:]
     if command_line_arguments:
@@ -110,6 +113,8 @@ def _check_types(types, func_args, defaults):
     func_args: list of function arguments name
     defaults: tuple of default values for the function argument
   """
+  # TODO: Raise a specific error, also add what is raised in the
+  # docstring
   if len(types) > len(func_args):
     raise AssertionError("To many types provided for conversion.")
   if len(types) < len(func_args) - len(defaults):
