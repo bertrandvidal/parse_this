@@ -3,7 +3,7 @@ import unittest
 
 from parse_this import (_get_args_and_defaults, NoDefault, _get_args_to_parse,
                         _check_types, _get_arg_parser, parse_this, _prepare_doc,
-                        create_parser, Self, Class)
+                        create_parser, Self, Class, ParseThisError)
 
 
 def parse_me(one, two, three=12):
@@ -57,8 +57,8 @@ class TestParseThis(unittest.TestCase):
                                      "Help message for three"])
 
   def test_check_types(self):
-    self.assertRaises(AssertionError, _check_types, [], ["arg_one"], ())
-    self.assertRaises(AssertionError, _check_types, [int, float], ["arg_one"],
+    self.assertRaises(ParseThisError, _check_types, [], ["arg_one"], ())
+    self.assertRaises(ParseThisError, _check_types, [int, float], ["arg_one"],
                       ())
     try:
       _check_types([], [], ())

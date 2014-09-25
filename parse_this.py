@@ -5,6 +5,11 @@ from itertools import izip_longest
 import sys
 
 
+class ParseThisError(Exception):
+  """Error base class raised by this module."""
+  pass
+
+
 class NoDefault(object):
   """Use to fill the list of args and default to indicate the argument doesn't
     have a default value.
@@ -110,13 +115,14 @@ def _check_types(types, func_args, defaults):
     types: a list of Python types to which the argument should be converted to
     func_args: list of function arguments name
     defaults: tuple of default values for the function argument
+  Raises:
+    ParseThisError: if the number of types for conversion does not match
+        the number of function's arguments
   """
-  # TODO: Raise a specific error, also add what is raised in the
-  # docstring
   if len(types) > len(func_args):
-    raise AssertionError("To many types provided for conversion.")
+    raise ParseThisError("To many types provided for conversion.")
   if len(types) < len(func_args) - len(defaults):
-    raise AssertionError("Not enough types provided for conversion")
+    raise ParseThisError("Not enough types provided for conversion")
   if types and types[0] in [Self, Class]:
     types = types[1:]
     func_args = func_args[1:]
