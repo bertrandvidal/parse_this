@@ -21,6 +21,16 @@ def parse_me_no_doc(one, two, three):
   return one * two, three * three
 
 
+def will_you_dare_parse_me(one, two, three):
+  """I am a sneaky function.
+
+  Args:
+    one: this one is a no brainer
+    three: noticed you're missing docstring for two
+  """
+  return one * two, three * three
+
+
 class TestParseThis(unittest.TestCase):
 
   def test_get_args_and_default(self):
@@ -55,6 +65,13 @@ class TestParseThis(unittest.TestCase):
     self.assertItemsEqual(help_msg, ["Help message for one",
                                      "Help message for two",
                                      "Help message for three"])
+
+  def test_prepare_doc_will_you_dare(self):
+    (description, help_msg) = _prepare_doc(will_you_dare_parse_me,
+                                           ["one", "two", "three"])
+    self.assertEquals(description, "I am a sneaky function.")
+    self.assertItemsEqual(help_msg, ["this one is a no brainer", "",
+                                     "noticed you're missing docstring for two"])
 
   def test_check_types(self):
     self.assertRaises(ParseThisError, _check_types, [], ["arg_one"], ())

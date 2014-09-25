@@ -59,6 +59,7 @@ def _prepare_doc(func, args):
     if line.strip():
       description.append(line.strip())
     else:
+      # The first empty line marks the end of the method description
       break
   for argument in args:
     # TODO: Make this more explicit
