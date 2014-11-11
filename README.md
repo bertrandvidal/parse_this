@@ -1,6 +1,8 @@
 parse_this
 ==========
 
+[![Code health][landscape]][landscape_link]
+
 Makes it easy to parse command line arguments for any function, method or classmethod.
 
 You just finished writing an awesome piece of code and now comes the boring part:
@@ -156,4 +158,5 @@ TODO
  * Handle vargs and kwargs
  * Make a package and upload it to pypy
 
-
+[landscape_link]: https://landscape.io/github/bertrandvidal/kaizen/master "kaizen on Landscape"
+[landscape]: https://landscape.io/github/bertrandvidal/kaizen/master/landscape.png "Code health"
