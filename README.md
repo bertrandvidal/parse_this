@@ -158,5 +158,5 @@ TODO
  * Handle vargs and kwargs
  * Make a package and upload it to pypy
 
-[landscape_link]: https://landscape.io/github/bertrandvidal/kaizen/master "kaizen on Landscape"
-[landscape]: https://landscape.io/github/bertrandvidal/kaizen/master/landscape.png "Code health"
+[landscape_link]: https://landscape.io/github/bertrandvidal/parse_this/master "parse_this on Landscape"
+[landscape]: https://landscape.io/github/bertrandvidal/parse_this/master/landscape.png "Code health"
