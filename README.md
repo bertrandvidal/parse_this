@@ -17,19 +17,19 @@ from parse_this import create_parser
 
 @create_parser(str, int)
 def concatenate_str(one, two=2):
-  """Concatenates a string with itself a given number of times.
+    """Concatenates a string with itself a given number of times.
 
-  Args:
-    one: string to be concatenated with itself
-    two: number of times the string is concatenated, defaults to 2
-  """
-  return one * two
+    Args:
+        one: string to be concatenated with itself
+        two: number of times the string is concatenated, defaults to 2
+    """
+    return one * two
 
 
 if __name__ == "__main__":
-  parser = concatenate_str.parser
-  namespace_args = parser.parse_args()
-  print concatenate_str(namespace_args.one, namespace_args.two)
+    parser = concatenate_str.parser
+    namespace_args = parser.parse_args()
+    print concatenate_str(namespace_args.one, namespace_args.two)
 ```
 
 Note that the function can still be called as any other function.
@@ -42,17 +42,17 @@ from parse_this import parse_this
 
 
 def concatenate_str(one, two=2):
-  """Concatenates a string with itself a given number of times.
+    """Concatenates a string with itself a given number of times.
 
-  Args:
-    one: string to be concatenated with itself
-    two: number of times the string is concatenated, defaults to 2
-  """
-  return one * two
+    Args:
+        one: string to be concatenated with itself
+        two: number of times the string is concatenated, defaults to 2
+    """
+    return one * two
 
 
 if __name__ == "__main__":
-  print parse_this(concatenate_str, [str, int])
+    print parse_this(concatenate_str, [str, int])
 ```
 
 Arguments and types
@@ -71,24 +71,24 @@ from parse_this import create_parser, Self
 
 class INeedParsing(object):
 
-  @create_parser(Self, int, str)
-  def parse_me_if_you_can(self, an_int, a_string, default=12):
-   """I dare you to parse me !!!
+    @create_parser(Self, int, str)
+    def parse_me_if_you_can(self, an_int, a_string, default=12):
+        """I dare you to parse me !!!
 
-   Args:"
-     an_int: int are pretty cool
-     a_string: string aren't that nice
-     default: guess what I got a default value
-   """
-   return a_string * an_int, default * default
+        Args:
+            an_int: int are pretty cool
+            a_string: string aren't that nice
+            default: guess what I got a default value
+        """
+        return a_string * an_int, default * default
 
 
 if __name__ == "__main__":
-  need_parsing = INeedParsing()
-  parser = need_parsing.parse_me_if_you_can.parser
-  namespace_args = parser.parse_args()
-  print need_parsing.parse_me_if_you_can(namespace_args.an_int,
-                     namespace_args.a_string)
+    need_parsing = INeedParsing()
+    parser = need_parsing.parse_me_if_you_can.parser
+    namespace_args = parser.parse_args()
+    print need_parsing.parse_me_if_you_can(namespace_args.an_int,
+                                           namespace_args.a_string)
 ```
 
 The following would be the output of the command line `python test.py --help`:
@@ -107,9 +107,40 @@ optional arguments:
   --default DEFAULT  guess what I got a default value
 ```
 
+In a similar fashion you can parse line arguments for classmethods:
+
+```python
+from parse_this import create_parser, Class
+
+
+class INeedParsing(object):
+
+    @classmethod
+    @create_parser(Class, int, str)
+    def parse_me_if_you_can(cls, an_int, a_string, default=12):
+        """I dare you to parse me !!!
+
+        Args:
+            an_int: int are pretty cool
+            a_string: string aren't that nice
+            default: guess what I got a default value
+        """
+        return a_string * an_int, default * default
+
+
+if __name__ == "__main__":
+    parser = INeedParsing.parse_me_if_you_can.parser
+    namespace_args = parser.parse_args()
+    print INeedParsing.parse_me_if_you_can(namespace_args.an_int,
+                                           namespace_args.a_string)
+```
+The output will be the same as above.
+
+**Note**: The `classmethod` decorator is place **on top** of the `create_parser`
+decorator in order for the method to still be a considered a class method.
+
 TODO
 ----
- * Add and example for classmethod
  * Docstring parsing doesn't handle multiline for argument
  * Handle vargs and kwargs
  * Make a package and upload it to pypy
