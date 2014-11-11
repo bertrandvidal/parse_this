@@ -3,6 +3,17 @@ parse_this
 
 Makes it easy to parse command line arguments for any function, method or classmethod.
 
+You just finished writing an awesome piece of code and now comes the boring part:
+adding the command line parsing to actually use it ...
+
+So now you need to use the awesome, but very verbose, `argparse` module.
+For each argument of your entry point method you need to add a name, a help
+message and/or a default value. But wait... Your parameters are correctly named
+right!? And you have an awesome docstring for that method. There is probably a
+way of creating the `ArgumentParser` easily right?
+
+Yes and it's called `parse_this`!
+
 Usage
 -----
 
