@@ -45,6 +45,9 @@ def _prepare_doc(func, args):
     Args:
         func: the function that needs argument parsing
         args: name of the function arguments
+    Returns:
+        The description to be used in the argument parser and the list of help
+        message for each argument as a tuple.
     """
     if not func.__doc__:
         return ("Argument parsing for %s" % func.__name__,
