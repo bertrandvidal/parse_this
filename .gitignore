@@ -34,3 +34,6 @@ test_results.xml
 .mr.developer.cfg
 .project
 .pydevproject
+
+# Virtualenv directory
+env/
