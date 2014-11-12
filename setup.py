@@ -7,7 +7,7 @@ with open(os.path.join(os.path.dirname(__file__), 'README.rst'), "r") as readme_
 
 setup(
     name = "parse_this",
-    version = "0.1",
+    version = "0.2",
     description = "Makes it easy to parse command line arguments for any function, method or classmethod..",
     long_description = readme,
     author = "Bertrand Vidal",
