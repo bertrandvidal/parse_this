@@ -1,7 +1,9 @@
 parse\_this
 ===========
 
-|Code health|
+`[|PyPI latest version badge|\ ][pypi\_link] [|PyPI monthly
+downloads|\ ][pypi\_link]\ |Code
+health| <https://landscape.io/github/bertrandvidal/parse_this/master>`__
 
 Makes it easy to parse command line arguments for any function, method
 or classmethod.
@@ -162,12 +164,31 @@ The output will be the same as above.
 ``create_parser`` decorator in order for the method to still be a
 considered a class method.
 
+INSTALLING PARSE\_THIS
+----------------------
+
+``parse_this`` can be installed using the following command:
+
+.. code:: bash
+
+    pip install parse_this
+
+RUNNING TESTS
+-------------
+
+To check that everything is running fine you can run the following
+command:
+
+.. code:: bash
+
+    python setup.py nosetests
+
 TODO
 ----
 
 -  Docstring parsing doesn't handle multiline for argument
 -  Handle vargs and kwargs
--  Make a package and upload it to pypy
 
+.. |PyPI latest version badge| image:: https://pypip.in/v/parse_this/badge.png
+.. |PyPI monthly downloads| image:: https://pypip.in/d/parse_this/badge.png
 .. |Code health| image:: https://landscape.io/github/bertrandvidal/parse_this/master/landscape.png
-   :target: https://landscape.io/github/bertrandvidal/parse_this/master
