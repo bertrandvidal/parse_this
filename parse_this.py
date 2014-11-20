@@ -78,7 +78,7 @@ def _get_arg_parser(func, types, args_and_defaults):
         args_and_defaults: list of 2-tuples (arg_name, arg_default)
     """
     (description, arg_help) = _prepare_doc(
-        func, [x for (x, y) in args_and_defaults])
+        func, [x for (x, _) in args_and_defaults])
     parser = ArgumentParser(description=description)
     identity_type = lambda x: x
     for ((arg, default), arg_type, help_msg) in izip_longest(args_and_defaults,
@@ -155,7 +155,7 @@ def parse_this(func, types, args=None):
             convert the command line arguments
         args: a list of arguments to be parsed if None sys.argv is used
     """
-    (func_args, varargs, keywords, defaults) = getargspec(func)
+    (func_args, _, keywords, defaults) = getargspec(func)
     types, func_args = _check_types(types, func_args, defaults)
     args_and_defaults = _get_args_and_defaults(func_args, defaults)
     parser = _get_arg_parser(func, types, args_and_defaults)
