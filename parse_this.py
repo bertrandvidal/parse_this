@@ -155,7 +155,7 @@ def parse_this(func, types, args=None):
             convert the command line arguments
         args: a list of arguments to be parsed if None sys.argv is used
     """
-    (func_args, _, keywords, defaults) = getargspec(func)
+    (func_args, _, __, defaults) = getargspec(func)
     types, func_args = _check_types(types, func_args, defaults)
     args_and_defaults = _get_args_and_defaults(func_args, defaults)
     parser = _get_arg_parser(func, types, args_and_defaults)
