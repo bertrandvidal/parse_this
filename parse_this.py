@@ -46,14 +46,15 @@ def _prepare_doc(func, args):
         func: the function that needs argument parsing
         args: name of the function arguments
     Returns:
-        The description to be used in the argument parser and the list of help
-        message for each argument as a tuple.
+        A tuple containing the description to be used in the argument parser and
+        a dict indexed on the callable argument name and their associated help
+        message
     """
     if not func.__doc__:
         return ("Argument parsing for %s" % func.__name__,
-                ["Help message for %s" % arg for arg in args])
+                {arg: "Help message for %s" % arg for arg in args})
     description = []
-    args_help = []
+    args_help = {}
     for line in func.__doc__.split("\n"):
         if line.strip():
             description.append(line.strip())
@@ -62,9 +63,9 @@ def _prepare_doc(func, args):
             break
     for argument in args:
         # TODO: Make this more explicit
-        args_help.append(" ".join([line[line.index(":") + 1:].strip()
-                                   for line in func.__doc__.split("\n")
-                                   if line.strip().startswith("%s:" % argument)]))
+        args_help[argument] = " ".join([line[line.index(":") + 1:].strip()
+                                       for line in func.__doc__.split("\n")
+                                       if line.strip().startswith("%s:" % argument)])
     return (" ".join(description), args_help)
 
 
@@ -81,8 +82,8 @@ def _get_arg_parser(func, types, args_and_defaults):
         func, [x for (x, _) in args_and_defaults])
     parser = ArgumentParser(description=description)
     identity_type = lambda x: x
-    for ((arg, default), arg_type, help_msg) in izip_longest(args_and_defaults,
-                                                             types, arg_help):
+    for ((arg, default), arg_type) in izip_longest(args_and_defaults, types):
+        help_msg = arg_help[arg]
         if default is NoDefault:
             arg_type = arg_type or identity_type
             parser.add_argument(arg, help=help_msg, type=arg_type)
