@@ -2,6 +2,7 @@ from argparse import ArgumentParser
 from functools import wraps
 from inspect import getargspec
 from itertools import izip_longest
+import re
 import sys
 
 
@@ -55,17 +56,29 @@ def _prepare_doc(func, args):
                 {arg: "Help message for %s" % arg for arg in args})
     description = []
     args_help = {}
+    fill_description = True
+    arg_name = None
     for line in func.__doc__.split("\n"):
-        if line.strip():
+        if line.strip() and fill_description:
             description.append(line.strip())
         else:
             # The first empty line marks the end of the method description
-            break
+            fill_description = False
+            arg_match = re.match("\b*(?P<arg_name>\w+):(?P<help_msg>.+)",
+                                 line.strip())
+            try:
+                arg_name = arg_match.groupdict()["arg_name"]
+                args_help[arg_name] = arg_match.groupdict()["help_msg"]
+            except AttributeError:
+                # The line didn't match the pattern we've hit a
+                # multiline argument docstring so we add it to the
+                # previous argument help message
+                if arg_name is not None:
+                    args_help[arg_name] = " ".join([args_help[arg_name], line.strip()])
+    # If an argument is missing a help message we create a simple one
     for argument in args:
-        # TODO: Make this more explicit
-        args_help[argument] = " ".join([line[line.index(":") + 1:].strip()
-                                       for line in func.__doc__.split("\n")
-                                       if line.strip().startswith("%s:" % argument)])
+        if argument not in args_help:
+            args_help[argument] = "Help message for %s" % argument
     return (" ".join(description), args_help)
 
 

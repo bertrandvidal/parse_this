@@ -26,7 +26,8 @@ def will_you_dare_parse_me(one, two, three):
 
     Args:
       one: this one is a no brainer
-      three: noticed you're missing docstring for two
+      three: noticed you're missing docstring for two and
+        I'm multiline too!
     """
     return one * two, three * three
 
@@ -58,25 +59,25 @@ class TestParseThis(unittest.TestCase):
         (description, help_msg) = _prepare_doc(parse_me,
                                                ["one", "two", "three"])
         self.assertEquals(description, "Could use some parsing.")
-        self.assertDictEqual(help_msg, {"one":"some stuff shouldn't be written down",
-                                        "two":"I can turn 2 syllables words into 6 syllables words",
-                                        "three": "I don't like the number three"})
+        self.assertItemsEqual(help_msg, {"one":"some stuff shouldn't be written down",
+                                         "two":"I can turn 2 syllables words into 6 syllables words",
+                                         "three": "I don't like the number three"})
 
     def test_prepare_doc_no_docstring(self):
         (description, help_msg) = _prepare_doc(parse_me_no_doc,
                                                ["one", "two", "three"])
         self.assertEquals(description, "Argument parsing for parse_me_no_doc")
-        self.assertDictEqual(help_msg, {"one": "Help message for one",
-                                        "two":  "Help message for two",
-                                        "three":  "Help message for three"})
+        self.assertItemsEqual(help_msg, {"one": "Help message for one",
+                                         "two":  "Help message for two",
+                                         "three":  "Help message for three"})
 
     def test_prepare_doc_will_you_dare(self):
         (description, help_msg) = _prepare_doc(will_you_dare_parse_me,
                                                ["one", "two", "three"])
         self.assertEquals(description, "I am a sneaky function.")
-        self.assertDictEqual(help_msg, {"one": "this one is a no brainer",
-                                        "two": "",
-                                        "three": "noticed you're missing docstring for two"})
+        self.assertItemsEqual(help_msg, {"one": "this one is a no brainer",
+                                         "two": "Help message for two",
+                                         "three": "noticed you're missing docstring for two and I'm multiline too!"})
 
     def test_check_types(self):
         self.assertRaises(ParseThisError, _check_types, [], ["arg_one"], ())
