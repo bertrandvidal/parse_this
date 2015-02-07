@@ -74,6 +74,23 @@ As a function that will handle the command line arguments directly.
     if __name__ == "__main__":
         print parse_this(concatenate_str, [str, int])
 
+Note: both ``parse_this`` and ``create_parser`` need your docstring to
+be in a specific format. The description of the argument parser is taken
+from the docstring and contains all the text until the first blank line.
+Arguments help message are taken from the following pattern:
+
+``<argument_name><delimiter_chars><argument_help>``
+
+-  argument\_name must be the same as the argument of the method
+-  delimiter\_chars is one or more chars that separate the argument from
+   its help message
+-  argument\_help is everything behind the delimiter\_chars until the
+   next argument, a blank line or the end of the docstring
+
+The ``delimiter_chars`` can be passed to both ``parse_this`` and
+``create_parser`` as the keywords argument ``params_delim``. It defaults
+to ``:`` since this is the convention I most often use.
+
 Arguments and types
 -------------------
 
@@ -92,14 +109,14 @@ If this is the containt of ``test.py``:
 
     class INeedParsing(object):
 
-        @create_parser(Self, int, str)
+        @create_parser(Self, int, str, params_delim="--")
         def parse_me_if_you_can(self, an_int, a_string, default=12):
             """I dare you to parse me !!!
 
             Args:
-                an_int: int are pretty cool
-                a_string: string aren't that nice
-                default: guess what I got a default value
+                an_int -- int are pretty cool
+                a_string -- string aren't that nice
+                default -- guess what I got a default value
             """
             return a_string * an_int, default * default
 
@@ -138,14 +155,14 @@ In a similar fashion you can parse line arguments for classmethods:
     class INeedParsing(object):
 
         @classmethod
-        @create_parser(Class, int, str)
+        @create_parser(Class, int, str, params_delim="--")
         def parse_me_if_you_can(cls, an_int, a_string, default=12):
             """I dare you to parse me !!!
 
             Args:
-                an_int: int are pretty cool
-                a_string: string aren't that nice
-                default: guess what I got a default value
+                an_int -- int are pretty cool
+                a_string -- string aren't that nice
+                default -- guess what I got a default value
             """
             return a_string * an_int, default * default
 
