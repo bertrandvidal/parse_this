@@ -173,7 +173,6 @@ python setup.py nosetests
 
 TODO
 ----
- * Docstring parsing doesn't handle multiline for argument
  * Handle vargs and kwargs
 
 

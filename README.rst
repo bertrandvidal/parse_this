@@ -184,7 +184,6 @@ command:
 TODO
 ----
 
--  Docstring parsing doesn't handle multiline for argument
 -  Handle vargs and kwargs
 
 .. |PyPI latest version badge| image:: https://badge.fury.io/py/parse_this.svg
