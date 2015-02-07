@@ -38,46 +38,46 @@ class TestParseThis(unittest.TestCase):
         args_and_defaults = _get_args_and_defaults(["first", "second", "third"],
                                                    ("default_value",
                                                     "other_default"))
-        self.assertItemsEqual(args_and_defaults, [("first", NoDefault),
-                                                  ("second", "default_value"),
-                                                  ("third", "other_default")])
-        self.assertItemsEqual(_get_args_and_defaults([], ()), [])
+        self.assertListEqual(args_and_defaults, [("first", NoDefault),
+                                                 ("second", "default_value"),
+                                                 ("third", "other_default")])
+        self.assertListEqual(_get_args_and_defaults([], ()), [])
 
     def test_get_args_to_parse(self):
-        self.assertItemsEqual(_get_args_to_parse(None, []), [])
-        self.assertItemsEqual(
+        self.assertListEqual(_get_args_to_parse(None, []), [])
+        self.assertListEqual(
             _get_args_to_parse(None, ["prog", "arg"]), ["arg"])
-        self.assertItemsEqual(_get_args_to_parse(None, ["prog", "arg",
-                                                        "--kwargs=12"]),
+        self.assertListEqual(_get_args_to_parse(None, ["prog", "arg",
+                                                       "--kwargs=12"]),
                               ["arg", "--kwargs=12"])
-        self.assertItemsEqual(_get_args_to_parse([], []), [])
-        self.assertItemsEqual(_get_args_to_parse(["prog", "arg",
-                                                  "--kwargs=12"], []),
+        self.assertListEqual(_get_args_to_parse([], []), [])
+        self.assertListEqual(_get_args_to_parse(["prog", "arg",
+                                                 "--kwargs=12"], []),
                               ["prog", "arg", "--kwargs=12"])
 
     def test_prepare_doc(self):
         (description, help_msg) = _prepare_doc(parse_me,
                                                ["one", "two", "three"])
-        self.assertEquals(description, "Could use some parsing.")
-        self.assertItemsEqual(help_msg, {"one":"some stuff shouldn't be written down",
-                                         "two":"I can turn 2 syllables words into 6 syllables words",
-                                         "three": "I don't like the number three"})
+        self.assertEqual(description, "Could use some parsing.")
+        self.assertEqual(help_msg, {"one":"some stuff shouldn't be written down",
+                                    "two":"I can turn 2 syllables words into 6 syllables words",
+                                    "three": "I don't like the number three"})
 
     def test_prepare_doc_no_docstring(self):
         (description, help_msg) = _prepare_doc(parse_me_no_doc,
                                                ["one", "two", "three"])
-        self.assertEquals(description, "Argument parsing for parse_me_no_doc")
-        self.assertItemsEqual(help_msg, {"one": "Help message for one",
-                                         "two":  "Help message for two",
-                                         "three":  "Help message for three"})
+        self.assertEqual(description, "Argument parsing for parse_me_no_doc")
+        self.assertEqual(help_msg, {"one": "Help message for one",
+                                    "two":  "Help message for two",
+                                    "three":  "Help message for three"})
 
     def test_prepare_doc_will_you_dare(self):
         (description, help_msg) = _prepare_doc(will_you_dare_parse_me,
                                                ["one", "two", "three"])
-        self.assertEquals(description, "I am a sneaky function.")
-        self.assertItemsEqual(help_msg, {"one": "this one is a no brainer",
-                                         "two": "Help message for two",
-                                         "three": "noticed you're missing docstring for two and I'm multiline too!"})
+        self.assertEqual(description, "I am a sneaky function.")
+        self.assertEqual(help_msg, {"one": "this one is a no brainer",
+                                    "two": "Help message for two",
+                                    "three": "noticed you're missing docstring for two and I'm multiline too!"})
 
     def test_check_types(self):
         self.assertRaises(ParseThisError, _check_types, [], ["arg_one"], ())
@@ -97,23 +97,23 @@ class TestParseThis(unittest.TestCase):
                                                         ("two", NoDefault),
                                                         ("three", 12)])
         namespace = parser.parse_args("yes 42".split())
-        self.assertEquals(namespace.one, "yes")
-        self.assertEquals(namespace.two, 42)
-        self.assertEquals(namespace.three, 12)
+        self.assertEqual(namespace.one, "yes")
+        self.assertEqual(namespace.two, 42)
+        self.assertEqual(namespace.three, 12)
 
     def test_namespace(self):
         parser = _get_arg_parser(parse_me, [str, int], [("one", NoDefault),
                                                         ("two", NoDefault),
                                                         ("three", 12)])
         namespace = parser.parse_args("no 12 --three=23".split())
-        self.assertEquals(namespace.one, "no")
-        self.assertEquals(namespace.two, 12)
-        self.assertEquals(namespace.three, 23)
+        self.assertEqual(namespace.one, "no")
+        self.assertEqual(namespace.two, 12)
+        self.assertEqual(namespace.three, 23)
 
     def test_return_value(self):
-        self.assertEquals(parse_this(parse_me, [str, int], "yes 2".split()),
+        self.assertEqual(parse_this(parse_me, [str, int], "yes 2".split()),
                           ("yesyes", 144))
-        self.assertEquals(parse_this(parse_me, [str, int],
+        self.assertEqual(parse_this(parse_me, [str, int],
                                      "no 3 --three 2".split()),
                           ("nonono", 4))
 
@@ -154,29 +154,29 @@ class TestParseable(unittest.TestCase):
     def test_parseable(self):
         parser = iam_parseable.parser
         namespace = parser.parse_args("yes 2 --three 3".split())
-        self.assertEquals(namespace.one, "yes")
-        self.assertEquals(namespace.two, 2)
-        self.assertEquals(namespace.three, 3)
-        self.assertEquals(iam_parseable("yes", 2, 3), ("yesyes", 9))
+        self.assertEqual(namespace.one, "yes")
+        self.assertEqual(namespace.two, 2)
+        self.assertEqual(namespace.three, 3)
+        self.assertEqual(iam_parseable("yes", 2, 3), ("yesyes", 9))
 
     def test_parseable_method(self):
         need_parsing = NeedParsing()
         parser = need_parsing.could_you_parse_me.parser
         namespace = parser.parse_args("yes 2 --three 3".split())
-        self.assertEquals(namespace.one, "yes")
-        self.assertEquals(namespace.two, 2)
-        self.assertEquals(namespace.three, 3)
-        self.assertEquals(
+        self.assertEqual(namespace.one, "yes")
+        self.assertEqual(namespace.two, 2)
+        self.assertEqual(namespace.three, 3)
+        self.assertEqual(
             need_parsing.could_you_parse_me("yes", 2, 3), ("yesyes", 9))
 
     def test_parseable_class(self):
         parser = NeedParsing.parse_me_if_you_can.parser
         namespace = parser.parse_args("yes 2 --three 3".split())
-        self.assertEquals(namespace.one, "yes")
-        self.assertEquals(namespace.two, 2)
-        self.assertEquals(namespace.three, 3)
-        self.assertEquals(
-            NeedParsing.parse_me_if_you_can("yes", 2, 3), ("yesyes", 9))
+        self.assertEqual(namespace.one, "yes")
+        self.assertEqual(namespace.two, 2)
+        self.assertEqual(namespace.three, 3)
+        self.assertEqual(NeedParsing.parse_me_if_you_can("yes", 2, 3),
+                         ("yesyes", 9))
 
 
 if __name__ == "__main__":

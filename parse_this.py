@@ -71,13 +71,13 @@ def _prepare_doc(func, args):
             arg_match = re.match("\b*(?P<arg_name>\w+):(?P<help_msg>.+)",
                                  line.strip())
             try:
-                arg_name = arg_match.groupdict()["arg_name"]
-                args_help[arg_name] = arg_match.groupdict()["help_msg"]
+                arg_name = arg_match.groupdict()["arg_name"].strip()
+                args_help[arg_name] = arg_match.groupdict()["help_msg"].strip()
             except AttributeError:
                 # The line didn't match the pattern we've hit a
                 # multiline argument docstring so we add it to the
                 # previous argument help message
-                if arg_name is not None:
+                if arg_name is not None and line.strip():
                     args_help[arg_name] = " ".join([args_help[arg_name], line.strip()])
     # If an argument is missing a help message we create a simple one
     for argument in args:
