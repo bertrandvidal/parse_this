@@ -1,7 +1,7 @@
 parse\_this
 ===========
 
-|PyPI latest version badge| |PyPI monthly downloads| |Code health|
+|PyPI latest version badge| |Code health|
 
 Makes it easy to parse command line arguments for any function, method
 or classmethod.
@@ -187,9 +187,7 @@ TODO
 -  Docstring parsing doesn't handle multiline for argument
 -  Handle vargs and kwargs
 
-.. |PyPI latest version badge| image:: https://pypip.in/v/parse_this/badge.png
-   :target: https://pypi.python.org/pypi/parse_this
-.. |PyPI monthly downloads| image:: https://pypip.in/d/parse_this/badge.png
+.. |PyPI latest version badge| image:: https://badge.fury.io/py/parse_this.svg
    :target: https://pypi.python.org/pypi/parse_this
 .. |Code health| image:: https://landscape.io/github/bertrandvidal/parse_this/master/landscape.png
    :target: https://landscape.io/github/bertrandvidal/parse_this/master
