@@ -202,6 +202,8 @@ TODO
 ----
 
 -  Handle vargs and kwargs
+-  Make a class decorator for a argparser with multiple subcommand for
+   each of its decorated method
 
 .. |PyPI latest version badge| image:: https://badge.fury.io/py/parse_this.svg
    :target: https://pypi.python.org/pypi/parse_this

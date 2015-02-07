@@ -190,6 +190,7 @@ python setup.py nosetests
 TODO
 ----
  * Handle vargs and kwargs
+ * Make a class decorator for a argparser with multiple subcommand for each of its decorated method
 
 
 [pypi_link]: https://pypi.python.org/pypi/parse_this "parse_this on PyPI"
