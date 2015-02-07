@@ -89,7 +89,7 @@ class TestParseThis(unittest.TestCase):
             _check_types([int, int], ["arg_one", "arg_two"], (12,))
             _check_types([int], ["arg_one", "arg_two"], (12,))
             _check_types([Self, int, int], ["self", "arg_one", "arg_two"], ())
-        except Exception, exception:
+        except Exception as exception:
             self.fail("_check_types should not have raised: %s" % exception)
 
     def test_namespace_no_option(self):

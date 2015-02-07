@@ -1,9 +1,13 @@
 from argparse import ArgumentParser
 from functools import wraps
 from inspect import getargspec
-from itertools import izip_longest
 import re
 import sys
+
+try:
+    from itertools import izip_longest as zip_longest
+except ImportError:
+    from itertools import zip_longest
 
 
 class ParseThisError(Exception):
@@ -33,7 +37,7 @@ def _get_args_and_defaults(args, defaults):
         defaults: tuple of default values
     """
     args_and_defaults = []
-    for (k, v) in izip_longest(args[::-1], defaults[::-1], fillvalue=NoDefault):
+    for (k, v) in zip_longest(args[::-1], defaults[::-1], fillvalue=NoDefault):
         args_and_defaults.append((k, v))
     return args_and_defaults[::-1]
 
@@ -95,7 +99,7 @@ def _get_arg_parser(func, types, args_and_defaults):
         func, [x for (x, _) in args_and_defaults])
     parser = ArgumentParser(description=description)
     identity_type = lambda x: x
-    for ((arg, default), arg_type) in izip_longest(args_and_defaults, types):
+    for ((arg, default), arg_type) in zip_longest(args_and_defaults, types):
         help_msg = arg_help[arg]
         if default is NoDefault:
             arg_type = arg_type or identity_type
