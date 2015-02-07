@@ -32,6 +32,18 @@ def will_you_dare_parse_me(one, two, three):
     return one * two, three * three
 
 
+def check_my_params_delimiter(one, two, three):
+    """I am a sneaky function.
+
+    Args:
+      one -- this one is a no brainer even with dashes
+      three -- noticed you're missing docstring for two and
+        I'm multiline too!
+    """
+    return one * two, three * three
+
+
+
 class TestParseThis(unittest.TestCase):
 
     def test_get_args_and_default(self):
@@ -57,7 +69,7 @@ class TestParseThis(unittest.TestCase):
 
     def test_prepare_doc(self):
         (description, help_msg) = _prepare_doc(parse_me,
-                                               ["one", "two", "three"])
+                                               ["one", "two", "three"], ":")
         self.assertEqual(description, "Could use some parsing.")
         self.assertEqual(help_msg, {"one":"some stuff shouldn't be written down",
                                     "two":"I can turn 2 syllables words into 6 syllables words",
@@ -65,7 +77,7 @@ class TestParseThis(unittest.TestCase):
 
     def test_prepare_doc_no_docstring(self):
         (description, help_msg) = _prepare_doc(parse_me_no_doc,
-                                               ["one", "two", "three"])
+                                               ["one", "two", "three"], ":")
         self.assertEqual(description, "Argument parsing for parse_me_no_doc")
         self.assertEqual(help_msg, {"one": "Help message for one",
                                     "two":  "Help message for two",
@@ -73,11 +85,20 @@ class TestParseThis(unittest.TestCase):
 
     def test_prepare_doc_will_you_dare(self):
         (description, help_msg) = _prepare_doc(will_you_dare_parse_me,
-                                               ["one", "two", "three"])
+                                               ["one", "two", "three"], ":")
         self.assertEqual(description, "I am a sneaky function.")
         self.assertEqual(help_msg, {"one": "this one is a no brainer",
                                     "two": "Help message for two",
                                     "three": "noticed you're missing docstring for two and I'm multiline too!"})
+
+    def test_prepare_doc_params_delim(self):
+        (description, help_msg) = _prepare_doc(check_my_params_delimiter,
+                                               ["one", "two", "three"], "--")
+        self.assertEqual(description, "I am a sneaky function.")
+        self.assertEqual(help_msg, {"one": "this one is a no brainer even with dashes",
+                                    "two": "Help message for two",
+                                    "three": "noticed you're missing docstring for two and I'm multiline too!"})
+
 
     def test_check_types(self):
         self.assertRaises(ParseThisError, _check_types, [], ["arg_one"], ())
@@ -95,7 +116,7 @@ class TestParseThis(unittest.TestCase):
     def test_namespace_no_option(self):
         parser = _get_arg_parser(parse_me, [str, int], [("one", NoDefault),
                                                         ("two", NoDefault),
-                                                        ("three", 12)])
+                                                        ("three", 12)], ":")
         namespace = parser.parse_args("yes 42".split())
         self.assertEqual(namespace.one, "yes")
         self.assertEqual(namespace.two, 42)
@@ -104,7 +125,7 @@ class TestParseThis(unittest.TestCase):
     def test_namespace(self):
         parser = _get_arg_parser(parse_me, [str, int], [("one", NoDefault),
                                                         ("two", NoDefault),
-                                                        ("three", 12)])
+                                                        ("three", 12)], ":")
         namespace = parser.parse_args("no 12 --three=23".split())
         self.assertEqual(namespace.one, "no")
         self.assertEqual(namespace.two, 12)

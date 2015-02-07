@@ -42,7 +42,7 @@ def _get_args_and_defaults(args, defaults):
     return args_and_defaults[::-1]
 
 
-def _prepare_doc(func, args):
+def _prepare_doc(func, args, params_delim):
     """From the function docstring get the arg parse description and arguments
         help message. If there is no docstring simple description and help
         message are created.
@@ -50,6 +50,8 @@ def _prepare_doc(func, args):
     Args:
         func: the function that needs argument parsing
         args: name of the function arguments
+        params_delim: characters used to separate the parameters from their
+        help message in the docstring
     Returns:
         A tuple containing the description to be used in the argument parser and
         a dict indexed on the callable argument name and their associated help
@@ -68,8 +70,8 @@ def _prepare_doc(func, args):
         else:
             # The first empty line marks the end of the method description
             fill_description = False
-            arg_match = re.match("\b*(?P<arg_name>\w+):(?P<help_msg>.+)",
-                                 line.strip())
+            arg_match = re.match("\b*(?P<arg_name>\w+)\s*%s\s*(?P<help_msg>.+)"
+                                 % params_delim, line.strip())
             try:
                 arg_name = arg_match.groupdict()["arg_name"].strip()
                 args_help[arg_name] = arg_match.groupdict()["help_msg"].strip()
@@ -86,7 +88,7 @@ def _prepare_doc(func, args):
     return (" ".join(description), args_help)
 
 
-def _get_arg_parser(func, types, args_and_defaults):
+def _get_arg_parser(func, types, args_and_defaults, params_delim):
     """Return an ArgumentParser for the given function. Arguments are defined
         from the function arguments and their associated defaults.
 
@@ -94,9 +96,11 @@ def _get_arg_parser(func, types, args_and_defaults):
         func: function for which we want an ArgumentParser
         types: types to which the command line arguments should be converted to
         args_and_defaults: list of 2-tuples (arg_name, arg_default)
+        params_delim: characters used to separate the parameters from their
+        help message in the docstring
     """
     (description, arg_help) = _prepare_doc(
-        func, [x for (x, _) in args_and_defaults])
+        func, [x for (x, _) in args_and_defaults], params_delim)
     parser = ArgumentParser(description=description)
     identity_type = lambda x: x
     for ((arg, default), arg_type) in zip_longest(args_and_defaults, types):
@@ -163,7 +167,7 @@ def _call(func, func_args, arguments):
     return func(*args)
 
 
-def parse_this(func, types, args=None):
+def parse_this(func, types, args=None, params_delim=":"):
     """Create an ArgumentParser for the given function converting the command line
         arguments according to the list of types.
 
@@ -172,11 +176,13 @@ def parse_this(func, types, args=None):
         types: a list of types - as accepted by argparse - that will be used to
             convert the command line arguments
         args: a list of arguments to be parsed if None sys.argv is used
+        params_delim: characters used to separate the parameters from their
+        help message in the docstring. Defaults to ':'
     """
     (func_args, _, __, defaults) = getargspec(func)
     types, func_args = _check_types(types, func_args, defaults)
     args_and_defaults = _get_args_and_defaults(func_args, defaults)
-    parser = _get_arg_parser(func, types, args_and_defaults)
+    parser = _get_arg_parser(func, types, args_and_defaults, params_delim)
     arguments = parser.parse_args(_get_args_to_parse(args, sys.argv))
     return _call(func, func_args, arguments)
 
@@ -184,13 +190,17 @@ def parse_this(func, types, args=None):
 class create_parser(object):
     """Creates an argument parser for the decorated function."""
 
-    def __init__(self, *types):
+    def __init__(self, *types, **options):
         """
         Args:
-            type: vargs list of types to which the command line arguments should
+            types: vargs list of types to which the command line arguments should
             be converted to
+            options: options to pass to create the parser. Possible values are:
+                params_delim: characters used to separate the parameters from their
+                help message in the docstring. Defaults to ':'
         """
         self.types = types
+        self.params_delim = options.get("params_delim",":")
 
     def __call__(self, func):
         """Add an argument parser attribute `parser` to the decorated function.
@@ -203,7 +213,8 @@ class create_parser(object):
             self.types, func_args = _check_types(
                 self.types, func_args, defaults)
             args_and_defaults = _get_args_and_defaults(func_args, defaults)
-            func.parser = _get_arg_parser(func, self.types, args_and_defaults)
+            func.parser = _get_arg_parser(func, self.types, args_and_defaults,
+                                          self.params_delim)
 
         @wraps(func)
         def decorated(*args, **kwargs):
