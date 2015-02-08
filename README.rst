@@ -30,6 +30,7 @@ used to parse the command line argument.
 
 .. code:: python
 
+    from __future__ import print_function
     from parse_this import create_parser
 
 
@@ -47,7 +48,7 @@ used to parse the command line argument.
     if __name__ == "__main__":
         parser = concatenate_str.parser
         namespace_args = parser.parse_args()
-        print concatenate_str(namespace_args.one, namespace_args.two)
+        print(concatenate_str(namespace_args.one, namespace_args.two))
 
 Note that the function can still be called as any other function.
 
@@ -58,6 +59,7 @@ As a function that will handle the command line arguments directly.
 
 .. code:: python
 
+    from __future__ import print_function
     from parse_this import parse_this
 
 
@@ -72,7 +74,7 @@ As a function that will handle the command line arguments directly.
 
 
     if __name__ == "__main__":
-        print parse_this(concatenate_str, [str, int])
+        print(parse_this(concatenate_str, [str, int]))
 
 Note: both ``parse_this`` and ``create_parser`` need your docstring to
 be in a specific format. The description of the argument parser is taken
@@ -104,10 +106,15 @@ If this is the containt of ``test.py``:
 
 .. code:: python
 
+    from __future__ import print_function
     from parse_this import create_parser, Self
 
 
     class INeedParsing(object):
+        """A class that clearly needs argument parsing!"""
+
+        def __init__(self, an_argument):
+            self._an_arg = an_argument
 
         @create_parser(Self, int, str, params_delim="--")
         def parse_me_if_you_can(self, an_int, a_string, default=12):
@@ -118,15 +125,16 @@ If this is the containt of ``test.py``:
                 a_string -- string aren't that nice
                 default -- guess what I got a default value
             """
-            return a_string * an_int, default * default
+            return a_string * an_int, default * self._an_arg
 
 
     if __name__ == "__main__":
-        need_parsing = INeedParsing()
+        need_parsing = INeedParsing(2)
         parser = need_parsing.parse_me_if_you_can.parser
         namespace_args = parser.parse_args()
-        print need_parsing.parse_me_if_you_can(namespace_args.an_int,
-                                               namespace_args.a_string)
+        print(need_parsing.parse_me_if_you_can(namespace_args.an_int,
+                                               namespace_args.a_string,
+                                               namespace_args.default))
 
 The following would be the output of the command line
 ``python test.py --help``:
@@ -145,14 +153,28 @@ The following would be the output of the command line
       -h, --help         show this help message and exit
       --default DEFAULT  guess what I got a default value
 
+The following would be the output of the command line
+``python test.py 2 yes --default 4``:
+
+.. code:: bash
+
+    ('yesyes', 8)
+
+The first line argument ``2`` is used as the ``an_int`` argument for the
+method, the second ``yes`` is the string that will be concatenated ``2``
+times. And finally the optional argument specified by ``--default`` is
+multiplied by the construtor arg i.e. ``8``.
+
 In a similar fashion you can parse line arguments for classmethods:
 
 .. code:: python
 
+    from __future__ import print_function
     from parse_this import create_parser, Class
 
 
     class INeedParsing(object):
+        """A class that clearly needs argument parsing!"""
 
         @classmethod
         @create_parser(Class, int, str, params_delim="--")
@@ -170,12 +192,13 @@ In a similar fashion you can parse line arguments for classmethods:
     if __name__ == "__main__":
         parser = INeedParsing.parse_me_if_you_can.parser
         namespace_args = parser.parse_args()
-        print INeedParsing.parse_me_if_you_can(namespace_args.an_int,
-                                               namespace_args.a_string)
+        print(INeedParsing.parse_me_if_you_can(namespace_args.an_int,
+                                               namespace_args.a_string,
+                                               namespace_args.default))
 
 The output will be the same as above.
 
-**Note**: The ``classmethod`` decorator is place **on top** of the
+**Note**: The ``classmethod`` decorator is placed **on top** of the
 ``create_parser`` decorator in order for the method to still be a
 considered a class method.
 
