@@ -191,6 +191,7 @@ TODO
 ----
  * Handle vargs and kwargs
  * Make a class decorator for a argparser with multiple subcommand for each of its decorated method
+ * Docstring parsing, if line below the arguments docstring match the pattern they will be added to the last argument help.
 
 
 [pypi_link]: https://pypi.python.org/pypi/parse_this "parse_this on PyPI"
