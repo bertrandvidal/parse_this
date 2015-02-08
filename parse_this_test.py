@@ -202,6 +202,10 @@ class NeedParsing(object):
     def multiply_self_arg(self, num):
         return self._four * num
 
+    @create_parser(Self, int)
+    def _private_method(self, num):
+        return self._four * num
+
     @create_parser(Self, str, int)
     def could_you_parse_me(self, one, two, three=12):
         """I would like some arg parsing please.
@@ -237,6 +241,13 @@ class TestParseable(unittest.TestCase):
                                                          namespace.two,
                                                          namespace.three),
                          ("yesyes", 16))
+
+    def test_private_method_are_exposed(self):
+        parser = NeedParsing.parser
+        namespace = parser.parse_args("12 private-method 2".split())
+        need_parsing = NeedParsing(namespace.four)
+        self.assertEqual(namespace.method, "private-method")
+        self.assertEqual(need_parsing._private_method(namespace.num), 24)
 
     def test_parseable(self):
         parser = iam_parseable.parser

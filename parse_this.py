@@ -232,7 +232,8 @@ class create_parser(object):
             return func(*args, **kwargs)
         return decorated
 
-
+# TODO Make it a class so the __init__ takes the description and if the
+# private methods should be exposed.
 def parse_class(cls):
     """Allows to create a global argument parser for a class along with
     subparsers with each if its properly decorated methods.
@@ -264,8 +265,9 @@ def parse_class(cls):
                                                  dest="method")
     for method_name, parser in methods_to_parse.items():
         # Make the method name compatible for the argument parsing
-        # TODO: make it possible to support 'private' methods by
-        # removing the leading '_'
+        if method_name.startswith("_"):
+            # 'Private' methods are exposed without their leading '_'
+            method_name = method_name[1:]
         parser_name = method_name.replace("_", "-")
         sub_parsers.add_parser(parser_name, parents=[parser], add_help=False,
                                description=parser.description)
