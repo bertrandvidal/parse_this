@@ -53,6 +53,7 @@ def _prepare_doc(func, args, params_delim):
         args: name of the function arguments
         params_delim: characters used to separate the parameters from their
         help message in the docstring
+
     Returns:
         A tuple containing the description to be used in the argument parser and
         a dict indexed on the callable argument name and their associated help
@@ -147,6 +148,7 @@ def _check_types(types, func_args, defaults):
         types: a list of Python types to which the argument should be converted to
         func_args: list of function arguments name
         defaults: tuple of default values for the function argument
+
     Raises:
         ParseThisError: if the number of types for conversion does not match
             the number of function's arguments
@@ -205,8 +207,8 @@ class create_parser(object):
             types: vargs list of types to which the command line arguments should
             be converted to
             options: options to pass to create the parser. Possible values are:
-                params_delim: characters used to separate the parameters from their
-                help message in the docstring. Defaults to ':'
+            params_delim: characters used to separate the parameters from their
+            help message in the docstring. Defaults to ':'
         """
         self.types = types
         self.params_delim = options.get("params_delim",":")
@@ -229,4 +231,46 @@ class create_parser(object):
         def decorated(*args, **kwargs):
             return func(*args, **kwargs)
         return decorated
+
+
+def parse_class(cls):
+    """Allows to create a global argument parser for a class along with
+    subparsers with each if its properly decorated methods.
+
+    Args:
+        cls: class to get decorated
+    """
+    methods_to_parse = {}
+    init_parser = None
+    for name, obj in vars(cls).items():
+        # Every callable object that has a 'parser' attribute will be
+        # added as a subparser.
+        # This won't work for classmethods because reference to
+        # classmethods are only possible once the class has been defined
+        if callable(obj) and hasattr(obj, "parser"):
+            if name == "__init__":
+                # If we find the decorated __init__ method it will be
+                # used as the top level parser
+                init_parser = obj.parser
+            else:
+                methods_to_parse[obj.__name__] = obj.parser
+    top_level_parents = [init_parser] if init_parser else []
+    # TODO: have a top level help message that display help for sub
+    # commands
+    top_level_parser = ArgumentParser(description=cls.__doc__,
+                                      parents=top_level_parents,
+                                      add_help=False)
+    sub_parsers = top_level_parser.add_subparsers(description="Accessible methods of {}".format(cls.__name__),
+                                                 dest="method")
+    for method_name, parser in methods_to_parse.items():
+        # Make the method name compatible for the argument parsing
+        # TODO: make it possible to support 'private' methods by
+        # removing the leading '_'
+        parser_name = method_name.replace("_", "-")
+        sub_parsers.add_parser(parser_name, parents=[parser], add_help=False,
+                               description=parser.description)
+    cls.parser = top_level_parser
+    return cls
+
+
 

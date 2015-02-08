@@ -3,7 +3,7 @@ import unittest
 
 from parse_this import (_get_args_and_defaults, NoDefault, _get_args_to_parse,
                         _check_types, _get_arg_parser, parse_this, _prepare_doc,
-                        create_parser, Self, Class, ParseThisError)
+                        create_parser, Self, Class, ParseThisError, parse_class)
 
 
 def parse_me(one, two, three=12):
@@ -186,7 +186,21 @@ def iam_parseable(one, two, three=12):
     return one * two, three * three
 
 
+@parse_class
 class NeedParsing(object):
+    """This will be used as the parser description."""
+
+    @create_parser(Self, int)
+    def __init__(self, four):
+        """
+        Args:
+            four: an int that will be used to multiply stuff
+        """
+        self._four = four
+
+    @create_parser(Self, int)
+    def multiply_self_arg(self, num):
+        return self._four * num
 
     @create_parser(Self, str, int)
     def could_you_parse_me(self, one, two, three=12):
@@ -207,6 +221,23 @@ class NeedParsing(object):
 
 class TestParseable(unittest.TestCase):
 
+    def test_class_is_decorated(self):
+        self.assertTrue(hasattr(NeedParsing, "parser"))
+        self.assertTrue(hasattr(NeedParsing(12), "parser"))
+
+    def test_subparsers(self):
+        parser = NeedParsing.parser
+        namespace = parser.parse_args("12 multiply-self-arg 2".split())
+        need_parsing = NeedParsing(namespace.four)
+        self.assertEqual(namespace.method, "multiply-self-arg")
+        self.assertEqual(need_parsing.multiply_self_arg(namespace.num), 24)
+        namespace = parser.parse_args("12 could-you-parse-me yes 2 --three 4".split())
+        self.assertEqual(namespace.method, "could-you-parse-me")
+        self.assertEqual(need_parsing.could_you_parse_me(namespace.one,
+                                                         namespace.two,
+                                                         namespace.three),
+                         ("yesyes", 16))
+
     def test_parseable(self):
         parser = iam_parseable.parser
         namespace = parser.parse_args("yes 2 --three 3".split())
@@ -216,7 +247,7 @@ class TestParseable(unittest.TestCase):
         self.assertEqual(iam_parseable("yes", 2, 3), ("yesyes", 9))
 
     def test_parseable_method(self):
-        need_parsing = NeedParsing()
+        need_parsing = NeedParsing(12)
         parser = need_parsing.could_you_parse_me.parser
         namespace = parser.parse_args("yes 2 --three 3".split())
         self.assertEqual(namespace.one, "yes")
