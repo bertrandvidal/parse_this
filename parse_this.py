@@ -65,7 +65,7 @@ def _prepare_doc(func, args, params_delim):
     args_help = {}
     fill_description = True
     arg_name = None
-    for line in func.__doc__.split("\n"):
+    for line in func.__doc__.splitlines():
         if line.strip() and fill_description:
             description.append(line.strip())
         else:
