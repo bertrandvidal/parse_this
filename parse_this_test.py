@@ -13,6 +13,10 @@ def parse_me(one, two, three=12):
         one: some stuff shouldn't be written down
         two: I can turn 2 syllables words into 6 syllables words
         three: I don't like the number three
+
+    Returns:
+        the first string argument concatenated with itself 'two' times and the
+        last parameters multiplied by itself
     """
     return one * two, three * three
 
@@ -50,9 +54,25 @@ def check_my_params_delimiter(one, two, three):
     """
     return one * two, three * three
 
+def blank_line_in_wrong_place(one, two):
+    """I put the blank line after arguments ...
+
+    Args:
+        one: this help #1
+
+        two: this once won't appear sadly
+    """
+    return one * two
 
 
 class TestParseThis(unittest.TestCase):
+
+    def test_prepare_doc_blank_in_wrong_place(self):
+        (description, help_msg) = _prepare_doc(blank_line_in_wrong_place,
+                                               ["one", "two"], ":")
+        self.assertEqual(description, "I put the blank line after arguments ...")
+        self.assertEqual(help_msg, {"one": "this help #1",
+                                    "two": "Help message for two"})
 
     def test_get_args_and_default(self):
         args_and_defaults = _get_args_and_defaults(["first", "second", "third"],

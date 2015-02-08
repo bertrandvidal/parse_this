@@ -42,11 +42,23 @@ def concatenate_str(one, two=2):
 
 if __name__ == "__main__":
     parser = concatenate_str.parser
+    # This parser expect two arguments 'one' and 'two'
     namespace_args = parser.parse_args()
     print(concatenate_str(namespace_args.one, namespace_args.two))
 ```
 
+Calling this script from the command line as follow:
+
+```bash
+python script.py yes 2
+```
+
+will return `'yesyes'` as expected and all the parsing have been done for you.
+
 Note that the function can still be called as any other function.
+Also it is not possible to stack `create_parser` with any decorator that would
+modify the signature of the decorated function e.g. using `functools.wraps`.
+
 
 ### Function
 As a function that will handle the command line arguments directly.
@@ -70,20 +82,8 @@ if __name__ == "__main__":
     print(parse_this(concatenate_str, [str, int]))
 ```
 
-Note: both `parse_this` and `create_parser` need your docstring to be in a
-specific format. The description of the argument parser is taken from the
-docstring and contains all the text until the first blank line.
-Arguments help message are taken from the following pattern:
-
-`<argument_name><delimiter_chars><argument_help>`
-
-* argument_name must be the same as the argument of the method
-* delimiter_chars is one or more chars that separate the argument from its help message
-* argument_help is everything behind the delimiter_chars until the next argument, a blank line or the end of the docstring
-
-The `delimiter_chars` can be passed to both `parse_this` and `create_parser` as
-the keywords argument `params_delim`. It defaults to `:` since this is the
-convention I most often use.
+Calling this script with the same command line arguments `yes 2` will also
+return `'yesyes'` as expected.
 
 
 Arguments and types
@@ -154,6 +154,20 @@ The first line argument `2` is used as the `an_int` argument for the method,
 the second `yes` is the string that will be concatenated `2` times. And finally
 the optional argument specified by `--default` is multiplied by the construtor arg i.e. `8`.
 
+Note: both `parse_this` and `create_parser` need your docstring to be in a
+specific format. The description of the argument parser is taken from the
+docstring and contains all the text until the first blank line.
+Arguments help message are taken from the following pattern:
+
+`<argument_name><delimiter_chars><argument_help>`
+
+* argument_name must be the same as the argument of the method
+* delimiter_chars is one or more chars that separate the argument from its help message
+* argument_help is everything behind the delimiter_chars until the next argument, **a blank line** or the end of the docstring
+
+The `delimiter_chars` can be passed to both `parse_this` and `create_parser` as
+the keywords argument `params_delim`. It defaults to `:` since this is the
+convention I most often use.
 
 
 In a similar fashion you can parse line arguments for classmethods:
@@ -214,7 +228,6 @@ TODO
 ----
  * Handle vargs and kwargs
  * Make a class decorator for a argparser with multiple subcommand for each of its decorated method
- * Docstring parsing, if line below the arguments docstring match the pattern they will be added to the last argument help.
 
 
 [pypi_link]: https://pypi.python.org/pypi/parse_this "parse_this on PyPI"
