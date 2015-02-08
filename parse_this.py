@@ -37,6 +37,7 @@ def _get_args_and_defaults(args, defaults):
         defaults: tuple of default values
     """
     args_and_defaults = []
+    defaults = defaults or []
     for (k, v) in zip_longest(args[::-1], defaults[::-1], fillvalue=NoDefault):
         args_and_defaults.append((k, v))
     return args_and_defaults[::-1]
@@ -143,6 +144,7 @@ def _check_types(types, func_args, defaults):
         ParseThisError: if the number of types for conversion does not match
             the number of function's arguments
     """
+    defaults = defaults or []
     if len(types) > len(func_args):
         raise ParseThisError("To many types provided for conversion.")
     if len(types) < len(func_args) - len(defaults):

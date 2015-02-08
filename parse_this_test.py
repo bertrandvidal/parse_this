@@ -10,12 +10,20 @@ def parse_me(one, two, three=12):
     """Could use some parsing.
 
     Args:
-      one: some stuff shouldn't be written down
-      two: I can turn 2 syllables words into 6 syllables words
-      three: I don't like the number three
+        one: some stuff shouldn't be written down
+        two: I can turn 2 syllables words into 6 syllables words
+        three: I don't like the number three
     """
     return one * two, three * three
 
+def parse_me_no_defaults(one, two):
+    """I don't have any default !
+
+    Args:
+        one: some stuff shoudln't be written down
+        two: I can turn 2 syllables words into 6 syllables words
+    """
+    return one * two
 
 def parse_me_no_doc(one, two, three):
     return one * two, three * three
@@ -25,9 +33,9 @@ def will_you_dare_parse_me(one, two, three):
     """I am a sneaky function.
 
     Args:
-      one: this one is a no brainer
-      three: noticed you're missing docstring for two and
-        I'm multiline too!
+        one: this one is a no brainer
+        three: noticed you're missing docstring for two and
+          I'm multiline too!
     """
     return one * two, three * three
 
@@ -36,9 +44,9 @@ def check_my_params_delimiter(one, two, three):
     """I am a sneaky function.
 
     Args:
-      one -- this one is a no brainer even with dashes
-      three -- noticed you're missing docstring for two and
-        I'm multiline too!
+        one -- this one is a no brainer even with dashes
+        three -- noticed you're missing docstring for two and
+          I'm multiline too!
     """
     return one * two, three * three
 
@@ -112,6 +120,13 @@ class TestParseThis(unittest.TestCase):
             _check_types([Self, int, int], ["self", "arg_one", "arg_two"], ())
         except Exception as exception:
             self.fail("_check_types should not have raised: %s" % exception)
+
+    def test_parsing_no_defaults(self):
+        parser = _get_arg_parser(parse_me, [str, int], [("one", NoDefault),
+                                                        ("two", NoDefault)], ":")
+        namespace = parser.parse_args("yes 2".split())
+        self.assertEqual(namespace.one, "yes")
+        self.assertEqual(namespace.two, 2)
 
     def test_namespace_no_option(self):
         parser = _get_arg_parser(parse_me, [str, int], [("one", NoDefault),
