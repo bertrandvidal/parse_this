@@ -254,8 +254,22 @@ class parse_class(object):
         Args:
             cls: class to get decorated
         """
-        methods_to_parse = {}
+        init_parser, methods_to_parse = self._get_parseable_methods(cls)
+        return self._get_class_parser(init_parser, methods_to_parse, cls)
+
+    def _get_parseable_methods(self, cls):
+        """Return all methods of cls that are parseable i.e. have been decorated
+        by '@create_parser'.
+
+        Args:
+            cls: the class currently being decorated
+
+        Returns:
+            a 2-tuple with the parser of the __init__ method if any and a dict
+            of the form {'method_name': associated_parser}
+        """
         init_parser = None
+        methods_to_parse = {}
         for name, obj in vars(cls).items():
             # Every callable object that has a 'parser' attribute will be
             # added as a subparser.
@@ -268,6 +282,20 @@ class parse_class(object):
                     init_parser = obj.parser
                 else:
                     methods_to_parse[obj.__name__] = obj.parser
+        return (init_parser, methods_to_parse)
+
+    def _get_class_parser(self, init_parser, methods_to_parse, cls):
+        """Creates the complete argument parser for the decorated class.
+
+        Args:
+            init_parser: argument parser for the __init__ method or None
+            methods_to_parse: dict of method name pointing to their associated
+            argument parser
+            cls: the class we are decorating
+
+        Returns:
+            The decorated class with an added attribute 'parser'
+        """
         top_level_parents = [init_parser] if init_parser else []
         # TODO: have a top level help message that display help for sub
         # commands: see http://stackoverflow.com/q/20094215/2003420
