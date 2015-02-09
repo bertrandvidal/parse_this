@@ -246,6 +246,10 @@ the `method` attribute of the object returned by `parser.parse_args()` it will
 contain the name of the invoked command, hence you know which method to call
 on your object and are guaranteed the arguments for this method have been
 correctly parsed
+* When used in a `parse_class` decorated class `create_parser` can take an extra
+parameters `name` that will be used as the sub-command name. It can be useful
+because the method name could be easy to use from your editor/IDE but hard to
+remember from the command line
 
 If the previous decorated class `ParseMePlease` is in a `script.py` file we can
 execute the following commands:
