@@ -257,12 +257,14 @@ def parse_class(cls):
                 methods_to_parse[obj.__name__] = obj.parser
     top_level_parents = [init_parser] if init_parser else []
     # TODO: have a top level help message that display help for sub
-    # commands
+    # commands: see http://stackoverflow.com/q/20094215/2003420
     top_level_parser = ArgumentParser(description=cls.__doc__,
                                       parents=top_level_parents,
                                       add_help=False)
-    sub_parsers = top_level_parser.add_subparsers(description="Accessible methods of {}".format(cls.__name__),
-                                                 dest="method")
+    description = "Accessible methods of {}".format(cls.__name__),
+    sub_parsers = top_level_parser.add_subparsers(description=description,
+                                                  dest="method",
+                                                  title="Acessible methods")
     for method_name, parser in methods_to_parse.items():
         # Make the method name compatible for the argument parsing
         if method_name.startswith("_"):
