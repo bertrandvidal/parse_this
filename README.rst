@@ -185,13 +185,7 @@ In a similar fashion you can parse line arguments for classmethods:
 
 .. code:: python
 
-    from __future__ import print_function
-    from parse_this import create_parser, Class
-
-
-    class INeedParsing(object):
-        """A class that clearly needs argument parsing!"""
-
+    ...
         @classmethod
         @create_parser(Class, int, str, params_delim="--")
         def parse_me_if_you_can(cls, an_int, a_string, default=12):
@@ -204,19 +198,78 @@ In a similar fashion you can parse line arguments for classmethods:
             """
             return a_string * an_int, default * default
 
-
-    if __name__ == "__main__":
-        parser = INeedParsing.parse_me_if_you_can.parser
-        namespace_args = parser.parse_args()
-        print(INeedParsing.parse_me_if_you_can(namespace_args.an_int,
-                                               namespace_args.a_string,
-                                               namespace_args.default))
-
 The output will be the same as above.
 
 **Note**: The ``classmethod`` decorator is placed **on top** of the
 ``create_parser`` decorator in order for the method to still be a
 considered a class method.
+
+``parse_this`` contains a simple way to create a command line interface
+from an entire class. For that you will need to use the ``parse_class``
+class decorator.
+
+.. code:: python
+
+    from __future__ import print_function
+    from parse_this import Self, create_parser, parse_class
+
+
+    @parse_class()
+    class ParseMePlease(object):
+        """This will be the description of the parser."""
+
+        @create_parser(Self, int)
+        def __init__(self, foo):
+            self._foo = foo
+
+        @create_parser(Self, int)
+        def do_stuff(self, bar):
+            return self._foo * bar
+
+
+    if __name__ == "__main__":
+        parser = ParseMePlease.parser
+        namespace = parser.parse_args()
+        parse_me_please = ParseMePlease(namespace.foo)
+        if namespace.method == "do-stuff":
+            print(parse_me_please.do_stuff(namespace.bar))
+
+``parse_class`` will create a command line argument parser that is able
+to handle your whole class!!
+
+How does it work?
+
+-  If the ``__init__`` method is decorated it will be considered the
+   first, or top-level, parser this means that all arguments in your
+   ``__init__`` will be arguments pass right after invoking you script
+   i.e. ``python script.py init_arg_1 init_arg_2 etc...``
+-  The description of the top-level parser is taken from the class's
+   docstring or overwritten by the keyword argument ``description`` of
+   ``parse_class``.
+-  Each method decorated by ``create_parser`` will become a subparser of
+   its own. The command name of the subparser is the same as the method
+   name with ``_`` replaced by ``-``. 'Private' methods, whose name
+   start with an ``_``, do not have a subparser by default, as this
+   would expose them to the outside. However if you want to expose them
+   you can set the keyword argument ``parse_private=True`` to
+   ``parse_class``. If exposed their command name will need contain the
+   leading ``-`` as this would be confusing for command parsing
+-  When calling ``python script.py --help`` the help message for
+   **every** parser will be displayed making easier to find what you are
+   looking for
+-  To know which subcommand has been called by the command line you need
+   to access the ``method`` attribute of the object returned by
+   ``parser.parse_args()`` it will contain the name of the invoked
+   command, hence you know which method to call on your object and are
+   guaranteed the arguments for this method have been correctly parsed
+
+If the previous decorated class ``ParseMePlease`` is in a ``script.py``
+file we can execute the following commands:
+
+.. code:: bash
+
+    python script.py --help # Print the help for every parser
+    python script.py 12 do-stuff 2 # Outputs 24 as expected
 
 INSTALLING PARSE\_THIS
 ----------------------
