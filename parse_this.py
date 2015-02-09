@@ -1,4 +1,4 @@
-from argparse import ArgumentParser
+import argparse
 from functools import wraps
 from inspect import getargspec
 import re
@@ -110,7 +110,7 @@ def _get_arg_parser(func, types, args_and_defaults, params_delim):
     """
     (description, arg_help) = _prepare_doc(
         func, [x for (x, _) in args_and_defaults], params_delim)
-    parser = ArgumentParser(description=description)
+    parser = argparse.ArgumentParser(description=description)
     identity_type = lambda x: x
     for ((arg, default), arg_type) in zip_longest(args_and_defaults, types):
         help_msg = arg_help[arg]
@@ -233,6 +233,29 @@ class create_parser(object):
         return decorated
 
 
+class _HelpAction(argparse._HelpAction):
+    """Custom HelpAction to display help from all subparsers.
+
+    This allows to have the help for all sub-commands when invoking:
+    '<script.py> --help' rather than a somewhat incomplete help message only
+    describing the name of the sub-commands.
+    Note: taken from http://stackoverflow.com/a/24122778/2003420
+    """
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        # Print help for the parser this class is linked to
+        parser.print_help()
+        # Retrieve sub-parsers of the given parser
+        subparsers_actions = [action for action in parser._actions
+                              if isinstance(action, argparse._SubParsersAction)]
+        for subparser_action in subparsers_actions:
+            # Get all subparsers and print their help
+            for choice, subparser in subparser_action.choices.items():
+                print("** Command '{}' **".format(choice))
+                print("{}\n\n".format(subparser.format_help()))
+        parser.exit()
+
+
 class parse_class(object):
     """Allows to create a global argument parser for a class along with
     subparsers with each if its properly decorated methods."""
@@ -297,15 +320,17 @@ class parse_class(object):
             The decorated class with an added attribute 'parser'
         """
         top_level_parents = [init_parser] if init_parser else []
-        # TODO: have a top level help message that display help for sub
-        # commands: see http://stackoverflow.com/q/20094215/2003420
-        top_level_parser = ArgumentParser(description=self._description or cls.__doc__,
-                                          parents=top_level_parents,
-                                          add_help=False)
+        top_level_parser = argparse.ArgumentParser(description=self._description or cls.__doc__,
+                                                   parents=top_level_parents,
+                                                   add_help=False,
+                                                   conflict_handler="resolve")
+        top_level_parser.add_argument("--help", action=_HelpAction,
+                                      help="Display this help message")
         description = "Accessible methods of {}".format(cls.__name__),
         sub_parsers = top_level_parser.add_subparsers(description=description,
                                                       dest="method",
-                                                      title="Acessible methods")
+                                                      title="Acessible methods",
+                                                      help="Help for sub-commands.")
         for method_name, parser in methods_to_parse.items():
             # Make the method name compatible for the argument parsing
             if method_name.startswith("_"):
