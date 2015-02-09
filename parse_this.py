@@ -252,7 +252,7 @@ class _HelpAction(argparse._HelpAction):
             # Get all subparsers and print their help
             for choice, subparser in subparser_action.choices.items():
                 print("** Command '{}' **".format(choice))
-                print("{}\n\n".format(subparser.format_help()))
+                print("{}\n".format(subparser.format_help()))
         parser.exit()
 
 
@@ -326,11 +326,9 @@ class parse_class(object):
                                                    conflict_handler="resolve")
         top_level_parser.add_argument("--help", action=_HelpAction,
                                       help="Display this help message")
-        description = "Accessible methods of {}".format(cls.__name__),
+        description = "Accessible methods of {}".format(cls.__name__)
         sub_parsers = top_level_parser.add_subparsers(description=description,
-                                                      dest="method",
-                                                      title="Acessible methods",
-                                                      help="Help for sub-commands.")
+                                                      dest="method")
         for method_name, parser in methods_to_parse.items():
             # Make the method name compatible for the argument parsing
             if method_name.startswith("_"):
