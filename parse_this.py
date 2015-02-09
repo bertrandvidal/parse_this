@@ -76,7 +76,7 @@ def _prepare_doc(func, args, params_delim):
             try:
                 arg_name = arg_match.groupdict()["arg_name"].strip()
                 args_help[arg_name] = arg_match.groupdict()["help_msg"].strip()
-            except AttributeError as e:
+            except AttributeError:
                 # The line didn't match the pattern we've hit a
                 # multiline argument docstring so we add it to the
                 # previous argument help message
