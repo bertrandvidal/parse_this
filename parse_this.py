@@ -232,49 +232,64 @@ class create_parser(object):
             return func(*args, **kwargs)
         return decorated
 
-# TODO Make it a class so the __init__ takes the description and if the
-# private methods should be exposed.
-def parse_class(cls):
+
+class parse_class(object):
     """Allows to create a global argument parser for a class along with
-    subparsers with each if its properly decorated methods.
+    subparsers with each if its properly decorated methods."""
 
-    Args:
-        cls: class to get decorated
-    """
-    methods_to_parse = {}
-    init_parser = None
-    for name, obj in vars(cls).items():
-        # Every callable object that has a 'parser' attribute will be
-        # added as a subparser.
-        # This won't work for classmethods because reference to
-        # classmethods are only possible once the class has been defined
-        if callable(obj) and hasattr(obj, "parser"):
-            if name == "__init__":
-                # If we find the decorated __init__ method it will be
-                # used as the top level parser
-                init_parser = obj.parser
-            else:
-                methods_to_parse[obj.__name__] = obj.parser
-    top_level_parents = [init_parser] if init_parser else []
-    # TODO: have a top level help message that display help for sub
-    # commands: see http://stackoverflow.com/q/20094215/2003420
-    top_level_parser = ArgumentParser(description=cls.__doc__,
-                                      parents=top_level_parents,
-                                      add_help=False)
-    description = "Accessible methods of {}".format(cls.__name__),
-    sub_parsers = top_level_parser.add_subparsers(description=description,
-                                                  dest="method",
-                                                  title="Acessible methods")
-    for method_name, parser in methods_to_parse.items():
-        # Make the method name compatible for the argument parsing
-        if method_name.startswith("_"):
-            # 'Private' methods are exposed without their leading '_'
-            method_name = method_name[1:]
-        parser_name = method_name.replace("_", "-")
-        sub_parsers.add_parser(parser_name, parents=[parser], add_help=False,
-                               description=parser.description)
-    cls.parser = top_level_parser
-    return cls
+    def __init__(self, description=None, parse_private=False):
+        """
 
+        Args:
+            description: give a specific description for the top level parser,
+            if not specified it will be the class docstring.
+            parse_private: specifies whether or not 'private' methods should be
+            parsed, defaults to False
+        """
+        self._description = description
+        self._parse_private = parse_private
 
-
+    def __call__(self, cls):
+        """
+        Args:
+            cls: class to get decorated
+        """
+        methods_to_parse = {}
+        init_parser = None
+        for name, obj in vars(cls).items():
+            # Every callable object that has a 'parser' attribute will be
+            # added as a subparser.
+            # This won't work for classmethods because reference to
+            # classmethods are only possible once the class has been defined
+            if callable(obj) and hasattr(obj, "parser"):
+                if name == "__init__":
+                    # If we find the decorated __init__ method it will be
+                    # used as the top level parser
+                    init_parser = obj.parser
+                else:
+                    methods_to_parse[obj.__name__] = obj.parser
+        top_level_parents = [init_parser] if init_parser else []
+        # TODO: have a top level help message that display help for sub
+        # commands: see http://stackoverflow.com/q/20094215/2003420
+        top_level_parser = ArgumentParser(description=self._description or cls.__doc__,
+                                          parents=top_level_parents,
+                                          add_help=False)
+        description = "Accessible methods of {}".format(cls.__name__),
+        sub_parsers = top_level_parser.add_subparsers(description=description,
+                                                      dest="method",
+                                                      title="Acessible methods")
+        for method_name, parser in methods_to_parse.items():
+            # Make the method name compatible for the argument parsing
+            if method_name.startswith("_"):
+                if not self._parse_private:
+                    # We skip private methods if the caller asked not to
+                    # parse them
+                    continue
+                # 'Private' methods are exposed without their leading '_'
+                method_name = method_name[1:]
+            parser_name = method_name.replace("_", "-")
+            sub_parsers.add_parser(parser_name, parents=[parser],
+                                   add_help=False,
+                                   description=parser.description)
+        cls.parser = top_level_parser
+        return cls

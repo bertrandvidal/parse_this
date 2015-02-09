@@ -186,7 +186,7 @@ def iam_parseable(one, two, three=12):
     return one * two, three * three
 
 
-@parse_class
+@parse_class(description="Hello World", parse_private=True)
 class NeedParsing(object):
     """This will be used as the parser description."""
 
@@ -223,11 +223,26 @@ class NeedParsing(object):
         return one * two, three * three
 
 
+@parse_class()
+class ShowMyDocstring(object):
+    """This should be the parser description"""
+
+    @create_parser(Self, int)
+    def _will_not_appear(self, num):
+        return num * numm
+
+
 class TestParseable(unittest.TestCase):
+
+    def test_class_decorator_description(self):
+        self.assertEqual(NeedParsing.parser.description, "Hello World")
+        self.assertEqual(ShowMyDocstring.parser.description,
+                         "This should be the parser description")
 
     def test_class_is_decorated(self):
         self.assertTrue(hasattr(NeedParsing, "parser"))
         self.assertTrue(hasattr(NeedParsing(12), "parser"))
+        self.assertTrue(hasattr(ShowMyDocstring, "parser"))
 
     def test_subparsers(self):
         parser = NeedParsing.parser
@@ -248,6 +263,10 @@ class TestParseable(unittest.TestCase):
         need_parsing = NeedParsing(namespace.four)
         self.assertEqual(namespace.method, "private-method")
         self.assertEqual(need_parsing._private_method(namespace.num), 24)
+
+    def test_private_method_are_not_exposed(self):
+        with self.assertRaises(SystemExit):
+            ShowMyDocstring.parser.parse_args("will-not-appear 12".split())
 
     def test_parseable(self):
         parser = iam_parseable.parser
