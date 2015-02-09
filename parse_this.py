@@ -324,7 +324,7 @@ class parse_class(object):
                                                    parents=top_level_parents,
                                                    add_help=False,
                                                    conflict_handler="resolve")
-        top_level_parser.add_argument("--help", action=_HelpAction,
+        top_level_parser.add_argument("-h", "--help", action=_HelpAction,
                                       help="Display this help message")
         description = "Accessible methods of {}".format(cls.__name__)
         sub_parsers = top_level_parser.add_subparsers(description=description,
