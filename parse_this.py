@@ -210,8 +210,8 @@ class create_parser(object):
             params_delim: characters used to separate the parameters from their
             help message in the docstring. Defaults to ':'
         """
-        self.types = types
-        self.params_delim = options.get("params_delim",":")
+        self._types = types
+        self._params_delim = options.get("params_delim",":")
 
     def __call__(self, func):
         """Add an argument parser attribute `parser` to the decorated function.
@@ -221,11 +221,11 @@ class create_parser(object):
         """
         if not hasattr(func, "parser"):
             (func_args, _, _, defaults) = getargspec(func)
-            self.types, func_args = _check_types(
-                self.types, func_args, defaults)
+            self._types, func_args = _check_types(
+                self._types, func_args, defaults)
             args_and_defaults = _get_args_and_defaults(func_args, defaults)
-            func.parser = _get_arg_parser(func, self.types, args_and_defaults,
-                                          self.params_delim)
+            func.parser = _get_arg_parser(func, self._types, args_and_defaults,
+                                          self._params_delim)
 
         @wraps(func)
         def decorated(*args, **kwargs):
