@@ -207,11 +207,15 @@ class create_parser(object):
             types: vargs list of types to which the command line arguments should
             be converted to
             options: options to pass to create the parser. Possible values are:
-            params_delim: characters used to separate the parameters from their
-            help message in the docstring. Defaults to ':'
+                -params_delim: characters used to separate the parameters from their
+                help message in the docstring. Defaults to ':'
+                -name: name that will be used for the parser when used in a
+                class decorated with `parse_class`. If not provided the name
+                of the method will be used
         """
         self._types = types
         self._params_delim = options.get("params_delim",":")
+        self._name = options.get("name", None)
 
     def __call__(self, func):
         """Add an argument parser attribute `parser` to the decorated function.
@@ -224,8 +228,10 @@ class create_parser(object):
             self._types, func_args = _check_types(
                 self._types, func_args, defaults)
             args_and_defaults = _get_args_and_defaults(func_args, defaults)
-            func.parser = _get_arg_parser(func, self._types, args_and_defaults,
-                                          self._params_delim)
+            parser = _get_arg_parser(func, self._types, args_and_defaults,
+                                     self._params_delim)
+            parser._name = self._name
+            func.parser = parser
 
         @wraps(func)
         def decorated(*args, **kwargs):
@@ -330,15 +336,18 @@ class parse_class(object):
         sub_parsers = top_level_parser.add_subparsers(description=description,
                                                       dest="method")
         for method_name, parser in methods_to_parse.items():
+            # We use the name provided in 'create_parser` or the name of the
+            # decorated method
+            parser_name = parser._name or method_name
             # Make the method name compatible for the argument parsing
-            if method_name.startswith("_"):
+            if parser_name.startswith("_"):
                 if not self._parse_private:
                     # We skip private methods if the caller asked not to
                     # parse them
                     continue
                 # 'Private' methods are exposed without their leading '_'
-                method_name = method_name[1:]
-            parser_name = method_name.replace("_", "-")
+                parser_name = parser_name[1:]
+            parser_name = parser_name.replace("_", "-")
             sub_parsers.add_parser(parser_name, parents=[parser],
                                    add_help=False,
                                    description=parser.description)
