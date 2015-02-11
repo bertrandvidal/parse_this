@@ -240,6 +240,17 @@ class ShowMyDocstring(object):
         return self.__class__.__name__
 
 
+@parse_class()
+class NeedInitDecorator(object):
+
+    def __init__(self, val):
+        self._val = val
+
+    @create_parser(Self, int)
+    def do_stuff(self, num, div=2):
+        return self._val * num / div
+
+
 class TestParseable(unittest.TestCase):
 
     def test_class_decorator_description(self):
@@ -254,36 +265,21 @@ class TestParseable(unittest.TestCase):
 
     def test_subparsers(self):
         parser = NeedParsing.parser
-        namespace = parser.parse_args("12 multiply-self-arg 2".split())
-        self.assertEqual(namespace.four, 12)
-        self.assertEqual(namespace.method, "multiply-self-arg")
-        self.assertEqual(namespace.num, 2)
-        need_parsing = NeedParsing(namespace.four)
-        self.assertEqual(parser.call(need_parsing, namespace), 24)
-        namespace = parser.parse_args("12 could-you-parse-me yes 2 --three 4".split())
-        self.assertEqual(namespace.method, "could-you-parse-me")
-        self.assertEqual(need_parsing.could_you_parse_me(namespace.one,
-                                                         namespace.two,
-                                                         namespace.three),
-                         ("yesyes", 16))
+        self.assertEqual(parser.call("12 multiply-self-arg 2".split()), 24)
+        self.assertEqual(parser.call("12 could-you-parse-me yes 2 --three 4".split()), ("yesyes", 16))
 
     def test_private_method_are_exposed(self):
         parser = NeedParsing.parser
-        namespace = parser.parse_args("12 private-method 2".split())
-        need_parsing = NeedParsing(namespace.four)
-        self.assertEqual(namespace.method, "private-method")
-        self.assertEqual(parser.call(need_parsing,namespace), 24)
+        self.assertEqual(parser.call("12 private-method 2".split()), 24)
 
     def test_special_method_is_exposed(self):
         parser = NeedParsing.parser
-        namespace = parser.parse_args("12 str".split())
-        need_parsing = NeedParsing(namespace.four)
-        self.assertEqual(namespace.method, "str")
-        self.assertEqual(parser.call(need_parsing, namespace), "12")
+        self.assertEqual(parser.call("12 str".split()), "12")
 
     def test_private_method_are_not_exposed(self):
         with self.assertRaises(SystemExit):
             ShowMyDocstring.parser.parse_args("will-not-appear 12".split())
+        with self.assertRaises(SystemExit):
             ShowMyDocstring.parser.parse_args("str".split())
 
     def test_parseable(self):
@@ -313,6 +309,16 @@ class TestParseable(unittest.TestCase):
         self.assertEqual(NeedParsing.parse_me_if_you_can(2, "yes", 3),
                          ("yesyes", 9))
 
+    def test_init_need_decoration(self):
+        with self.assertRaises(ParseThisError):
+            NeedInitDecorator.parser.call("do-stuff 12".split())
+
+    def test_need_init_decorator_with_instance(self):
+        instance = NeedInitDecorator(2)
+        self.assertEqual(NeedInitDecorator.parser.call("do-stuff 12".split(),
+                                                       instance), 12)
+        self.assertEqual(NeedInitDecorator.parser.call("do-stuff 12 --div 3".split(),
+                                                       instance), 8)
 
 if __name__ == "__main__":
     unittest.main()

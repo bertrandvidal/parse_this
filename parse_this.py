@@ -277,12 +277,14 @@ class parse_class(object):
         """
         self._description = description
         self._parse_private = parse_private
+        self._cls =  None
 
     def __call__(self, cls):
         """
         Args:
             cls: class to get decorated
         """
+        self._cls = cls
         init_parser, methods_to_parse = self._get_parseable_methods(cls)
         return self._get_class_parser(init_parser, methods_to_parse, cls)
 
@@ -375,41 +377,70 @@ class parse_class(object):
         parser_name_to_method_name = self._add_sub_parsers(top_level_parser,
                                                            methods_to_parse,
                                                            cls.__name__)
+        # Update the dict with the __init__ method so we can instantiate
+        # the decorated class
+        if init_parser:
+            parser_name_to_method_name["__init__"] = "__init__"
         top_level_parser.call = self._get_parser_call_method(parser_name_to_method_name)
         cls.parser = top_level_parser
         return cls
 
     def _get_parser_call_method(self, parser_name_to_method_name):
-        """Return the parser special method 'call' that handle sub-command calling.
+        """Return the parser special method 'call' that handles sub-command calling.
 
         Args:
             parser_name_to_method_name: mapping of the parser registered name
             to the method it is linked to
         """
-        # TODO: The instance may not be required if the __init__ method
-        # is properly decorated removing the need for the user to
-        # instantiate the class and call parse_arg on its end.
-        def inner_call(instance, namespace):
-            """Allows to call the method invoked from the command line.
+        def inner_call(args=None, instance=None):
+            """Allows to call the method invoked from the command line or
+            provided argument.
 
             Args:
-                instance: an instance of the decorated class
-                namespace: the argparse.Namespace object obtained from the
-                command line
+                argument: list of agurments to parse, defaults to command line
+                arguments
+                instance: an instance of the decorated class. If instance is
+                None, the default, and __init__ is decorated the object will be
+                instantiated on the fly from the command line arguments
             """
+            namespace = self._cls.parser.parse_args(args or sys.argv[1:])
+            if instance is None:
+                # If the __init__ method is not part of the method to
+                # decorate we cannot instantiate the class
+                if "__init__" not in parser_name_to_method_name:
+                    raise ParseThisError(("'__init__' method is not decorated. "
+                                          "Please provide an instance to "
+                                          "'{}.parser.call' or decorate the "
+                                          "'__init___' method with "
+                                          "'create_parser'".format(self._cls.__name__)))
+                # We instantiate the class from the command line agurments
+                instance = self._call_method_from_namespace(self._cls,
+                                                            "__init__",
+                                                            namespace)
             method_name = parser_name_to_method_name[namespace.method]
-            if not hasattr(instance, method_name):
-                # Technically this should not happen but better safe
-                # than sorry
-                raise ValueError("'{}' doesn't have a '{}' method.".format(instance, method_name))
-            method = getattr(instance, method_name)
-            method_parser = method.parser
-            # Retrieve the 'action' destination of the method parser i.e. its
-            # argument name
-            actions = [action.dest for action in method_parser._actions if not
-                       isinstance(action, argparse._HelpAction)]
-            arguments = {arg_name: getattr(namespace, arg_name)
-                         for arg_name in actions}
-            return method(**arguments)
+            return self._call_method_from_namespace(instance, method_name,
+                                                    namespace)
         return inner_call
+
+    def _call_method_from_namespace(self, obj, method_name, namespace):
+        """Call the method, retrieved from obj, with the correct arguments via
+        the namespace
+
+        Args:
+            obj: any kind of object
+            method_name: method to be called
+            namespace: an argparse.Namespace object containing parser command
+            line arguments
+        """
+        method = getattr(obj, method_name)
+        method_parser = method.parser
+        # Retrieve the 'action' destination of the method parser i.e. its
+        # argument name
+        actions = [action.dest for action in method_parser._actions if not
+                   isinstance(action, argparse._HelpAction)]
+        arguments = {arg_name: getattr(namespace, arg_name)
+                     for arg_name in actions}
+        if method_name == "__init__":
+            return obj(**arguments)
+        return method(**arguments)
 
