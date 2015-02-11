@@ -335,6 +335,10 @@ class parse_class(object):
         description = "Accessible methods of {}".format(cls.__name__)
         sub_parsers = top_level_parser.add_subparsers(description=description,
                                                       dest="method")
+        # Holds the mapping between the name registered for the parser
+        # and the method real name. It is useful in the 'inner_call'
+        # method retrieve the real method
+        parser_name_to_method_name = {}
         for method_name, parser in methods_to_parse.items():
             # We use the name provided in 'create_parser` or the name of the
             # decorated method
@@ -348,8 +352,37 @@ class parse_class(object):
                 # 'Private' methods are exposed without their leading '_'
                 parser_name = parser_name[1:]
             parser_name = parser_name.replace("_", "-")
+            parser_name_to_method_name[parser_name] = method_name
             sub_parsers.add_parser(parser_name, parents=[parser],
                                    add_help=False,
                                    description=parser.description)
+
+        # TODO: The instance may not be required if the __init__ method
+        # is properly decorated removing the need for the user to
+        # instantiate the class and call parse_arg on its end.
+        def inner_call(instance, namespace):
+            """Allows to call the method invoked from the command line.
+
+            Args:
+                instance: an instance of the decorated class
+                namespace: the argparse.Namespace object obtained from the
+                command line
+            """
+            method_name = parser_name_to_method_name[namespace.method]
+            if not hasattr(instance, method_name):
+                # Technically this should not happen but better safe
+                # than sorry
+                raise ValueError("'{}' doesn't have a '{}' method.".format(instance, method_name))
+            method = getattr(instance, method_name)
+            method_parser = method.parser
+            # Retrieve the 'action' destination of the method parser i.e. its
+            # argument name
+            actions = [action.dest for action in method_parser._actions if not
+                       isinstance(action, argparse._HelpAction)]
+            arguments = {arg_name: getattr(namespace, arg_name)
+                         for arg_name in actions}
+            return method(**arguments)
+
+        top_level_parser.call = inner_call
         cls.parser = top_level_parser
         return cls

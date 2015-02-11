@@ -247,9 +247,11 @@ class TestParseable(unittest.TestCase):
     def test_subparsers(self):
         parser = NeedParsing.parser
         namespace = parser.parse_args("12 multiply-self-arg 2".split())
-        need_parsing = NeedParsing(namespace.four)
+        self.assertEqual(namespace.four, 12)
         self.assertEqual(namespace.method, "multiply-self-arg")
-        self.assertEqual(need_parsing.multiply_self_arg(namespace.num), 24)
+        self.assertEqual(namespace.num, 2)
+        need_parsing = NeedParsing(namespace.four)
+        self.assertEqual(parser.call(need_parsing, namespace), 24)
         namespace = parser.parse_args("12 could-you-parse-me yes 2 --three 4".split())
         self.assertEqual(namespace.method, "could-you-parse-me")
         self.assertEqual(need_parsing.could_you_parse_me(namespace.one,
@@ -262,7 +264,7 @@ class TestParseable(unittest.TestCase):
         namespace = parser.parse_args("12 private-method 2".split())
         need_parsing = NeedParsing(namespace.four)
         self.assertEqual(namespace.method, "private-method")
-        self.assertEqual(need_parsing._private_method(namespace.num), 24)
+        self.assertEqual(parser.call(need_parsing,namespace), 24)
 
     def test_private_method_are_not_exposed(self):
         with self.assertRaises(SystemExit):
@@ -283,8 +285,8 @@ class TestParseable(unittest.TestCase):
         self.assertEqual(namespace.one, "yes")
         self.assertEqual(namespace.two, 2)
         self.assertEqual(namespace.three, 3)
-        self.assertEqual(
-            need_parsing.could_you_parse_me("yes", 2, 3), ("yesyes", 9))
+        self.assertEqual(need_parsing.could_you_parse_me(2, "yes", 3),
+                         ("yesyes", 9))
 
     def test_parseable_class(self):
         parser = NeedParsing.parse_me_if_you_can.parser
@@ -292,7 +294,7 @@ class TestParseable(unittest.TestCase):
         self.assertEqual(namespace.one, "yes")
         self.assertEqual(namespace.two, 2)
         self.assertEqual(namespace.three, 3)
-        self.assertEqual(NeedParsing.parse_me_if_you_can("yes", 2, 3),
+        self.assertEqual(NeedParsing.parse_me_if_you_can(2, "yes", 3),
                          ("yesyes", 9))
 
 
