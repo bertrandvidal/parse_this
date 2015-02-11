@@ -313,26 +313,20 @@ class parse_class(object):
                     methods_to_parse[obj.__name__] = obj.parser
         return (init_parser, methods_to_parse)
 
-    def _get_class_parser(self, init_parser, methods_to_parse, cls):
-        """Creates the complete argument parser for the decorated class.
+    def _add_sub_parsers(self, top_level_parser, methods_to_parse, class_name):
+        """Add all the sub-parsers to the top_level_parser.
 
         Args:
-            init_parser: argument parser for the __init__ method or None
+            top_level_parser: the top level parser
             methods_to_parse: dict of method name pointing to their associated
             argument parser
-            cls: the class we are decorating
+            class_name: name of the decorated class
 
         Returns:
-            The decorated class with an added attribute 'parser'
+            a dict of registered name of the parser i.e. sub command name
+            pointing to the method real name
         """
-        top_level_parents = [init_parser] if init_parser else []
-        top_level_parser = argparse.ArgumentParser(description=self._description or cls.__doc__,
-                                                   parents=top_level_parents,
-                                                   add_help=False,
-                                                   conflict_handler="resolve")
-        top_level_parser.add_argument("-h", "--help", action=_HelpAction,
-                                      help="Display this help message")
-        description = "Accessible methods of {}".format(cls.__name__)
+        description = "Accessible methods of {}".format(class_name)
         sub_parsers = top_level_parser.add_subparsers(description=description,
                                                       dest="method")
         # Holds the mapping between the name registered for the parser
@@ -356,7 +350,41 @@ class parse_class(object):
             sub_parsers.add_parser(parser_name, parents=[parser],
                                    add_help=False,
                                    description=parser.description)
+        return parser_name_to_method_name
 
+    def _get_class_parser(self, init_parser, methods_to_parse, cls):
+        """Creates the complete argument parser for the decorated class.
+
+        Args:
+            init_parser: argument parser for the __init__ method or None
+            methods_to_parse: dict of method name pointing to their associated
+            argument parser
+            cls: the class we are decorating
+
+        Returns:
+            The decorated class with an added attribute 'parser'
+        """
+        top_level_parents = [init_parser] if init_parser else []
+        top_level_parser = argparse.ArgumentParser(description=self._description or cls.__doc__,
+                                                   parents=top_level_parents,
+                                                   add_help=False,
+                                                   conflict_handler="resolve")
+        top_level_parser.add_argument("-h", "--help", action=_HelpAction,
+                                      help="Display this help message")
+        parser_name_to_method_name = self._add_sub_parsers(top_level_parser,
+                                                           methods_to_parse,
+                                                           cls.__name__)
+        top_level_parser.call = self._get_parser_call_method(parser_name_to_method_name)
+        cls.parser = top_level_parser
+        return cls
+
+    def _get_parser_call_method(self, parser_name_to_method_name):
+        """Return the parser special method 'call' that handle sub-command calling.
+
+        Args:
+            parser_name_to_method_name: mapping of the parser registered name
+            to the method it is linked to
+        """
         # TODO: The instance may not be required if the __init__ method
         # is properly decorated removing the need for the user to
         # instantiate the class and call parse_arg on its end.
@@ -382,7 +410,5 @@ class parse_class(object):
             arguments = {arg_name: getattr(namespace, arg_name)
                          for arg_name in actions}
             return method(**arguments)
+        return inner_call
 
-        top_level_parser.call = inner_call
-        cls.parser = top_level_parser
-        return cls
