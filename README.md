@@ -214,10 +214,7 @@ class ParseMePlease(object):
 
 
 if __name__ == "__main__":
-    parser = ParseMePlease.parser
-    namespace = parser.parse_args()
-    parse_me_please = ParseMePlease(namespace.foo)
-    print(parser.call(parse_me_please, namespace))
+    print(ParseMePlease.parser.call())
 ```
 
 `parse_class` will create a command line argument parser that is able to handle
@@ -240,9 +237,6 @@ want to expose them you can set the keyword argument `parse_private=True` to
 as this would be confusing for command parsing
 * When calling `python script.py --help` the help message for **every** parser
 will be displayed making easier to find what you are looking for
-* You don't need to check which method was called from the command line just
-call the parser's method `call` passing it the instance of your class and
-the object returned by `parser.parse_args()`.
 * When used in a `parse_class` decorated class `create_parser` can take an extra
 parameters `name` that will be used as the sub-command name. It can be useful
 because the method name could be easy to use from your editor/IDE but hard to
@@ -285,8 +279,10 @@ CAVEATS
 TODO
 ----
  * Handle vargs and kwargs - if possible
- * Make it possible to instantiate class and call method without the user having
-   to call `parse_args`
+ * Make `create_parser` able to be called directly like parser
+   from decorated classes
+ * Reorganize the project in several files - it's starting to get messy.
+   Including the test file.
 
 
 [pypi_link]: https://pypi.python.org/pypi/parse_this "parse_this on PyPI"
