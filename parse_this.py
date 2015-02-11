@@ -343,8 +343,9 @@ class parse_class(object):
                     # We skip private methods if the caller asked not to
                     # parse them
                     continue
-                # 'Private' methods are exposed without their leading '_'
-                parser_name = parser_name[1:]
+                # 'Private' methods are exposed without their leading or
+                # trailing '_'s. Also works for 'special' methods.
+                parser_name = parser_name.strip("_")
             parser_name = parser_name.replace("_", "-")
             parser_name_to_method_name[parser_name] = method_name
             sub_parsers.add_parser(parser_name, parents=[parser],

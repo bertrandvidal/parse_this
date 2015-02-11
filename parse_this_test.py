@@ -206,6 +206,10 @@ class NeedParsing(object):
     def _private_method(self, num):
         return self._four * num
 
+    @create_parser(Self)
+    def __str__(self):
+        return str(self._four)
+
     @create_parser(Self, str, int)
     def could_you_parse_me(self, one, two, three=12):
         """I would like some arg parsing please.
@@ -230,6 +234,10 @@ class ShowMyDocstring(object):
     @create_parser(Self, int)
     def _will_not_appear(self, num):
         return num * numm
+
+    @create_parser(Self)
+    def __str__(self):
+        return self.__class__.__name__
 
 
 class TestParseable(unittest.TestCase):
@@ -266,9 +274,17 @@ class TestParseable(unittest.TestCase):
         self.assertEqual(namespace.method, "private-method")
         self.assertEqual(parser.call(need_parsing,namespace), 24)
 
+    def test_special_method_is_exposed(self):
+        parser = NeedParsing.parser
+        namespace = parser.parse_args("12 str".split())
+        need_parsing = NeedParsing(namespace.four)
+        self.assertEqual(namespace.method, "str")
+        self.assertEqual(parser.call(need_parsing, namespace), "12")
+
     def test_private_method_are_not_exposed(self):
         with self.assertRaises(SystemExit):
             ShowMyDocstring.parser.parse_args("will-not-appear 12".split())
+            ShowMyDocstring.parser.parse_args("str".split())
 
     def test_parseable(self):
         parser = iam_parseable.parser
