@@ -217,8 +217,7 @@ if __name__ == "__main__":
     parser = ParseMePlease.parser
     namespace = parser.parse_args()
     parse_me_please = ParseMePlease(namespace.foo)
-    if namespace.method == "do-stuff":
-        print(parse_me_please.do_stuff(namespace.bar))
+    print(parser.call(parse_me_please, namespace))
 ```
 
 `parse_class` will create a command line argument parser that is able to handle
@@ -241,11 +240,9 @@ want to expose them you can set the keyword argument `parse_private=True` to
 as this would be confusing for command parsing
 * When calling `python script.py --help` the help message for **every** parser
 will be displayed making easier to find what you are looking for
-* To know which subcommand has been called by the command line you need to access
-the `method` attribute of the object returned by `parser.parse_args()` it will
-contain the name of the invoked command, hence you know which method to call
-on your object and are guaranteed the arguments for this method have been
-correctly parsed
+* You don't need to check which method was called from the command line just
+call the parser's method `call` passing it the instance of your class and
+the object returned by `parser.parse_args()`.
 * When used in a `parse_class` decorated class `create_parser` can take an extra
 parameters `name` that will be used as the sub-command name. It can be useful
 because the method name could be easy to use from your editor/IDE but hard to
@@ -278,10 +275,18 @@ To check that everything is running fine you can run the following command:
 python setup.py nosetests
 ```
 
+
+CAVEATS
+-------
+
+ * `parse_this` is not able to be used on methods with `*args` and `**kwargs`
+
+
 TODO
 ----
- * Handle vargs and kwargs
- * Make a class decorator for a argparser with multiple subcommand for each of its decorated method
+ * Handle vargs and kwargs - if possible
+ * Make it possible to instantiate class and call method without the user having
+   to call `parse_args`
 
 
 [pypi_link]: https://pypi.python.org/pypi/parse_this "parse_this on PyPI"
