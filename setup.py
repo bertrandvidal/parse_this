@@ -15,6 +15,7 @@ setup(
     author_email = "vidal.bertrand@gmail.com",
     download_url = "https://pypi.python.org/pypi/parse_this",
     url = "https://github.com/bertrandvidal/parse_this",
+    license = "License :: MIT",
     classifiers = [
         "Intended Audience :: Developers",
         "Intended Audience :: Information Technology",

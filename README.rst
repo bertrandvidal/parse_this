@@ -361,7 +361,12 @@ CAVEATS
 
 -  ``parse_this`` is not able to be used on methods with ``*args`` and
    ``**kwargs``
--  Some
+
+LICENSE
+-------
+
+``parse_this`` is released under the MIT Licence. See the bundled
+LICENSE file for details.
 
 TODO
 ----
