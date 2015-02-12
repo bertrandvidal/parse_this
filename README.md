@@ -19,83 +19,107 @@ Yes and it's called `parse_this`!
 Usage
 -----
 
-### Decorator
-As a decorator that will create an argument parser for the decorated function.
-A `parser` attribute will be added to the method and can be used to parse the
-command line argument.
+`parse_this` contains a simple way to create a command line interface from an
+entire class. For that you will need to use the `parse_class` class decorator.
 
 ```python
+# script.py
 from __future__ import print_function
-from parse_this import create_parser
+from parse_this import Self, create_parser, parse_class
 
 
-@create_parser(str, int)
-def concatenate_str(one, two=2):
-    """Concatenates a string with itself a given number of times.
+@parse_class()
+class ParseMePlease(object):
+    """This will be the description of the parser."""
 
-    Args:
-        one: string to be concatenated with itself
-        two: number of times the string is concatenated, defaults to 2
-    """
-    return one * two
+    @create_parser(Self, int)
+    def __init__(self, foo, --ham=1):
+        """Get ready to be parsed!
+
+        Args:
+          foo: because naming stuff is hard
+          ham: ham is good and it defaults to 1
+        """
+        self._foo = foo
+        self._ham = ham
+
+    @create_parser(Self, int, int)
+    def do_stuff(self, bar, spam=1):
+        """Can do incredible stuff with foo, bar and spam.
+
+        Args:
+          bar: as in foobar will be multiplied with everything else
+          spam: goes well with eggs, spam, bacon, spam, sausage and spam
+
+        Returns:
+          Everything multiplied with each others
+        """
+        return self._foo * bar * spam
 
 
 if __name__ == "__main__":
-    parser = concatenate_str.parser
-    # This parser expect two arguments 'one' and 'two'
-    namespace_args = parser.parse_args()
-    print(concatenate_str(namespace_args.one, namespace_args.two))
+    print(ParseMePlease.parser.call())
 ```
 
-Calling this script from the command line as follow:
 
 ```bash
-python script.py yes 2
+python script.py --help # Print a comprehensive help and usage message
+python script.py 2 do-stuff 2
+>>> 4
+python script.py 2 --ham 2 do-stuff 2 --spam 2
+>>> 16
 ```
 
-will return `'yesyes'` as expected and all the parsing have been done for you.
+How does it work **TL;DR version**?
 
-Note that the function can still be called as any other function.
-Also it is not possible to stack `create_parser` with any decorator that would
-modify the signature of the decorated function e.g. using `functools.wraps`.
-
-
-### Function
-As a function that will handle the command line arguments directly.
-
-```python
-from __future__ import print_function
-from parse_this import parse_this
-
-
-def concatenate_str(one, two=2):
-    """Concatenates a string with itself a given number of times.
-
-    Args:
-        one: string to be concatenated with itself
-        two: number of times the string is concatenated, defaults to 2
-    """
-    return one * two
+* You need to decorate the methods you want to be usable from the command line
+  using `create_parser`.
+* The `__init__` method arguments and keyword arguments will be the arguments
+  and options of the script command line *i.e.* the first arguments and options
+* The other methods will be transformed into sub-command, again mapping the
+  command line arguments and options to the method's own arguments
+* All you have to do for this to work is:
+  * Decorate your class with `parse_class`
+  * Decorate methods with `create_parser` making it aware of the type of the
+    arguments. Using `Self` to designate the `self` parameter
+  * Document your class and method with properly formed docstring to get help
+    and usage message
+  * Call `<YourClass>.parser.call()` and you are done!
 
 
-if __name__ == "__main__":
-    print(parse_this(concatenate_str, [str, int]))
-```
+If you feel like you may need more customization and details, please read on!
 
-Calling this script with the same command line arguments `yes 2` will also
-return `'yesyes'` as expected.
+* If the `__init__` method is decorated it will be considered the first, or
+  top-level, parser this means that all arguments in your `__init__` will be
+  arguments pass right after invoking you script i.e.
+  `python script.py init_arg_1 init_arg_2 etc...`
+* The description of the top-level parser is taken from the class's docstring or
+  overwritten by the keyword argument `description` of `parse_class`.
+* Each method decorated by `create_parser` will become a subparser of its own.
+  The command name of the subparser is the same as the method name with `_`
+  replaced by `-`. 'Private' methods, whose name start with an `_`, do not have
+  a subparser by default, as this would expose them to the outside. However if you
+  want to expose them you can set the keyword argument `parse_private=True` to
+  `parse_class`. If exposed their command name will not contain the leading `-`
+  as this would be confusing for command parsing
+* When calling `python script.py --help` the help message for **every** parser
+  will be displayed making easier to find what you are looking for
+* When used in a `parse_class` decorated class `create_parser` can take an extra
+  parameters `name` that will be used as the sub-command name. The same
+  modifications are made to the `name` replacing `_` with `_`
 
 
-Arguments and types
--------------------
+###Arguments and types
 
-Both `parse_this` and `create_parser` need a list of types to which
-arguments will be converted to. Any Python type can be used, two
-special values are used for the `self` and `cls` respectively `Self`
-and `Class`. There is no need to provide a type for keyword agurment
-since it is infered from the default value of the argument.
+Both `parse_this` and `create_parser` need a list of types to which arguments
+will be converted to. Any Python standard type can be used, two special values
+are used for the `self` and `cls` respectively `Self` and `Class`.
+There is no need to provide a type for keyword agurments since it is infered
+from the default value of the argument. If your method signature contains
+`arg_with_default=12` `parse_this` expect an `int` where `arg_with_default` is.
 
 If this is the containt of `test.py`:
+
 ```python
 from __future__ import print_function
 from parse_this import create_parser, Self
@@ -122,10 +146,8 @@ class INeedParsing(object):
 if __name__ == "__main__":
     need_parsing = INeedParsing(2)
     parser = need_parsing.parse_me_if_you_can.parser
-    namespace_args = parser.parse_args()
-    print(need_parsing.parse_me_if_you_can(namespace_args.an_int,
-                                           namespace_args.a_string,
-                                           namespace_args.default))
+    args = parser.parse_args()
+    print(need_parsing.parse_me_if_you_can(args.an_int, args.a_string, args.default))
 ```
 
 The following would be the output of the command line `python test.py --help`:
@@ -144,35 +166,137 @@ optional arguments:
   --default DEFAULT  guess what I got a default value
 ```
 
+The method `parse_me_if_you_can` expect an `int` of the name `an_int`, a `str`
+of the name `a_string` and other `int` with the name `default` and a default
+value of 12. So does the parser !!! As displayed by the `--help` command.
+
+
 The following would be the output of the command line `python test.py 2 yes --default 4`:
 
 ```bash
 ('yesyes', 8)
 ```
 
-The first line argument `2` is used as the `an_int` argument for the method,
-the second `yes` is the string that will be concatenated `2` times. And finally
-the optional argument specified by `--default` is multiplied by the construtor arg i.e. `8`.
+`parse_this` is looking for an `int`, a `str` and potentially and other `int`
+and that's just what we have provided.
+When effectively parsing the command line, via `parser.parse_args()`, we are
+given an object that contain the expected attributes `an_int`, `a_string` and
+`default` and their value will come directly from the command line arguments and
+options.
 
-Note: both `parse_this` and `create_parser` need your docstring to be in a
-specific format. The description of the argument parser is taken from the
-docstring and contains all the text until the first blank line.
-Arguments help message are taken from the following pattern:
 
-`<argument_name><delimiter_chars><argument_help>`
+###Help message
 
-* argument_name must be the same as the argument of the method
-* delimiter_chars is one or more chars that separate the argument from its help message
-* argument_help is everything behind the delimiter_chars until the next argument, **a blank line** or the end of the docstring
+In order to get a help message generated automatically from the method docstring
+it needs to be in a specific format as describe below:
+
+```python
+...
+    @create_parser(Self, int, int, params_delim=<delimiter_chars>)
+    def method(self, spam, ham):
+    """<description>
+    <blank_line>
+    <arg_name><delimiter_chars><arg_help>
+    <arg_name><delimiter_chars><arg_help>
+    """
+    pass
+...
+```
+
+* description: is a multiline description of the method used for the command line
+* each line of argument help have the following component:
+  * arg_name: the **same** name as the argument of the method
+  * delimiter_chars: one or more chars that separate the argument and its help
+    message
+  * arg_help: is everything behind the delimiter_chars until the next argument,
+    **a blank line** or the end of the docstring
 
 The `delimiter_chars` can be passed to both `parse_this` and `create_parser` as
 the keywords argument `params_delim`. It defaults to `:` since this is the
 convention I most often use.
 
+If no docstring is specified a generic - not so useful - help message will
+be generated for the command line and arguments.
+
+
+Decorator
+---------
+
+As a decorator `create_parser` will create an argument parser for a decorated
+function. A `parser` attribute will be added to the method and can be used to
+parse the command line argument.
+
+```python
+from __future__ import print_function
+from parse_this import create_parser
+
+
+@create_parser(str, int)
+def concatenate_str(one, two=2):
+    """Concatenates a string with itself a given number of times.
+
+    Args:
+        one: string to be concatenated with itself
+        two: number of times the string is concatenated, defaults to 2
+    """
+    return one * two
+
+
+if __name__ == "__main__":
+    parser = concatenate_str.parser
+    # This parser expect two arguments 'one' and '--two' just like the method
+    namespace_args = parser.parse_args()
+    print(concatenate_str(namespace_args.one, namespace_args.two))
+```
+
+Calling this script from the command line as follow:
+
+```bash
+python script.py yes --two 2
+```
+
+will return `'yesyes'` as expected and all the parsing have been done for you.
+
+Note that the function can still be called as any other function from any python
+file. Also it is not possible to stack `create_parser` with any decorator that
+would modify the signature of the decorated function e.g. using `functools.wraps`.
+
+
+Function
+--------
+
+As a function `parse_this` will handle the command line arguments directly.
+
+```python
+from __future__ import print_function
+from parse_this import parse_this
+
+
+def concatenate_str(one, two=2):
+    """Concatenates a string with itself a given number of times.
+
+    Args:
+        one: string to be concatenated with itself
+        two: number of times the string is concatenated, defaults to 2
+    """
+    return one * two
+
+
+if __name__ == "__main__":
+    print(parse_this(concatenate_str, [str, int]))
+```
+
+Calling this script with the same command line arguments `yes --two 2` will also
+return `'yesyes'` as expected.
+
+
+Classmethods
+------------
 
 In a similar fashion you can parse line arguments for classmethods:
 
 ```python
+
 ...
     @classmethod
     @create_parser(Class, int, str, params_delim="--")
@@ -185,70 +309,15 @@ In a similar fashion you can parse line arguments for classmethods:
             default -- guess what I got a default value
         """
         return a_string * an_int, default * default
+...
+
 ```
-The output will be the same as above.
+The output will be the same as above. The only difference is the use of the
+special value `Class` to specify where the `cls` argument is used.
 
 **Note**: The `classmethod` decorator is placed **on top** of the `create_parser`
 decorator in order for the method to still be a considered a class method.
 
-
-`parse_this` contains a simple way to create a command line interface from an
-entire class. For that you will need to use the `parse_class` class decorator.
-
-```python
-from __future__ import print_function
-from parse_this import Self, create_parser, parse_class
-
-
-@parse_class()
-class ParseMePlease(object):
-    """This will be the description of the parser."""
-
-    @create_parser(Self, int)
-    def __init__(self, foo):
-        self._foo = foo
-
-    @create_parser(Self, int)
-    def do_stuff(self, bar):
-        return self._foo * bar
-
-
-if __name__ == "__main__":
-    print(ParseMePlease.parser.call())
-```
-
-`parse_class` will create a command line argument parser that is able to handle
-your whole class!!
-
-How does it work?
-
-* If the `__init__` method is decorated it will be considered the first, or
-top-level, parser this means that all arguments in your `__init__` will be
-arguments pass right after invoking you script i.e.
-`python script.py init_arg_1 init_arg_2 etc...`
-* The description of the top-level parser is taken from the class's docstring or
-overwritten by the keyword argument `description` of `parse_class`.
-* Each method decorated by `create_parser` will become a subparser of its own.
-The command name of the subparser is the same as the method name with `_`
-replaced by `-`. 'Private' methods, whose name start with an `_`, do not have
-a subparser by default, as this would expose them to the outside. However if you
-want to expose them you can set the keyword argument `parse_private=True` to
-`parse_class`. If exposed their command name will need contain the leading `-`
-as this would be confusing for command parsing
-* When calling `python script.py --help` the help message for **every** parser
-will be displayed making easier to find what you are looking for
-* When used in a `parse_class` decorated class `create_parser` can take an extra
-parameters `name` that will be used as the sub-command name. It can be useful
-because the method name could be easy to use from your editor/IDE but hard to
-remember from the command line
-
-If the previous decorated class `ParseMePlease` is in a `script.py` file we can
-execute the following commands:
-
-```bash
-python script.py --help # Print the help for every parser
-python script.py 12 do-stuff 2 # Outputs 24 as expected
-```
 
 INSTALLING PARSE_THIS
 ---------------------
@@ -257,6 +326,10 @@ INSTALLING PARSE_THIS
 
 ```bash
 pip install parse_this
+```
+or
+```bash
+easy_install parse_this
 ```
 
 
@@ -274,11 +347,12 @@ CAVEATS
 -------
 
  * `parse_this` is not able to be used on methods with `*args` and `**kwargs`
-
+ * Some
 
 TODO
 ----
  * Handle vargs and kwargs - if possible
+ * Test decorated classmethods in decorated class
  * Make `create_parser` able to be called directly like parser
    from decorated classes
  * Reorganize the project in several files - it's starting to get messy.
