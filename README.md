@@ -132,28 +132,26 @@ class INeedParsing(object):
         self._an_arg = an_argument
 
     @create_parser(Self, int, str, params_delim="--")
-    def parse_me_if_you_can(self, an_int, a_string, default=12):
+    def parse_me_if_you_can(self, an_int, a_string, an_other_int=12):
         """I dare you to parse me !!!
 
         Args:
             an_int -- int are pretty cool
             a_string -- string aren't that nice
-            default -- guess what I got a default value
+            an_other_int -- guess what? I got a default value
         """
-        return a_string * an_int, default * self._an_arg
+        return a_string * an_int, an_other_int * self._an_arg
 
 
 if __name__ == "__main__":
     need_parsing = INeedParsing(2)
-    parser = need_parsing.parse_me_if_you_can.parser
-    args = parser.parse_args()
-    print(need_parsing.parse_me_if_you_can(args.an_int, args.a_string, args.default))
+    print(INeedParsing.parse_me_if_you_can.parser.call(need_parsing))
 ```
 
 The following would be the output of the command line `python test.py --help`:
 
 ```bash
-usage: test.py [-h] [--default DEFAULT] an_int a_string
+usage: test.py [-h] [--an_other_int AN_OTHER_INT] an_int a_string
 
 I dare you to parse me !!!
 
@@ -163,12 +161,16 @@ positional arguments:
 
 optional arguments:
   -h, --help         show this help message and exit
-  --default DEFAULT  guess what I got a default value
+  --an_other_int AN_OTHER_INT  guess what? I got a default value
 ```
 
 The method `parse_me_if_you_can` expect an `int` of the name `an_int`, a `str`
-of the name `a_string` and other `int` with the name `default` and a default
+of the name `a_string` and other `int` with the name `an_other_int` and a default
 value of 12. So does the parser !!! As displayed by the `--help` command.
+
+Note: `create_parser` cannot decorate the `__init__` method of a class unless
+the class is itself decorated with `parse_class`. A `ParseThisError` will be
+raised if you attempt to use the `call` method of such a parser.
 
 
 The following would be the output of the command line `python test.py 2 yes --default 4`:
@@ -176,13 +178,6 @@ The following would be the output of the command line `python test.py 2 yes --de
 ```bash
 ('yesyes', 8)
 ```
-
-`parse_this` is looking for an `int`, a `str` and potentially and other `int`
-and that's just what we have provided.
-When effectively parsing the command line, via `parser.parse_args()`, we are
-given an object that contain the expected attributes `an_int`, `a_string` and
-`default` and their value will come directly from the command line arguments and
-options.
 
 
 ###Help message
