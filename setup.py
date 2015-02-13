@@ -12,7 +12,8 @@ setup(
     description=("Makes it easy to create a command line interface for any "
                  "function, method or classmethod.."),
     long_description=readme,
-    py_modules=["parse_this", "parse_this_test"],
+    py_modules=["parse_this_test"],
+    packages=["parse_this"],
     author="Bertrand Vidal",
     author_email="vidal.bertrand@gmail.com",
     download_url="https://pypi.python.org/pypi/parse_this",
