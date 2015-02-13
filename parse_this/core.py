@@ -175,6 +175,27 @@ def _call(callable_obj, arg_names, namespace):
     return callable_obj(**arguments)
 
 
+def _call_method_from_namespace(obj, method_name, namespace):
+    """Call the method, retrieved from obj, with the correct arguments via
+    the namespace
+
+    Args:
+        obj: any kind of object
+        method_name: method to be called
+        namespace: an argparse.Namespace object containing parsed command
+        line arguments
+    """
+    method = getattr(obj, method_name)
+    method_parser = method.parser
+    # Retrieve the 'action' destination of the method parser i.e. its
+    # argument name. The HelpAction is ignored.
+    arg_names = [action.dest for action in method_parser._actions if not
+                isinstance(action, argparse._HelpAction)]
+    if method_name == "__init__":
+        return _call(obj, arg_names, namespace)
+    return _call(method, arg_names, namespace)
+
+
 class FullHelpAction(argparse._HelpAction):
     """Custom HelpAction to display help from all subparsers.
 

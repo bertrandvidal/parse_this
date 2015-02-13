@@ -2,7 +2,7 @@ from functools import wraps
 from inspect import getargspec
 from parse_this.core import (_check_types, _get_args_and_defaults,
     _get_arg_parser, _get_args_to_parse, _call, ParseThisError, Self, Class,
-    NoDefault, FullHelpAction)
+    NoDefault, FullHelpAction, _call_method_from_namespace)
 import argparse
 import sys
 
@@ -223,30 +223,10 @@ class parse_class(object):
                                           "'__init___' method with "
                                           "'create_parser'".format(self._cls.__name__)))
                 # We instantiate the class from the command line agurments
-                instance = self._call_method_from_namespace(self._cls,
-                                                            "__init__",
-                                                            namespace)
+                instance = _call_method_from_namespace(self._cls, "__init__",
+                                                       namespace)
             method_name = parser_name_to_method_name[namespace.method]
-            return self._call_method_from_namespace(instance, method_name,
-                                                    namespace)
+            return _call_method_from_namespace(instance, method_name,
+                                               namespace)
         return inner_call
 
-    def _call_method_from_namespace(self, obj, method_name, namespace):
-        """Call the method, retrieved from obj, with the correct arguments via
-        the namespace
-
-        Args:
-            obj: any kind of object
-            method_name: method to be called
-            namespace: an argparse.Namespace object containing parsed command
-            line arguments
-        """
-        method = getattr(obj, method_name)
-        method_parser = method.parser
-        # Retrieve the 'action' destination of the method parser i.e. its
-        # argument name
-        arg_names = [action.dest for action in method_parser._actions if not
-                    isinstance(action, argparse._HelpAction)]
-        if method_name == "__init__":
-            return _call(obj, arg_names, namespace)
-        return _call(method, arg_names, namespace)
