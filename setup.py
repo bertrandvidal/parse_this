@@ -8,7 +8,7 @@ with open(readme_file, "r") as readme_file:
 
 setup(
     name="parse_this",
-    version="1.0.0",
+    version="1.0.1",
     description=("Makes it easy to create a command line interface for any "
                  "function, method or classmethod.."),
     long_description=readme,
