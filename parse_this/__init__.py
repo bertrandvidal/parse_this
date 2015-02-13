@@ -91,11 +91,12 @@ class parse_class(object):
     def __call__(self, cls):
         """
         Args:
-            cls: class to get decorated
+            cls: class to be decorated
         """
         self._cls = cls
         init_parser, methods_to_parse = self._get_parseable_methods(cls)
-        return self._get_class_parser(init_parser, methods_to_parse, cls)
+        self._set_class_parser(init_parser, methods_to_parse, cls)
+        return cls
 
     def _get_parseable_methods(self, cls):
         """Return all methods of cls that are parseable i.e. have been decorated
@@ -164,7 +165,7 @@ class parse_class(object):
                                    description=parser.description)
         return parser_name_to_method_name
 
-    def _get_class_parser(self, init_parser, methods_to_parse, cls):
+    def _set_class_parser(self, init_parser, methods_to_parse, cls):
         """Creates the complete argument parser for the decorated class.
 
         Args:
@@ -192,7 +193,6 @@ class parse_class(object):
             parser_name_to_method_name["__init__"] = "__init__"
         top_level_parser.call = self._get_parser_call_method(parser_name_to_method_name)
         cls.parser = top_level_parser
-        return cls
 
     def _get_parser_call_method(self, parser_name_to_method_name):
         """Return the parser special method 'call' that handles sub-command calling.
