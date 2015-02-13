@@ -161,18 +161,18 @@ def _check_types(types, func_args, defaults):
     return (types, func_args)
 
 
-def _call(func, func_args, arguments):
-    """Actually calls the function with the arguments parsed from the command line.
+def _call(callable_obj, arg_names, namespace):
+    """Actually calls the callable with the namespace parsed from the command
+    line.
 
     Args:
-        func: the function to called
-        func_args: name of the function arguments
-        arguments: the namespace object parse from the command line
+        callable_obj: a callable object
+        arg_names: name of the function arguments
+        namespace: the namespace object parsed from the command line
     """
-    args = []
-    for argument in func_args:
-        args.append(getattr(arguments, argument))
-    return func(*args)
+    arguments = {arg_name: getattr(namespace, arg_name)
+                 for arg_name in arg_names}
+    return callable_obj(**arguments)
 
 
 class FullHelpAction(argparse._HelpAction):

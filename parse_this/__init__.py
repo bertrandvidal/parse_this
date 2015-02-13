@@ -238,17 +238,15 @@ class parse_class(object):
         Args:
             obj: any kind of object
             method_name: method to be called
-            namespace: an argparse.Namespace object containing parser command
+            namespace: an argparse.Namespace object containing parsed command
             line arguments
         """
         method = getattr(obj, method_name)
         method_parser = method.parser
         # Retrieve the 'action' destination of the method parser i.e. its
         # argument name
-        actions = [action.dest for action in method_parser._actions if not
-                   isinstance(action, argparse._HelpAction)]
-        arguments = {arg_name: getattr(namespace, arg_name)
-                     for arg_name in actions}
+        arg_names = [action.dest for action in method_parser._actions if not
+                    isinstance(action, argparse._HelpAction)]
         if method_name == "__init__":
-            return obj(**arguments)
-        return method(**arguments)
+            return _call(obj, arg_names, namespace)
+        return _call(method, arg_names, namespace)
