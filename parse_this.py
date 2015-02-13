@@ -142,7 +142,7 @@ def _get_args_to_parse(args, sys_argv):
 
 def _check_types(types, func_args, defaults):
     """Make sure that enough types were given to ensure conversion. Also remove
-        a potentiel Self arguments.
+       potential Self/Class arguments.
 
     Args:
         types: a list of Python types to which the argument should be converted to
@@ -214,7 +214,7 @@ class create_parser(object):
                 of the method will be used
         """
         self._types = types
-        self._params_delim = options.get("params_delim",":")
+        self._params_delim = options.get("params_delim", ":")
         self._name = options.get("name", None)
 
     def __call__(self, func):
@@ -277,7 +277,7 @@ class parse_class(object):
         """
         self._description = description
         self._parse_private = parse_private
-        self._cls =  None
+        self._cls = None
 
     def __call__(self, cls):
         """
