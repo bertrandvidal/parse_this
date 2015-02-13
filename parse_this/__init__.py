@@ -2,7 +2,7 @@ from functools import wraps
 from inspect import getargspec
 from parse_this.core import (_check_types, _get_args_and_defaults,
     _get_arg_parser, _get_args_to_parse, _call, ParseThisError, Self, Class,
-    NoDefault)
+    NoDefault, FullHelpAction)
 import argparse
 import sys
 
@@ -69,29 +69,6 @@ class create_parser(object):
         def decorated(*args, **kwargs):
             return func(*args, **kwargs)
         return decorated
-
-
-class _HelpAction(argparse._HelpAction):
-    """Custom HelpAction to display help from all subparsers.
-
-    This allows to have the help for all sub-commands when invoking:
-    '<script.py> --help' rather than a somewhat incomplete help message only
-    describing the name of the sub-commands.
-    Note: taken from http://stackoverflow.com/a/24122778/2003420
-    """
-
-    def __call__(self, parser, namespace, values, option_string=None):
-        # Print help for the parser this class is linked to
-        parser.print_help()
-        # Retrieve sub-parsers of the given parser
-        subparsers_actions = [action for action in parser._actions
-                              if isinstance(action, argparse._SubParsersAction)]
-        for subparser_action in subparsers_actions:
-            # Get all subparsers and print their help
-            for choice, subparser in subparser_action.choices.items():
-                print("** Command '{}' **".format(choice))
-                print("{}\n".format(subparser.format_help()))
-        parser.exit()
 
 
 class parse_class(object):
@@ -204,7 +181,7 @@ class parse_class(object):
                                                    parents=top_level_parents,
                                                    add_help=False,
                                                    conflict_handler="resolve")
-        top_level_parser.add_argument("-h", "--help", action=_HelpAction,
+        top_level_parser.add_argument("-h", "--help", action=FullHelpAction,
                                       help="Display this help message")
         parser_name_to_method_name = self._add_sub_parsers(top_level_parser,
                                                            methods_to_parse,
@@ -275,4 +252,3 @@ class parse_class(object):
         if method_name == "__init__":
             return obj(**arguments)
         return method(**arguments)
-
