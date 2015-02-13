@@ -235,7 +235,7 @@ class parse_class(object):
             provided argument.
 
             Args:
-                argument: list of agurments to parse, defaults to command line
+                args: list of arguments to parse, defaults to command line
                 arguments
                 instance: an instance of the decorated class. If instance is
                 None, the default, and __init__ is decorated the object will be
