@@ -1,9 +1,8 @@
-import sys
+from parse_this import parse_this, create_parser, parse_class
+from parse_this.core import (_get_args_and_defaults, NoDefault,
+    _get_args_to_parse, _check_types, _get_arg_parser, _prepare_doc, Self,
+    Class, ParseThisError)
 import unittest
-
-from parse_this import (_get_args_and_defaults, NoDefault, _get_args_to_parse,
-                        _check_types, _get_arg_parser, parse_this, _prepare_doc,
-                        create_parser, Self, Class, ParseThisError, parse_class)
 
 
 def parse_me(one, two, three=12):
@@ -20,6 +19,7 @@ def parse_me(one, two, three=12):
     """
     return one * two, three * three
 
+
 def parse_me_no_defaults(one, two):
     """I don't have any default !
 
@@ -28,6 +28,7 @@ def parse_me_no_defaults(one, two):
         two: I can turn 2 syllables words into 6 syllables words
     """
     return one * two
+
 
 def parse_me_no_doc(one, two, three):
     return one * two, three * three
@@ -53,6 +54,7 @@ def check_my_params_delimiter(one, two, three):
           I'm multiline too!
     """
     return one * two, three * three
+
 
 def blank_line_in_wrong_place(one, two):
     """I put the blank line after arguments ...
@@ -127,7 +129,6 @@ class TestParseThis(unittest.TestCase):
                                     "two": "Help message for two",
                                     "three": "noticed you're missing docstring for two and I'm multiline too!"})
 
-
     def test_check_types(self):
         self.assertRaises(ParseThisError, _check_types, [], ["arg_one"], ())
         self.assertRaises(ParseThisError, _check_types, [int, float],
@@ -143,7 +144,8 @@ class TestParseThis(unittest.TestCase):
 
     def test_parsing_no_defaults(self):
         parser = _get_arg_parser(parse_me, [str, int], [("one", NoDefault),
-                                                        ("two", NoDefault)], ":")
+                                                        ("two", NoDefault)],
+                                 ":")
         namespace = parser.parse_args("yes 2".split())
         self.assertEqual(namespace.one, "yes")
         self.assertEqual(namespace.two, 2)
@@ -233,7 +235,7 @@ class ShowMyDocstring(object):
 
     @create_parser(Self, int)
     def _will_not_appear(self, num):
-        return num * numm
+        return num * num
 
     @create_parser(Self)
     def __str__(self):
@@ -266,7 +268,8 @@ class TestParseable(unittest.TestCase):
     def test_subparsers(self):
         parser = NeedParsing.parser
         self.assertEqual(parser.call("12 multiply-self-arg 2".split()), 24)
-        self.assertEqual(parser.call("12 could-you-parse-me yes 2 --three 4".split()), ("yesyes", 16))
+        self.assertEqual(parser.call("12 could-you-parse-me yes 2 --three 4".split()),
+                         ("yesyes", 16))
 
     def test_private_method_are_exposed(self):
         parser = NeedParsing.parser
