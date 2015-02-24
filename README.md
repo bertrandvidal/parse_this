@@ -33,7 +33,7 @@ class ParseMePlease(object):
     """This will be the description of the parser."""
 
     @create_parser(Self, int)
-    def __init__(self, foo, --ham=1):
+    def __init__(self, foo, ham=1):
         """Get ready to be parsed!
 
         Args:
@@ -45,10 +45,10 @@ class ParseMePlease(object):
 
     @create_parser(Self, int, int)
     def do_stuff(self, bar, spam=1):
-        """Can do incredible stuff with foo, bar and spam.
+        """Can do incredible stuff with bar and spam.
 
         Args:
-          bar: as in foobar will be multiplied with everything else
+          bar: as in foobar, will be multiplied with everything else
           spam: goes well with eggs, spam, bacon, spam, sausage and spam
 
         Returns:
