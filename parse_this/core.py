@@ -160,12 +160,7 @@ def _get_args_to_parse(args, sys_argv):
         args: argument to be parsed
         sys_argv: arguments of the command line i.e. sys.argv
     """
-    if args is not None:
-        return args
-    command_line_arguments = sys_argv[1:]
-    if command_line_arguments:
-        return command_line_arguments
-    return []
+    return args if args is not None else sys_argv[1:]
 
 
 def _check_types(types, func_args, defaults):
