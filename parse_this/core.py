@@ -1,3 +1,4 @@
+from __future__ import print_function
 import argparse
 import re
 
@@ -18,11 +19,24 @@ class NoDefault(object):
 
 
 class Self(object):
-    """Special value to use as the type of the self parameter of a method."""
+    """Special value to use as the type of the self arg of a method."""
 
 
 class Class(object):
-    """Special value to use as the type of the class parameter of a classmethod."""
+    """Special value to use as the type of the cls arg of a classmethod."""
+
+
+def identity_type(obj):
+    """Return the object as is.
+
+    Args:
+        obj: the object to be 'cast'
+
+    Note:
+        This method is the callable used by the ArgumentParser to parse the
+        command line arguments.
+    """
+    return obj
 
 
 def _get_args_and_defaults(args, defaults):
@@ -35,8 +49,9 @@ def _get_args_and_defaults(args, defaults):
     """
     args_and_defaults = []
     defaults = defaults or []
-    for (k, v) in zip_longest(args[::-1], defaults[::-1], fillvalue=NoDefault):
-        args_and_defaults.append((k, v))
+    for (argument, default) in zip_longest(args[::-1], defaults[::-1],
+                                           fillvalue=NoDefault):
+        args_and_defaults.append((argument, default))
     return args_and_defaults[::-1]
 
 
@@ -68,6 +83,7 @@ def _prepare_doc(func, args, params_delim):
         if line and fill_description:
             description.append(line)
         elif line:
+            # TODO: use a compiled regex
             arg_match = re.match("\b*(?P<arg_name>\w+)\s*%s\s*(?P<help_msg>.+)"
                                  % params_delim, line)
             try:
@@ -108,7 +124,6 @@ def _get_arg_parser(func, types, args_and_defaults, params_delim):
     (description, arg_help) = _prepare_doc(
         func, [x for (x, _) in args_and_defaults], params_delim)
     parser = argparse.ArgumentParser(description=description)
-    identity_type = lambda x: x
     for ((arg, default), arg_type) in zip_longest(args_and_defaults, types):
         help_msg = arg_help[arg]
         if default is NoDefault:
@@ -142,7 +157,7 @@ def _check_types(types, func_args, defaults):
        potential Self/Class arguments.
 
     Args:
-        types: a list of Python types to which the argument should be converted to
+        types: a list of Python types to which the argument will be converted
         func_args: list of function arguments name
         defaults: tuple of default values for the function argument
 
@@ -190,7 +205,7 @@ def _call_method_from_namespace(obj, method_name, namespace):
     # Retrieve the 'action' destination of the method parser i.e. its
     # argument name. The HelpAction is ignored.
     arg_names = [action.dest for action in method_parser._actions if not
-                isinstance(action, argparse._HelpAction)]
+                 isinstance(action, argparse._HelpAction)]
     if method_name == "__init__":
         return _call(obj, arg_names, namespace)
     return _call(method, arg_names, namespace)
