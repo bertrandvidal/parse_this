@@ -4,7 +4,7 @@ from parse_this.core import (_check_types, _get_args_and_defaults,
                              _get_arg_parser, _get_args_to_parse, _call,
                              ParseThisError, Self, Class, FullHelpAction,
                              _call_method_from_namespace,
-                             _get_parser_call_method)
+                             _get_parser_call_method, _get_parseable_methods)
 import argparse
 import sys
 
@@ -102,36 +102,9 @@ class parse_class(object):
             cls: class to be decorated
         """
         self._cls = cls
-        init_parser, methods_to_parse = self._get_parseable_methods(cls)
+        init_parser, methods_to_parse = _get_parseable_methods(cls)
         self._set_class_parser(init_parser, methods_to_parse, cls)
         return cls
-
-    def _get_parseable_methods(self, cls):
-        """Return all methods of cls that are parseable i.e. have been decorated
-        by '@create_parser'.
-
-        Args:
-            cls: the class currently being decorated
-
-        Returns:
-            a 2-tuple with the parser of the __init__ method if any and a dict
-            of the form {'method_name': associated_parser}
-        """
-        init_parser = None
-        methods_to_parse = {}
-        for name, obj in vars(cls).items():
-            # Every callable object that has a 'parser' attribute will be
-            # added as a subparser.
-            # This won't work for classmethods because reference to
-            # classmethods are only possible once the class has been defined
-            if callable(obj) and hasattr(obj, "parser"):
-                if name == "__init__":
-                    # If we find the decorated __init__ method it will be
-                    # used as the top level parser
-                    init_parser = obj.parser
-                else:
-                    methods_to_parse[obj.__name__] = obj.parser
-        return (init_parser, methods_to_parse)
 
     def _add_sub_parsers(self, top_level_parser, methods_to_parse, class_name):
         """Add all the sub-parsers to the top_level_parser.

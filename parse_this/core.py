@@ -106,6 +106,34 @@ def _prepare_doc(func, args, params_delim):
                                      args_help)
 
 
+def _get_parseable_methods(cls):
+    """Return all methods of cls that are parseable i.e. have been decorated
+    by '@create_parser'.
+
+    Args:
+        cls: the class currently being decorated
+
+    Returns:
+        a 2-tuple with the parser of the __init__ method if any and a dict
+        of the form {'method_name': associated_parser}
+    """
+    init_parser = None
+    methods_to_parse = {}
+    for name, obj in vars(cls).items():
+        # Every callable object that has a 'parser' attribute will be
+        # added as a subparser.
+        # This won't work for classmethods because reference to
+        # classmethods are only possible once the class has been defined
+        if callable(obj) and hasattr(obj, "parser"):
+            if name == "__init__":
+                # If we find the decorated __init__ method it will be
+                # used as the top level parser
+                init_parser = obj.parser
+            else:
+                methods_to_parse[obj.__name__] = obj.parser
+    return (init_parser, methods_to_parse)
+
+
 def _get_default_help_message(func, args, description=None, args_help=None):
     """Create a default description for the parser and help message for the
     agurments if they are missing.
