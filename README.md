@@ -54,7 +54,7 @@ class ParseMePlease(object):
         Returns:
           Everything multiplied with each others
         """
-        return self._foo * bar * spam
+        return self._foo * self._ham * bar * spam
 
 
 if __name__ == "__main__":
