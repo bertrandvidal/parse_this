@@ -71,14 +71,13 @@ def _prepare_doc(func, args, params_delim):
         message
     """
     if not func.__doc__:
-        return ("Argument parsing for %s" % func.__name__,
-                {arg: "Help message for %s" % arg for arg in args})
+        return _get_default_help_message(func, args)
     description = []
     args_help = {}
     fill_description = True
     arg_name = None
-    arg_doc_regex = re.compile("\b*(?P<arg_name>\w+)\s*%s\s*(?P<help_msg>.+)"
-                       % params_delim)
+    arg_doc_regex = re.compile("\b*(?P<arg_name>\w+)\s*%s\s*(?P<help_msg>.+)" %
+                               params_delim)
     for line in func.__doc__.splitlines():
         line = line.strip()
         if line and fill_description:
@@ -102,11 +101,29 @@ def _prepare_doc(func, args, params_delim):
             if not fill_description and args_help:
                 break
             fill_description = False
+    return _get_default_help_message(func, args, " ".join(description),
+                                     args_help)
+
+
+def _get_default_help_message(func, args, description=None, args_help=None):
+    """Create a default description for the parser and help message for the
+    agurments if they are missing.
+
+    Args:
+        func: the method we are creating a parser for
+        args: the argument names of the method
+        description: a potentially existing description created from the
+        function docstring
+        args_help: a dict {arg_name: help} with potentially missing arguments
+    """
+    if description is None:
+        description = "Argument parsing for %s" % func.__name__
+    args_help = args_help or {}
     # If an argument is missing a help message we create a simple one
-    for argument in args:
-        if argument not in args_help:
-            args_help[argument] = "Help message for %s" % argument
-    return (" ".join(description), args_help)
+    for argument in [arg_name for arg_name in args
+                     if arg_name not in args_help]:
+        args_help[argument] = "Help message for %s" % argument
+    return (description, args_help)
 
 
 def _get_arg_parser(func, types, args_and_defaults, params_delim):
