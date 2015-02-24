@@ -77,14 +77,14 @@ def _prepare_doc(func, args, params_delim):
     args_help = {}
     fill_description = True
     arg_name = None
+    arg_doc_regex = re.compile("\b*(?P<arg_name>\w+)\s*%s\s*(?P<help_msg>.+)"
+                       % params_delim)
     for line in func.__doc__.splitlines():
         line = line.strip()
         if line and fill_description:
             description.append(line)
         elif line:
-            # TODO: use a compiled regex
-            arg_match = re.match("\b*(?P<arg_name>\w+)\s*%s\s*(?P<help_msg>.+)"
-                                 % params_delim, line)
+            arg_match = arg_doc_regex.match(line)
             try:
                 arg_name = arg_match.groupdict()["arg_name"].strip()
                 args_help[arg_name] = arg_match.groupdict()["help_msg"].strip()
