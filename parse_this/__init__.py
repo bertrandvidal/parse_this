@@ -23,7 +23,7 @@ def parse_this(func, types, args=None, params_delim=":"):
         params_delim: characters used to separate the parameters from their
         help message in the docstring. Defaults to ':'
     """
-    (func_args, _, __, defaults) = getargspec(func)
+    (func_args, dummy_1, dummy_2, defaults) = getargspec(func)
     types, func_args = _check_types(types, func_args, defaults)
     args_and_defaults = _get_args_and_defaults(func_args, defaults)
     parser = _get_arg_parser(func, types, args_and_defaults, params_delim)
@@ -91,7 +91,7 @@ class create_parser(object):
             args_and_defaults = _get_args_and_defaults(func_args, defaults)
             parser = _get_arg_parser(func, self._types, args_and_defaults,
                                      self._params_delim)
-            parser.get_name = lambda : self._name
+            parser.get_name = lambda: self._name
             parser.call = self._get_parser_call_method(parser, func.__name__)
             func.parser = parser
 
@@ -253,7 +253,7 @@ class parse_class(object):
                                           "Please provide an instance to "
                                           "'{}.parser.call' or decorate the "
                                           "'__init___' method with "
-                                          "'create_parser'"\
+                                          "'create_parser'"
                                           .format(self._cls.__name__)))
                 # We instantiate the class from the command line agurments
                 instance = _call_method_from_namespace(self._cls, "__init__",
