@@ -342,6 +342,8 @@ CAVEATS
 -------
 
  * `parse_this` is not able to be used on methods with `*args` and `**kwargs`
+ * When using `create_parser` on a method that has an argument with `None` as
+   a default value its type *must be* past in the list of types.
 
 
 LICENSE
@@ -354,8 +356,6 @@ TODO
 ----
  * Handle vargs and kwargs - if possible
  * Test decorated classmethods in decorated class
- * Make `create_parser` able to be called directly like parser
-   from decorated classes
  * Reorganize the project in several files - it's starting to get messy.
    Including the test file.
  * Some default values for paramters e.g. `None`, [], {} will not be usable.
