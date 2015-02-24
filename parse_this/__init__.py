@@ -3,7 +3,8 @@ from inspect import getargspec
 from parse_this.core import (_check_types, _get_args_and_defaults,
                              _get_arg_parser, _get_args_to_parse, _call,
                              ParseThisError, Self, Class, FullHelpAction,
-                             _call_method_from_namespace)
+                             _call_method_from_namespace,
+                             _get_parser_call_method)
 import argparse
 import sys
 
@@ -55,29 +56,6 @@ class create_parser(object):
         self._params_delim = options.get("params_delim", ":")
         self._name = options.get("name", None)
 
-    def _get_parser_call_method(self, parser, method_name):
-        """Returns the method that is linked to the 'call' method of the parser
-
-        Args:
-            parser: The parser that will used to parse the command line args
-            method_name: name of the decorated method
-
-        Raises:
-            ParseThisError if the decorated method is __init__, __init__ can
-            only be decorated in a class decorated by parse_class
-        """
-        def inner_call(instance, args=None):
-            # Defer this check in the method call so that __init__ can be
-            # decorated in class decorated with parse_class
-            if method_name == "__init__":
-                raise ParseThisError(("To use 'create_parser' on the"
-                                      "'__init__' you need to decorate the "
-                                      "class with '@parse_class'"))
-            namespace = parser.parse_args(args or sys.argv[1:])
-            return _call_method_from_namespace(instance, method_name, namespace)
-
-        return inner_call
-
     def __call__(self, func):
         """Add an argument parser attribute `parser` to the decorated function.
 
@@ -92,7 +70,7 @@ class create_parser(object):
             parser = _get_arg_parser(func, self._types, args_and_defaults,
                                      self._params_delim)
             parser.get_name = lambda: self._name
-            parser.call = self._get_parser_call_method(parser, func.__name__)
+            parser.call = _get_parser_call_method(parser, func.__name__)
             func.parser = parser
 
         @wraps(func)
@@ -262,4 +240,3 @@ class parse_class(object):
             return _call_method_from_namespace(instance, method_name,
                                                namespace)
         return inner_call
-

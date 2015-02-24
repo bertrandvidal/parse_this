@@ -1,6 +1,7 @@
 from __future__ import print_function
 import argparse
 import re
+import sys
 
 try:
     from itertools import izip_longest as zip_longest
@@ -185,6 +186,37 @@ def _check_types(types, func_args, defaults):
         types = types[1:]
         func_args = func_args[1:]
     return (types, func_args)
+
+
+def _get_parser_call_method(parser, method_name):
+    """Returns the method that is linked to the 'call' method of the parser
+
+    Args:
+        parser: The parser that will used to parse the command line args
+        method_name: name of the decorated method
+
+    Raises:
+        ParseThisError if the decorated method is __init__, __init__ can
+        only be decorated in a class decorated by parse_class
+    """
+
+    def inner_call(instance, args=None):
+        """This is method attached to <parser>.call.
+
+        Args:
+            instance: the instance of the parser
+            args: arguments to be parsed
+        """
+        # Defer this check in the method call so that __init__ can be
+        # decorated in class decorated with parse_class
+        if method_name == "__init__":
+            raise ParseThisError(("To use 'create_parser' on the"
+                                  "'__init__' you need to decorate the "
+                                  "class with '@parse_class'"))
+        namespace = parser.parse_args(args or sys.argv[1:])
+        return _call_method_from_namespace(instance, method_name, namespace)
+
+    return inner_call
 
 
 def _call(callable_obj, arg_names, namespace):
