@@ -47,11 +47,10 @@ def _get_args_and_defaults(args, defaults):
         args: list of argument name
         defaults: tuple of default values
     """
-    args_and_defaults = []
     defaults = defaults or []
-    for (argument, default) in zip_longest(args[::-1], defaults[::-1],
-                                           fillvalue=NoDefault):
-        args_and_defaults.append((argument, default))
+    args_and_defaults = [(argument, default) for (argument, default)
+                         in zip_longest(args[::-1], defaults[::-1],
+                                        fillvalue=NoDefault)]
     return args_and_defaults[::-1]
 
 
