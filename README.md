@@ -358,6 +358,8 @@ TODO
    from decorated classes
  * Reorganize the project in several files - it's starting to get messy.
    Including the test file.
+ * Some default values for paramters e.g. `None`, [], {} will not be usable.
+   Warns the user when creating the parser.
 
 
 [pypi_link]: https://pypi.python.org/pypi/parse_this "parse_this on PyPI"
