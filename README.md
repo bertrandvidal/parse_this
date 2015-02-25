@@ -238,10 +238,7 @@ def concatenate_str(one, two=2):
 
 
 if __name__ == "__main__":
-    parser = concatenate_str.parser
-    # This parser expect two arguments 'one' and '--two' just like the method
-    namespace_args = parser.parse_args()
-    print(concatenate_str(namespace_args.one, namespace_args.two))
+    print(concatenate_str.parser.call())
 ```
 
 Calling this script from the command line as follow:
@@ -314,8 +311,11 @@ The output will be the same as using `create_parser` on a regular method.
 The only difference is the use of the special value `Class` to specify where
 the `cls` argument is used.
 
-**Note**: The `classmethod` decorator is placed **on top** of the `create_parser`
-decorator in order for the method to still be a considered a class method.
+**Notes**:
+  * The `classmethod` decorator is placed **on top** of the `create_parser`
+    decorator in order for the method to still be a considered a class method.
+  * It is not possible to decorate a `classmethod` with `create_parser` in a
+    class decoraetd with `parse_class`.
 
 
 INSTALLING PARSE_THIS
@@ -362,9 +362,6 @@ LICENSE
 TODO
 ----
  * Handle vargs and kwargs - if possible
- * Test decorated classmethods in decorated class
- * Reorganize the project in several files - it's starting to get messy.
-   Including the test file.
  * Some default values for paramters e.g. `None`, [], {} will not be usable.
    Warns the user when creating the parser.
 
