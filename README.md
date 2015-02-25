@@ -345,7 +345,10 @@ python setup.py nosetests
 CAVEATS
 -------
 
- * `parse_this` is not able to be used on methods with `*args` and `**kwargs`
+ * `parse_this` and `create_parser` are not able to be used on methods with
+   `*args` and `**kwargs`
+ * Classmethods cannot be access from the command line in a class decorated
+   with `parse_class`
  * When using `create_parser` on a method that has an argument with `None` as
    a default value its type *must be* past in the list of types.
 
