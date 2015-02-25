@@ -1,7 +1,6 @@
 from parse_this import parse_this, create_parser, parse_class
-from parse_this.core import (_get_args_and_defaults, NoDefault,
-    _get_args_to_parse, _check_types, _get_arg_parser, _prepare_doc, Self,
-    Class, ParseThisError)
+from parse_this.core import (NoDefault, _get_args_to_parse, _check_types,
+                             _get_arg_parser, Self, Class, ParseThisError)
 import unittest
 
 
@@ -30,51 +29,7 @@ def parse_me_no_defaults(one, two):
     return one * two
 
 
-def parse_me_no_doc(one, two, three):
-    return one * two, three * three
-
-
-def will_you_dare_parse_me(one, two, three):
-    """I am a sneaky function.
-
-    Args:
-        one: this one is a no brainer
-        three: noticed you're missing docstring for two and
-          I'm multiline too!
-    """
-    return one * two, three * three
-
-
-def check_my_params_delimiter(one, two, three):
-    """I am a sneaky function.
-
-    Args:
-        one -- this one is a no brainer even with dashes
-        three -- noticed you're missing docstring for two and
-          I'm multiline too!
-    """
-    return one * two, three * three
-
-
-def blank_line_in_wrong_place(one, two):
-    """I put the blank line after arguments ...
-
-    Args:
-        one: this help #1
-
-        two: this once won't appear sadly
-    """
-    return one * two
-
-
 class TestParseThis(unittest.TestCase):
-
-    def test_prepare_doc_blank_in_wrong_place(self):
-        (description, help_msg) = _prepare_doc(blank_line_in_wrong_place,
-                                               ["one", "two"], ":")
-        self.assertEqual(description, "I put the blank line after arguments ...")
-        self.assertEqual(help_msg, {"one": "this help #1",
-                                    "two": "Help message for two"})
 
     def test_get_args_to_parse(self):
         self.assertListEqual(_get_args_to_parse(None, []), [])
@@ -87,38 +42,6 @@ class TestParseThis(unittest.TestCase):
         self.assertListEqual(_get_args_to_parse(["prog", "arg",
                                                  "--kwargs=12"], []),
                               ["prog", "arg", "--kwargs=12"])
-
-    def test_prepare_doc(self):
-        (description, help_msg) = _prepare_doc(parse_me,
-                                               ["one", "two", "three"], ":")
-        self.assertEqual(description, "Could use some parsing.")
-        self.assertEqual(help_msg, {"one":"some stuff shouldn't be written down",
-                                    "two":"I can turn 2 syllables words into 6 syllables words",
-                                    "three": "I don't like the number three"})
-
-    def test_prepare_doc_no_docstring(self):
-        (description, help_msg) = _prepare_doc(parse_me_no_doc,
-                                               ["one", "two", "three"], ":")
-        self.assertEqual(description, "Argument parsing for parse_me_no_doc")
-        self.assertEqual(help_msg, {"one": "Help message for one",
-                                    "two":  "Help message for two",
-                                    "three":  "Help message for three"})
-
-    def test_prepare_doc_will_you_dare(self):
-        (description, help_msg) = _prepare_doc(will_you_dare_parse_me,
-                                               ["one", "two", "three"], ":")
-        self.assertEqual(description, "I am a sneaky function.")
-        self.assertEqual(help_msg, {"one": "this one is a no brainer",
-                                    "two": "Help message for two",
-                                    "three": "noticed you're missing docstring for two and I'm multiline too!"})
-
-    def test_prepare_doc_params_delim(self):
-        (description, help_msg) = _prepare_doc(check_my_params_delimiter,
-                                               ["one", "two", "three"], "--")
-        self.assertEqual(description, "I am a sneaky function.")
-        self.assertEqual(help_msg, {"one": "this one is a no brainer even with dashes",
-                                    "two": "Help message for two",
-                                    "three": "noticed you're missing docstring for two and I'm multiline too!"})
 
     def test_check_types(self):
         self.assertRaises(ParseThisError, _check_types, [], ["arg_one"], ())

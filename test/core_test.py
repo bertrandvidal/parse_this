@@ -1,7 +1,7 @@
 from parse_this import create_parser
 from parse_this.core import (_get_args_and_defaults, NoDefault,
                              _get_default_help_message, Self,
-                             _get_parseable_methods, Class)
+                             _get_parseable_methods, Class, _prepare_doc)
 import unittest
 
 
@@ -34,6 +34,66 @@ class Parsable(object):
     @create_parser(Class, int)
     def cls_method(cls, e):
         return e * e
+
+
+def blank_line_in_wrong_place(one, two):
+    """I put the blank line after arguments ...
+
+    Args:
+        one: this help is #1
+
+        two: this once won't appear sadly
+    """
+    return one * two
+
+
+def parse_me_full_docstring(one, two, three=12):
+    """Could use some parsing.
+
+    Args:
+        one: some stuff shouldn't be written down
+        two: I can turn 2 syllables words into 6 syllables words
+        three: I don't like the number three
+
+    Returns:
+        the first string argument concatenated with itself 'two' times and the
+        last parameters multiplied by itself
+    """
+    return one * two, three * three
+
+
+def parse_me_no_docstring(one, two, three):
+    return one * two, three * three
+
+
+def multiline_docstring(one, two, three):
+    """I am a sneaky function.
+
+    Args:
+        one: this one is a no brainer
+        three: noticed you're missing docstring for two and
+          I'm multiline too!
+
+    Returns:
+        the first string argument concatenated with itself 'two' times and the
+        last parameters multiplied by itself
+    """
+    return one * two, three * three
+
+
+def different_params_delimiter(one, two, three):
+    """I am a sneaky function.
+
+    Args:
+        one -- this one is a no brainer even with dashes
+        three -- noticed you're missing docstring for two and
+          I'm multiline too!
+
+    Returns:
+        the first string argument concatenated with itself 'two' times and the
+        last parameters multiplied by itself
+    """
+    return one * two, three * three
 
 
 class TestCore(unittest.TestCase):
@@ -73,6 +133,45 @@ class TestCore(unittest.TestCase):
     def test_get_parseable_methods_do_not_include_classmethod(self):
         (_, method_to_parser) = _get_parseable_methods(Parsable)
         self.assertNotIn("cls_method", method_to_parser.keys())
+
+    def test_prepare_doc_blank_line_in_wrong_place(self):
+        (description, help_msg) = _prepare_doc(blank_line_in_wrong_place,
+                                               ["one", "two"], ":")
+        self.assertEqual(description, "I put the blank line after arguments ...")
+        self.assertEqual(help_msg, {"one": "this help is #1",
+                                    "two": "Help message for two"})
+
+    def test_prepare_doc_full_docstring(self):
+        (description, help_msg) = _prepare_doc(parse_me_full_docstring,
+                                               ["one", "two", "three"], ":")
+        self.assertEqual(description, "Could use some parsing.")
+        self.assertEqual(help_msg, {"one":"some stuff shouldn't be written down",
+                                    "two":"I can turn 2 syllables words into 6 syllables words",
+                                    "three": "I don't like the number three"})
+
+    def test_prepare_doc_no_docstring(self):
+        (description, help_msg) = _prepare_doc(parse_me_no_docstring,
+                                               ["one", "two", "three"], ":")
+        self.assertEqual(description, "Argument parsing for parse_me_no_docstring")
+        self.assertEqual(help_msg, {"one": "Help message for one",
+                                    "two":  "Help message for two",
+                                    "three":  "Help message for three"})
+
+    def test_prepare_doc_will_you_dare(self):
+        (description, help_msg) = _prepare_doc(multiline_docstring,
+                                               ["one", "two", "three"], ":")
+        self.assertEqual(description, "I am a sneaky function.")
+        self.assertEqual(help_msg, {"one": "this one is a no brainer",
+                                    "two": "Help message for two",
+                                    "three": "noticed you're missing docstring for two and I'm multiline too!"})
+
+    def test_prepare_doc_params_delim(self):
+        (description, help_msg) = _prepare_doc(different_params_delimiter,
+                                               ["one", "two", "three"], "--")
+        self.assertEqual(description, "I am a sneaky function.")
+        self.assertEqual(help_msg, {"one": "this one is a no brainer even with dashes",
+                                    "two": "Help message for two",
+                                    "three": "noticed you're missing docstring for two and I'm multiline too!"})
 
 
 if __name__ == "__main__":
