@@ -292,6 +292,7 @@ In a similar fashion you can parse line arguments for classmethods:
 
 ```python
 
+class MyClass(object):
 ...
     @classmethod
     @create_parser(Class, int, str, params_delim="--")
@@ -306,9 +307,12 @@ In a similar fashion you can parse line arguments for classmethods:
         return a_string * an_int, default * default
 ...
 
+MyClass.parse_me_if_you_can.parser.call(MyClass)
+
 ```
-The output will be the same as above. The only difference is the use of the
-special value `Class` to specify where the `cls` argument is used.
+The output will be the same as using `create_parser` on a regular method.
+The only difference is the use of the special value `Class` to specify where
+the `cls` argument is used.
 
 **Note**: The `classmethod` decorator is placed **on top** of the `create_parser`
 decorator in order for the method to still be a considered a class method.
