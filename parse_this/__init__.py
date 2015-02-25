@@ -206,7 +206,7 @@ class parse_class(object):
                                           "'__init___' method with "
                                           "'create_parser'"
                                           .format(self._cls.__name__)))
-                # We instantiate the class from the command line agurments
+                # We instantiate the class from the command line arguments
                 instance = _call_method_from_namespace(self._cls, "__init__",
                                                        namespace)
             method_name = parser_to_method[namespace.method]
