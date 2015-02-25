@@ -19,16 +19,6 @@ def parse_me(one, two, three=12):
     return one * two, three * three
 
 
-def parse_me_no_defaults(one, two):
-    """I don't have any default !
-
-    Args:
-        one: some stuff shoudln't be written down
-        two: I can turn 2 syllables words into 6 syllables words
-    """
-    return one * two
-
-
 class TestParseThis(unittest.TestCase):
 
     def test_get_args_to_parse(self):
