@@ -144,6 +144,9 @@ def _get_default_help_message(func, args, description=None, args_help=None):
         description: a potentially existing description created from the
         function docstring
         args_help: a dict {arg_name: help} with potentially missing arguments
+
+    Returns:
+        a tuple (arg_parse_description, complete_args_help)
     """
     if description is None:
         description = "Argument parsing for %s" % func.__name__

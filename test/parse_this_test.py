@@ -76,15 +76,6 @@ class TestParseThis(unittest.TestCase):
         self.assertEqual(help_msg, {"one": "this help #1",
                                     "two": "Help message for two"})
 
-    def test_get_args_and_default(self):
-        args_and_defaults = _get_args_and_defaults(["first", "second", "third"],
-                                                   ("default_value",
-                                                    "other_default"))
-        self.assertListEqual(args_and_defaults, [("first", NoDefault),
-                                                 ("second", "default_value"),
-                                                 ("third", "other_default")])
-        self.assertListEqual(_get_args_and_defaults([], ()), [])
-
     def test_get_args_to_parse(self):
         self.assertListEqual(_get_args_to_parse(None, []), [])
         self.assertListEqual(
