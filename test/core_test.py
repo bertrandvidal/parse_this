@@ -4,7 +4,8 @@ from parse_this.core import (_get_args_and_defaults, NoDefault,
                              _get_parseable_methods, Class, _prepare_doc,
                              _get_arg_parser, _get_args_to_parse,
                              ParseThisError, _check_types,
-                             _get_parser_call_method, _call)
+                             _get_parser_call_method, _call,
+                             _call_method_from_namespace)
 import unittest
 from collections import namedtuple
 
@@ -282,6 +283,21 @@ class TestCore(unittest.TestCase):
         fake_namespace = Namespace(**{"one": 2, "two": 12, "three": 3})
         self.assertEqual(_call(parse_me_no_docstring, ["one", "two", "three"],
                                fake_namespace), (24, 9))
+
+    def test_call_method_from_namespace_create_instance(self):
+        Namespace = namedtuple("Namespace", ["a"])
+        fake_namespace = Namespace(a=2)
+        parseable = _call_method_from_namespace(Parseable, "__init__",
+                                                fake_namespace)
+        self.assertIsInstance(parseable, Parseable)
+        self.assertEqual(parseable._a, 2)
+
+    def test_call_method_from_namespace_execution(self):
+        Namespace = namedtuple("Namespace", ["d"])
+        fake_namespace = Namespace(d=2)
+        self.assertEqual(_call_method_from_namespace(Parseable(12), "parseable",
+                                                     fake_namespace),
+                         24)
 
 if __name__ == "__main__":
     unittest.main()
