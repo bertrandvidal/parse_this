@@ -29,7 +29,7 @@ class TestParseThis(unittest.TestCase):
 
 
 @create_parser(str, int)
-def iam_parseable(one, two, three=12):
+def i_am_parseable(one, two, three=12):
     """I too want to be parseable.
 
     Args:
@@ -38,6 +38,60 @@ def iam_parseable(one, two, three=12):
       three: don't like the number three
     """
     return one * two, three * three
+
+
+class Dummy(object):
+
+    def __init__(self, a):
+        self._a = a
+
+    @create_parser(Self, int, params_delim="--")
+    def multiply_all(self, b, c=2):
+        """Will multiply everything!
+
+        Args:
+            b -- the Queen B
+            c -- a useless value
+
+        Returns:
+            Everything multiplied
+        """
+        return self._a * b * c
+
+    @classmethod
+    @create_parser(Class, int)
+    def mult(cls, d, e=2):
+        return d * e
+
+
+class NeedParseClassDecorator(object):
+
+    @create_parser(Self, int)
+    def __init__(self, a):
+        self._a = a
+
+
+class TestCreateParser(unittest.TestCase):
+
+    def test_create_parser_on_function(self):
+        parser = i_am_parseable.parser
+        self.assertEqual(parser.description, "I too want to be parseable.")
+        namespace = parser.parse_args("yes 2 --three 3".split())
+        self.assertEqual(i_am_parseable(namespace.one, namespace.two,
+                                        namespace.three), ("yesyes", 9))
+
+    def test_create_parser_on_method(self):
+        parser = Dummy.multiply_all.parser
+        self.assertEqual(parser.description, "Will multiply everything!")
+        self.assertEqual(parser.call(Dummy(12), ["2"]), 48)
+
+    def test_create_parser_on_classmethod(self):
+        parser = Dummy.mult.parser
+        self.assertEqual(parser.call(Dummy, "2 --e 2".split()), 4)
+
+    def test_create_parser_on_init(self):
+        parser = NeedParseClassDecorator.__init__.parser
+        self.assertRaises(ParseThisError, parser.call, None, ["2"])
 
 
 @parse_class(description="Hello World", parse_private=True)
@@ -136,14 +190,6 @@ class TestParseable(unittest.TestCase):
             ShowMyDocstring.parser.parse_args("will-not-appear 12".split())
         with self.assertRaises(SystemExit):
             ShowMyDocstring.parser.parse_args("str".split())
-
-    def test_parseable(self):
-        parser = iam_parseable.parser
-        namespace = parser.parse_args("yes 2 --three 3".split())
-        self.assertEqual(namespace.one, "yes")
-        self.assertEqual(namespace.two, 2)
-        self.assertEqual(namespace.three, 3)
-        self.assertEqual(iam_parseable("yes", 2, 3), ("yesyes", 9))
 
     def test_parseable_method(self):
         need_parsing = NeedParsing(12)
