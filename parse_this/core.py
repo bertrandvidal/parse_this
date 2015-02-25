@@ -247,7 +247,7 @@ def _get_parser_call_method(parser, method_name):
             raise ParseThisError(("To use 'create_parser' on the"
                                   "'__init__' you need to decorate the "
                                   "class with '@parse_class'"))
-        namespace = parser.parse_args(args or sys.argv[1:])
+        namespace = parser.parse_args(_get_args_to_parse(args, sys.argv))
         return _call_method_from_namespace(instance, method_name, namespace)
 
     return inner_call

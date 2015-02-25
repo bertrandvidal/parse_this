@@ -3,8 +3,10 @@ from parse_this.core import (_get_args_and_defaults, NoDefault,
                              _get_default_help_message, Self,
                              _get_parseable_methods, Class, _prepare_doc,
                              _get_arg_parser, _get_args_to_parse,
-    ParseThisError, _check_types)
+                             ParseThisError, _check_types,
+                             _get_parser_call_method, _call)
 import unittest
+from collections import namedtuple
 
 
 def no_docstring():
@@ -15,7 +17,7 @@ def with_args(a, b):
     pass
 
 
-class Parsable(object):
+class Parseable(object):
 
     @create_parser(Self, int)
     def __init__(self, a):
@@ -127,13 +129,13 @@ class TestCore(unittest.TestCase):
         self.assertListEqual(args_help.keys(), ["a", "b"])
 
     def test_get_parseable_methods(self):
-        (init_parser, method_to_parser) = _get_parseable_methods(Parsable)
+        (init_parser, method_to_parser) = _get_parseable_methods(Parseable)
         self.assertIsNotNone(init_parser)
         self.assertListEqual(method_to_parser.keys(), ["parseable",
                                                        "_private_method"])
 
     def test_get_parseable_methods_do_not_include_classmethod(self):
-        (_, method_to_parser) = _get_parseable_methods(Parsable)
+        (_, method_to_parser) = _get_parseable_methods(Parseable)
         self.assertNotIn("cls_method", method_to_parser.keys())
 
     def test_prepare_doc_blank_line_in_wrong_place(self):
@@ -262,6 +264,24 @@ class TestCore(unittest.TestCase):
     def test_check_types_no_args(self):
         self.assertEqual(_check_types([], [], ()), ([], []))
 
+    def test_get_parser_call_method_returns_callable(self):
+        call_method = _get_parser_call_method(None, "method")
+        self.assertTrue(callable(call_method))
+
+    def test_get_parser_call_method_raise_on_init(self):
+        call_method = _get_parser_call_method(None, "__init__")
+        self.assertRaises(ParseThisError, call_method, None)
+
+    def test_get_parser_call_method_execution(self):
+        call_method = _get_parser_call_method(Parseable.parseable.parser,
+                                              "parseable")
+        self.assertEqual(call_method(Parseable(12), ["2"]), 24)
+
+    def test_call_on_parse_me_no_docstring(self):
+        Namespace = namedtuple("Namespace", ["one", "two", "three"])
+        fake_namespace = Namespace(**{"one": 2, "two": 12, "three": 3})
+        self.assertEqual(_call(parse_me_no_docstring, ["one", "two", "three"],
+                               fake_namespace), (24, 9))
 
 if __name__ == "__main__":
     unittest.main()
