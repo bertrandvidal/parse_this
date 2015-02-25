@@ -113,6 +113,9 @@ def _get_parseable_methods(cls):
     Args:
         cls: the class currently being decorated
 
+    Note:
+        classmethods will not be included as they can only be referenced once
+        the class has been defined
     Returns:
         a 2-tuple with the parser of the __init__ method if any and a dict
         of the form {'method_name': associated_parser}
