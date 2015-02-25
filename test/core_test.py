@@ -1,4 +1,7 @@
-from parse_this import create_parser
+from StringIO import StringIO
+from collections import namedtuple
+from contextlib import contextmanager
+from parse_this import create_parser, parse_class
 from parse_this.core import (_get_args_and_defaults, NoDefault,
                              _get_default_help_message, Self,
                              _get_parseable_methods, Class, _prepare_doc,
@@ -6,8 +9,8 @@ from parse_this.core import (_get_args_and_defaults, NoDefault,
                              ParseThisError, _check_types,
                              _get_parser_call_method, _call,
                              _call_method_from_namespace)
+import sys
 import unittest
-from collections import namedtuple
 
 
 def no_docstring():
@@ -18,7 +21,32 @@ def with_args(a, b):
     pass
 
 
+@parse_class()
 class Parseable(object):
+
+    @create_parser(Self, int)
+    def __init__(self, a):
+        self._a = a
+
+    @create_parser(Self, int)
+    def _private_method(self, b):
+        return self._a * b
+
+    def not_parseable(self, c):
+        return self._a * c
+
+    @create_parser(Self, int)
+    def parseable(self, d):
+        return self._a * d
+
+    @classmethod
+    @create_parser(Class, int)
+    def cls_method(cls, e):
+        return e * e
+
+
+@parse_class(parse_private=True)
+class ParseableWithPrivateMethod(object):
 
     @create_parser(Self, int)
     def __init__(self, a):
@@ -99,6 +127,18 @@ def different_params_delimiter(one, two, three):
         last parameters multiplied by itself
     """
     return one * two, three * three
+
+
+@contextmanager
+def captured_output():
+    """Allows to safely capture stdout and stderr in a context manager."""
+    new_out, new_err = StringIO(), StringIO()
+    old_out, old_err = sys.stdout, sys.stderr
+    try:
+        sys.stdout, sys.stderr = new_out, new_err
+        yield sys.stdout, sys.stderr
+    finally:
+        sys.stdout, sys.stderr = old_out, old_err
 
 
 class TestCore(unittest.TestCase):
@@ -298,6 +338,30 @@ class TestCore(unittest.TestCase):
         self.assertEqual(_call_method_from_namespace(Parseable(12), "parseable",
                                                      fake_namespace),
                          24)
+
+
+class TestFullHelpAction(unittest.TestCase):
+
+    def test_help_is_complete(self):
+        with captured_output() as (out, _):
+            self.assertRaises(SystemExit, Parseable.parser.parse_args, ["-h"])
+            help_message = out.getvalue()
+        self.assertIn("parseable", help_message)
+        # Private methods and classmethods are not exposed by default
+        self.assertNotIn("private_method", help_message)
+        self.assertNotIn("cls_method", help_message)
+
+    def test_help_is_complete_with_private_method(self):
+        with captured_output() as (out, _):
+            self.assertRaises(SystemExit,
+                              ParseableWithPrivateMethod.parser.parse_args,
+                              ["-h"])
+            help_message = out.getvalue()
+        self.assertIn("parseable", help_message)
+        self.assertIn("private_method", help_message)
+        # Classmethods are not exposed by default
+        self.assertNotIn("cls_method", help_message)
+
 
 if __name__ == "__main__":
     unittest.main()
