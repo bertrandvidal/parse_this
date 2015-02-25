@@ -20,7 +20,7 @@ def parse_me(one, two, three=12):
 
 class TestParseThis(unittest.TestCase):
 
-    def test_return_value(self):
+    def test_parse_this_return_value(self):
         self.assertEqual(parse_this(parse_me, [str, int], "yes 2".split()),
                           ("yesyes", 144))
         self.assertEqual(parse_this(parse_me, [str, int],
