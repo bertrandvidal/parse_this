@@ -1,5 +1,6 @@
 from parse_this import parse_this, create_parser, parse_class
 from parse_this.core import Self, Class, ParseThisError
+from test.core_test import captured_output
 import unittest
 
 
@@ -159,67 +160,64 @@ class NeedInitDecorator(object):
         return self._val * num / div
 
 
-class TestParseable(unittest.TestCase):
+class TestParseClass(unittest.TestCase):
 
-    def test_class_decorator_description(self):
+    def test_parse_class_description(self):
         self.assertEqual(NeedParsing.parser.description, "Hello World")
         self.assertEqual(ShowMyDocstring.parser.description,
                          "This should be the parser description")
 
-    def test_class_is_decorated(self):
+    def test_parse_class_add_parser(self):
         self.assertTrue(hasattr(NeedParsing, "parser"))
         self.assertTrue(hasattr(NeedParsing(12), "parser"))
         self.assertTrue(hasattr(ShowMyDocstring, "parser"))
 
-    def test_subparsers(self):
+    def test_parse_class_subparsers(self):
         parser = NeedParsing.parser
         self.assertEqual(parser.call("12 multiply-self-arg 2".split()), 24)
         self.assertEqual(parser.call("12 could-you-parse-me yes 2 --three 4".split()),
                          ("yesyes", 16))
 
-    def test_private_method_are_exposed(self):
+    def test_parse_class_expose_private_method(self):
         parser = NeedParsing.parser
         self.assertEqual(parser.call("12 private-method 2".split()), 24)
 
-    def test_special_method_is_exposed(self):
+    def test_parse_class_expose_special_method(self):
         parser = NeedParsing.parser
         self.assertEqual(parser.call("12 str".split()), "12")
 
-    def test_private_method_are_not_exposed(self):
-        with self.assertRaises(SystemExit):
-            ShowMyDocstring.parser.parse_args("will-not-appear 12".split())
-        with self.assertRaises(SystemExit):
-            ShowMyDocstring.parser.parse_args("str".split())
+    def test_parse_class_do_not_expose_private_methods(self):
+        with captured_output():
+            with self.assertRaises(SystemExit):
+                ShowMyDocstring.parser.parse_args("will-not-appear 12".split())
+            with self.assertRaises(SystemExit):
+                ShowMyDocstring.parser.parse_args("str".split())
 
-    def test_parseable_method(self):
+    def test_parse_class_method_is_still_parseable(self):
         need_parsing = NeedParsing(12)
         parser = need_parsing.could_you_parse_me.parser
         namespace = parser.parse_args("yes 2 --three 3".split())
         self.assertEqual(namespace.one, "yes")
         self.assertEqual(namespace.two, 2)
         self.assertEqual(namespace.three, 3)
-        self.assertEqual(need_parsing.could_you_parse_me(2, "yes", 3),
+        self.assertEqual(need_parsing.could_you_parse_me("yes", 2, 3),
                          ("yesyes", 9))
 
-    def test_parseable_class(self):
-        parser = NeedParsing.parse_me_if_you_can.parser
-        namespace = parser.parse_args("yes 2 --three 3".split())
-        self.assertEqual(namespace.one, "yes")
-        self.assertEqual(namespace.two, 2)
-        self.assertEqual(namespace.three, 3)
-        self.assertEqual(NeedParsing.parse_me_if_you_can(2, "yes", 3),
-                         ("yesyes", 9))
-
-    def test_init_need_decoration(self):
+    def test_parse_class_init_need_decoration(self):
         with self.assertRaises(ParseThisError):
             NeedInitDecorator.parser.call("do-stuff 12".split())
 
-    def test_need_init_decorator_with_instance(self):
+    def test_parse_class_need_init_decorator_with_instance(self):
         instance = NeedInitDecorator(2)
         self.assertEqual(NeedInitDecorator.parser.call("do-stuff 12".split(),
                                                        instance), 12)
         self.assertEqual(NeedInitDecorator.parser.call("do-stuff 12 --div 3".split(),
                                                        instance), 8)
+
+    def test_parse_class_classmethod_are_not_sub_command(self):
+        with captured_output():
+            with self.assertRaises(SystemExit):
+                NeedParsing.parser.call("12 parse-me-if-you-can one 2")
 
 if __name__ == "__main__":
     unittest.main()
