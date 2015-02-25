@@ -222,17 +222,18 @@ def _check_types(types, func_args, defaults):
     return (types, func_args)
 
 
-def _get_parser_call_method(parser, method_name):
+def _get_parser_call_method(parser, func):
     """Returns the method that is linked to the 'call' method of the parser
 
     Args:
         parser: The parser that will used to parse the command line args
-        method_name: name of the decorated method
+        func: decorated function
 
     Raises:
         ParseThisError if the decorated method is __init__, __init__ can
         only be decorated in a class decorated by parse_class
     """
+    func_name = func.__name__
 
     def inner_call(instance, args=None):
         """This is method attached to <parser>.call.
@@ -243,12 +244,12 @@ def _get_parser_call_method(parser, method_name):
         """
         # Defer this check in the method call so that __init__ can be
         # decorated in class decorated with parse_class
-        if method_name == "__init__":
+        if func_name == "__init__":
             raise ParseThisError(("To use 'create_parser' on the"
                                   "'__init__' you need to decorate the "
                                   "class with '@parse_class'"))
         namespace = parser.parse_args(_get_args_to_parse(args, sys.argv))
-        return _call_method_from_namespace(instance, method_name, namespace)
+        return _call_method_from_namespace(instance, func_name, namespace)
 
     return inner_call
 

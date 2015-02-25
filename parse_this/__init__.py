@@ -70,7 +70,7 @@ class create_parser(object):
             parser = _get_arg_parser(func, self._types, args_and_defaults,
                                      self._params_delim)
             parser.get_name = lambda: self._name
-            parser.call = _get_parser_call_method(parser, func.__name__)
+            parser.call = _get_parser_call_method(parser, func)
             func.parser = parser
 
         @wraps(func)
@@ -211,6 +211,5 @@ class parse_class(object):
                 instance = _call_method_from_namespace(self._cls, "__init__",
                                                        namespace)
             method_name = parser_to_method[namespace.method]
-            return _call_method_from_namespace(instance, method_name,
-                                               namespace)
+            return _call_method_from_namespace(instance, method_name, namespace)
         return inner_call
