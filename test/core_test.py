@@ -2,7 +2,8 @@ from parse_this import create_parser
 from parse_this.core import (_get_args_and_defaults, NoDefault,
                              _get_default_help_message, Self,
                              _get_parseable_methods, Class, _prepare_doc,
-                             _get_arg_parser, _get_args_to_parse)
+                             _get_arg_parser, _get_args_to_parse,
+    ParseThisError, _check_types)
 import unittest
 
 
@@ -223,6 +224,43 @@ class TestCore(unittest.TestCase):
     def test_get_args_to_parse_used_empty_args_not_sys_argv(self):
         self.assertListEqual(_get_args_to_parse([], ["prog", "arg_1", "arg_2"]),
                              [])
+
+    def test_check_types_not_enough_types_provided(self):
+        self.assertRaises(ParseThisError, _check_types, [],
+                          ["i_dont_have_a_type"], ())
+
+    def test_check_types_too_many_types_provided(self):
+        self.assertRaises(ParseThisError, _check_types, [int, str],
+                          ["i_am_alone"], ())
+
+    def test_check_types_with_default(self):
+        types = [int, str]
+        func_args = ["i_am_alone", "i_have_a_default_value"]
+        self.assertEqual(_check_types(types, func_args, ("default_value",)),
+                         (types, func_args))
+
+    def test_check_types_with_default_type_not_specified(self):
+        types = [int]
+        func_args = ["i_am_an_int", "i_have_a_default_value"]
+        self.assertEqual(_check_types(types, func_args, ("default_value",)),
+                         (types, func_args))
+
+    def test_check_types_remove_self(self):
+        types = [int]
+        func_args = ["i_am_an_int", "i_have_a_default_value"]
+        self.assertEqual(_check_types([Self] + types, ["self"] + func_args,
+                                      ("default_value",)),
+                         ([int], func_args))
+
+    def test_check_types_remove_class(self):
+        types = [int]
+        func_args = ["i_am_an_int", "i_have_a_default_value"]
+        self.assertEqual(_check_types([Class] + types, ["cls"] + func_args,
+                                      ("default_value",)),
+                         ([int], func_args))
+
+    def test_check_types_no_args(self):
+        self.assertEqual(_check_types([], [], ()), ([], []))
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 from parse_this import parse_this, create_parser, parse_class
-from parse_this.core import _check_types, Self, Class, ParseThisError
+from parse_this.core import Self, Class, ParseThisError
 import unittest
 
 
@@ -19,19 +19,6 @@ def parse_me(one, two, three=12):
 
 
 class TestParseThis(unittest.TestCase):
-
-    def test_check_types(self):
-        self.assertRaises(ParseThisError, _check_types, [], ["arg_one"], ())
-        self.assertRaises(ParseThisError, _check_types, [int, float],
-                          ["arg_one"], ())
-        try:
-            _check_types([], [], ())
-            _check_types([int, int], ["arg_one", "arg_two"], ())
-            _check_types([int, int], ["arg_one", "arg_two"], (12,))
-            _check_types([int], ["arg_one", "arg_two"], (12,))
-            _check_types([Self, int, int], ["self", "arg_one", "arg_two"], ())
-        except Exception as exception:
-            self.fail("_check_types should not have raised: %s" % exception)
 
     def test_return_value(self):
         self.assertEqual(parse_this(parse_me, [str, int], "yes 2".split()),
