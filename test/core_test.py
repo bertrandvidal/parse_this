@@ -2,7 +2,7 @@ from parse_this import create_parser
 from parse_this.core import (_get_args_and_defaults, NoDefault,
                              _get_default_help_message, Self,
                              _get_parseable_methods, Class, _prepare_doc,
-                             _get_arg_parser)
+                             _get_arg_parser, _get_args_to_parse)
 import unittest
 
 
@@ -206,6 +206,23 @@ class TestCore(unittest.TestCase):
                                   ("three", 12)], ":")
         self.assertRaises(SystemExit, parser.parse_args,
                           "yes i_should_be_an_int".split())
+
+    def test_get_args_to_parse_nothing_to_parse(self):
+        self.assertListEqual(_get_args_to_parse(None, []), [])
+
+    def test_get_args_to_parse_remove_prog_from_sys_argv(self):
+        self.assertListEqual(_get_args_to_parse(None,
+                                                ["prog", "arg_1", "arg_2"]),
+                             ["arg_1", "arg_2"])
+
+    def test_get_args_to_parse_with_options(self):
+        self.assertListEqual(_get_args_to_parse(None, ["prog", "arg",
+                                                       "--kwargs=12"]),
+                              ["arg", "--kwargs=12"])
+
+    def test_get_args_to_parse_used_empty_args_not_sys_argv(self):
+        self.assertListEqual(_get_args_to_parse([], ["prog", "arg_1", "arg_2"]),
+                             [])
 
 
 if __name__ == "__main__":

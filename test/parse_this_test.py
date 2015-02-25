@@ -1,6 +1,5 @@
 from parse_this import parse_this, create_parser, parse_class
-from parse_this.core import (NoDefault, _get_args_to_parse, _check_types,
-                             Self, Class, ParseThisError)
+from parse_this.core import _check_types, Self, Class, ParseThisError
 import unittest
 
 
@@ -20,18 +19,6 @@ def parse_me(one, two, three=12):
 
 
 class TestParseThis(unittest.TestCase):
-
-    def test_get_args_to_parse(self):
-        self.assertListEqual(_get_args_to_parse(None, []), [])
-        self.assertListEqual(
-            _get_args_to_parse(None, ["prog", "arg"]), ["arg"])
-        self.assertListEqual(_get_args_to_parse(None, ["prog", "arg",
-                                                       "--kwargs=12"]),
-                              ["arg", "--kwargs=12"])
-        self.assertListEqual(_get_args_to_parse([], []), [])
-        self.assertListEqual(_get_args_to_parse(["prog", "arg",
-                                                 "--kwargs=12"], []),
-                              ["prog", "arg", "--kwargs=12"])
 
     def test_check_types(self):
         self.assertRaises(ParseThisError, _check_types, [], ["arg_one"], ())
