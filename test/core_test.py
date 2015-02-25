@@ -129,6 +129,11 @@ def different_params_delimiter(one, two, three):
     return one * two, three * three
 
 
+@create_parser(str, int)
+def concatenate_string(string, nb_concat):
+    return string * nb_concat
+
+
 @contextmanager
 def captured_output():
     """Allows to safely capture stdout and stderr in a context manager."""
@@ -319,6 +324,11 @@ class TestCore(unittest.TestCase):
         call_method = _get_parser_call_method(Parseable.parseable.parser,
                                               Parseable.parseable)
         self.assertEqual(call_method(Parseable(12), ["2"]), 24)
+
+    def test_get_parser_call_method_on_function(self):
+        parser = concatenate_string.parser
+        call_method = _get_parser_call_method(parser, concatenate_string)
+        self.assertEqual(call_method(args="yes 2".split()), "yesyes")
 
     def test_call_on_parse_me_no_docstring(self):
         Namespace = namedtuple("Namespace", ["one", "two", "three"])

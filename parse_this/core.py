@@ -235,7 +235,7 @@ def _get_parser_call_method(parser, func):
     """
     func_name = func.__name__
 
-    def inner_call(instance, args=None):
+    def inner_call(instance=None, args=None):
         """This is method attached to <parser>.call.
 
         Args:
@@ -249,6 +249,11 @@ def _get_parser_call_method(parser, func):
                                   "'__init__' you need to decorate the "
                                   "class with '@parse_class'"))
         namespace = parser.parse_args(_get_args_to_parse(args, sys.argv))
+        if instance is None:
+            # If instance is None we are probably decorating a function not a
+            # method and don't need the instance
+            args_name = _get_args_name_from_parser(parser)
+            return _call(func, args_name, namespace)
         return _call_method_from_namespace(instance, func_name, namespace)
 
     return inner_call
