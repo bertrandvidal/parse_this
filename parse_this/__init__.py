@@ -70,8 +70,8 @@ class create_parser(object):
             parser = _get_arg_parser(func, self._types, args_and_defaults,
                                      self._params_delim)
             parser.get_name = lambda: self._name
-            parser.call = _get_parser_call_method(parser, func)
             func.parser = parser
+            func.parser.call = _get_parser_call_method(func)
 
         @wraps(func)
         def decorated(*args, **kwargs):

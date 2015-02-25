@@ -222,18 +222,18 @@ def _check_types(types, func_args, defaults):
     return (types, func_args)
 
 
-def _get_parser_call_method(parser, func):
+def _get_parser_call_method(func):
     """Returns the method that is linked to the 'call' method of the parser
 
     Args:
-        parser: The parser that will used to parse the command line args
-        func: decorated function
+        func: the decorated function
 
     Raises:
         ParseThisError if the decorated method is __init__, __init__ can
         only be decorated in a class decorated by parse_class
     """
     func_name = func.__name__
+    parser = func.parser
 
     def inner_call(instance=None, args=None):
         """This is method attached to <parser>.call.

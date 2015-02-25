@@ -313,21 +313,19 @@ class TestCore(unittest.TestCase):
         self.assertEqual(_check_types([], [], ()), ([], []))
 
     def test_get_parser_call_method_returns_callable(self):
-        call_method = _get_parser_call_method(None, parse_me_full_docstring)
+        call_method = _get_parser_call_method(concatenate_string)
         self.assertTrue(callable(call_method))
 
     def test_get_parser_call_method_raise_on_init(self):
-        call_method = _get_parser_call_method(None, Parseable.__init__)
+        call_method = _get_parser_call_method(Parseable.__init__)
         self.assertRaises(ParseThisError, call_method, None)
 
     def test_get_parser_call_method_execution(self):
-        call_method = _get_parser_call_method(Parseable.parseable.parser,
-                                              Parseable.parseable)
+        call_method = _get_parser_call_method(Parseable.parseable)
         self.assertEqual(call_method(Parseable(12), ["2"]), 24)
 
     def test_get_parser_call_method_on_function(self):
-        parser = concatenate_string.parser
-        call_method = _get_parser_call_method(parser, concatenate_string)
+        call_method = _get_parser_call_method(concatenate_string)
         self.assertEqual(call_method(args="yes 2".split()), "yesyes")
 
     def test_call_on_parse_me_no_docstring(self):
