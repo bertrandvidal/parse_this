@@ -241,15 +241,17 @@ class TestCore(unittest.TestCase):
         parser = _get_arg_parser(parse_me_full_docstring, [str, int],
                                  [("one", NoDefault), ("two", NoDefault),
                                   ("three", 12)], ":")
-        self.assertRaises(SystemExit, parser.parse_args,
-                          "we_are_missing_two".split())
+        with captured_output():
+            self.assertRaises(SystemExit, parser.parse_args,
+                              "we_are_missing_two".split())
 
     def test_get_arg_parser_argument_type(self):
         parser = _get_arg_parser(parse_me_full_docstring, [str, int],
                                  [("one", NoDefault), ("two", NoDefault),
                                   ("three", 12)], ":")
-        self.assertRaises(SystemExit, parser.parse_args,
-                          "yes i_should_be_an_int".split())
+        with captured_output():
+            self.assertRaises(SystemExit, parser.parse_args,
+                              "yes i_should_be_an_int".split())
 
     def test_get_args_to_parse_nothing_to_parse(self):
         self.assertListEqual(_get_args_to_parse(None, []), [])
