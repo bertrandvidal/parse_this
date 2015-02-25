@@ -77,9 +77,8 @@ class TestCreateParser(unittest.TestCase):
     def test_create_parser_on_function(self):
         parser = i_am_parseable.parser
         self.assertEqual(parser.description, "I too want to be parseable.")
-        namespace = parser.parse_args("yes 2 --three 3".split())
-        self.assertEqual(i_am_parseable(namespace.one, namespace.two,
-                                        namespace.three), ("yesyes", 9))
+        self.assertEqual(parser.call(args="yes 2 --three 3".split()),
+                         ("yesyes", 9))
 
     def test_create_parser_on_method(self):
         parser = Dummy.multiply_all.parser
@@ -196,11 +195,7 @@ class TestParseClass(unittest.TestCase):
     def test_parse_class_method_is_still_parseable(self):
         need_parsing = NeedParsing(12)
         parser = need_parsing.could_you_parse_me.parser
-        namespace = parser.parse_args("yes 2 --three 3".split())
-        self.assertEqual(namespace.one, "yes")
-        self.assertEqual(namespace.two, 2)
-        self.assertEqual(namespace.three, 3)
-        self.assertEqual(need_parsing.could_you_parse_me("yes", 2, 3),
+        self.assertEqual(parser.call(need_parsing, "yes 2 --three 3".split()),
                          ("yesyes", 9))
 
     def test_parse_class_init_need_decoration(self):
