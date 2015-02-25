@@ -254,6 +254,18 @@ def _get_parser_call_method(parser, func):
     return inner_call
 
 
+def _get_args_name_from_parser(parser):
+    """Retrieve the name of the function argument linked to the given parser.
+
+    Args:
+        parser: a function parser
+    """
+    # Retrieve the 'action' destination of the method parser i.e. its
+    # argument name. The HelpAction is ignored.
+    return [action.dest for action in parser._actions if not
+            isinstance(action, argparse._HelpAction)]
+
+
 def _call(callable_obj, arg_names, namespace):
     """Actually calls the callable with the namespace parsed from the command
     line.
@@ -280,10 +292,7 @@ def _call_method_from_namespace(obj, method_name, namespace):
     """
     method = getattr(obj, method_name)
     method_parser = method.parser
-    # Retrieve the 'action' destination of the method parser i.e. its
-    # argument name. The HelpAction is ignored.
-    arg_names = [action.dest for action in method_parser._actions if not
-                 isinstance(action, argparse._HelpAction)]
+    arg_names = _get_args_name_from_parser(method_parser)
     if method_name == "__init__":
         return _call(obj, arg_names, namespace)
     return _call(method, arg_names, namespace)
