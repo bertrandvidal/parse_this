@@ -195,7 +195,8 @@ class parse_class(object):
                 None, the default, and __init__ is decorated the object will be
                 instantiated on the fly from the command line arguments
             """
-            namespace = self._cls.parser.parse_args(args or sys.argv[1:])
+            parser = self._cls.parser
+            namespace = parser.parse_args(_get_args_to_parse(args, sys.argv))
             if instance is None:
                 # If the __init__ method is not part of the method to
                 # decorate we cannot instantiate the class
