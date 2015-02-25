@@ -1,7 +1,8 @@
 from parse_this import create_parser
 from parse_this.core import (_get_args_and_defaults, NoDefault,
                              _get_default_help_message, Self,
-                             _get_parseable_methods, Class, _prepare_doc)
+                             _get_parseable_methods, Class, _prepare_doc,
+                             _get_arg_parser)
 import unittest
 
 
@@ -172,6 +173,39 @@ class TestCore(unittest.TestCase):
         self.assertEqual(help_msg, {"one": "this one is a no brainer even with dashes",
                                     "two": "Help message for two",
                                     "three": "noticed you're missing docstring for two and I'm multiline too!"})
+
+    def test_get_arg_parser_with_default_value(self):
+        parser = _get_arg_parser(parse_me_full_docstring,
+                                 [str, int], [("one", NoDefault),
+                                              ("two", NoDefault),
+                                              ("three", 12)], ":")
+        namespace = parser.parse_args("yes 42".split())
+        self.assertEqual(namespace.one, "yes")
+        self.assertEqual(namespace.two, 42)
+        self.assertEqual(namespace.three, 12)
+
+    def test_get_arg_parser_without_default_value(self):
+        parser = _get_arg_parser(parse_me_full_docstring, [str, int],
+                                 [("one", NoDefault), ("two", NoDefault),
+                                  ("three", 12)], ":")
+        namespace = parser.parse_args("no 12 --three=23".split())
+        self.assertEqual(namespace.one, "no")
+        self.assertEqual(namespace.two, 12)
+        self.assertEqual(namespace.three, 23)
+
+    def test_get_arg_parser_required_arguments(self):
+        parser = _get_arg_parser(parse_me_full_docstring, [str, int],
+                                 [("one", NoDefault), ("two", NoDefault),
+                                  ("three", 12)], ":")
+        self.assertRaises(SystemExit, parser.parse_args,
+                          "we_are_missing_two".split())
+
+    def test_get_arg_parser_argument_type(self):
+        parser = _get_arg_parser(parse_me_full_docstring, [str, int],
+                                 [("one", NoDefault), ("two", NoDefault),
+                                  ("three", 12)], ":")
+        self.assertRaises(SystemExit, parser.parse_args,
+                          "yes i_should_be_an_int".split())
 
 
 if __name__ == "__main__":

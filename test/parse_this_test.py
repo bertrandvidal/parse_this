@@ -1,6 +1,6 @@
 from parse_this import parse_this, create_parser, parse_class
 from parse_this.core import (NoDefault, _get_args_to_parse, _check_types,
-                             _get_arg_parser, Self, Class, ParseThisError)
+                             Self, Class, ParseThisError)
 import unittest
 
 
@@ -55,32 +55,6 @@ class TestParseThis(unittest.TestCase):
             _check_types([Self, int, int], ["self", "arg_one", "arg_two"], ())
         except Exception as exception:
             self.fail("_check_types should not have raised: %s" % exception)
-
-    def test_parsing_no_defaults(self):
-        parser = _get_arg_parser(parse_me, [str, int], [("one", NoDefault),
-                                                        ("two", NoDefault)],
-                                 ":")
-        namespace = parser.parse_args("yes 2".split())
-        self.assertEqual(namespace.one, "yes")
-        self.assertEqual(namespace.two, 2)
-
-    def test_namespace_no_option(self):
-        parser = _get_arg_parser(parse_me, [str, int], [("one", NoDefault),
-                                                        ("two", NoDefault),
-                                                        ("three", 12)], ":")
-        namespace = parser.parse_args("yes 42".split())
-        self.assertEqual(namespace.one, "yes")
-        self.assertEqual(namespace.two, 42)
-        self.assertEqual(namespace.three, 12)
-
-    def test_namespace(self):
-        parser = _get_arg_parser(parse_me, [str, int], [("one", NoDefault),
-                                                        ("two", NoDefault),
-                                                        ("three", 12)], ":")
-        namespace = parser.parse_args("no 12 --three=23".split())
-        self.assertEqual(namespace.one, "no")
-        self.assertEqual(namespace.two, 12)
-        self.assertEqual(namespace.three, 23)
 
     def test_return_value(self):
         self.assertEqual(parse_this(parse_me, [str, int], "yes 2".split()),
