@@ -23,10 +23,10 @@ class TestParseThis(unittest.TestCase):
 
     def test_parse_this_return_value(self):
         self.assertEqual(parse_this(parse_me, [str, int], "yes 2".split()),
-                          ("yesyes", 144))
+                         ("yesyes", 144))
         self.assertEqual(parse_this(parse_me, [str, int],
-                                     "no 3 --three 2".split()),
-                          ("nonono", 4))
+                                    "no 3 --three 2".split()),
+                         ("nonono", 4))
 
 
 @create_parser(str, int)

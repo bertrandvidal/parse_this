@@ -269,7 +269,7 @@ class TestCore(unittest.TestCase):
     def test_get_args_to_parse_with_options(self):
         self.assertListEqual(_get_args_to_parse(None, ["prog", "arg",
                                                        "--kwargs=12"]),
-                              ["arg", "--kwargs=12"])
+                             ["arg", "--kwargs=12"])
 
     def test_get_args_to_parse_used_empty_args_not_sys_argv(self):
         self.assertListEqual(_get_args_to_parse([], ["prog", "arg_1", "arg_2"]),
