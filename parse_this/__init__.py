@@ -68,7 +68,7 @@ class create_parser(object):
         """
         if not hasattr(func, "parser"):
             _LOG.debug("Creating parser for '%s'%s", func.__name__,
-                          "/%s" % self._name if self._name else "")
+                       "/%s" % self._name if self._name else "")
             (func_args, _, _, defaults) = getargspec(func)
             self._types, func_args = _check_types(func.__name__, self._types,
                                                   func_args, defaults)
