@@ -1,12 +1,16 @@
 from __future__ import print_function
 import argparse
+import logging
 import re
 import sys
+
 
 try:
     from itertools import izip_longest as zip_longest
 except ImportError:
     from itertools import zip_longest
+
+_LOG = logging.getLogger(__name__)
 
 
 class ParseThisError(Exception):
@@ -71,6 +75,7 @@ def _prepare_doc(func, args, params_delim):
         a dict indexed on the callable argument name and their associated help
         message
     """
+    _LOG.debug("Preparing doc for '%s'", func.__name__)
     if not func.__doc__:
         return _get_default_help_message(func, args)
     description = []
@@ -120,6 +125,7 @@ def _get_parseable_methods(cls):
         a 2-tuple with the parser of the __init__ method if any and a dict
         of the form {'method_name': associated_parser}
     """
+    _LOG.debug("Retrieving parseable methods for '%s'", cls.__name__)
     init_parser = None
     methods_to_parse = {}
     for name, obj in vars(cls).items():
@@ -128,6 +134,7 @@ def _get_parseable_methods(cls):
         # This won't work for classmethods because reference to
         # classmethods are only possible once the class has been defined
         if callable(obj) and hasattr(obj, "parser"):
+            _LOG.debug("Found method '%s'", name)
             if name == "__init__":
                 # If we find the decorated __init__ method it will be
                 # used as the top level parser
@@ -172,15 +179,18 @@ def _get_arg_parser(func, types, args_and_defaults, params_delim):
         params_delim: characters used to separate the parameters from their
         help message in the docstring
     """
+    _LOG.debug("Creating ArgumentParser for '%s'", func.__name__)
     (description, arg_help) = _prepare_doc(
         func, [x for (x, _) in args_and_defaults], params_delim)
     parser = argparse.ArgumentParser(description=description)
     for ((arg, default), arg_type) in zip_longest(args_and_defaults, types):
         help_msg = arg_help[arg]
         if default is NoDefault:
+            _LOG.debug("Adding positional argument %s.%s", func.__name__, arg)
             arg_type = arg_type or identity_type
             parser.add_argument(arg, help=help_msg, type=arg_type)
         else:
+            _LOG.debug("Adding optional argument %s.%s", func.__name__, arg)
             arg_type = arg_type or type(default)
             parser.add_argument("--%s" % arg, help=help_msg, default=default,
                                 type=arg_type)
@@ -195,7 +205,9 @@ def _get_args_to_parse(args, sys_argv):
         args: argument to be parsed
         sys_argv: arguments of the command line i.e. sys.argv
     """
-    return args if args is not None else sys_argv[1:]
+    arguments = args if args is not None else sys_argv[1:]
+    _LOG.debug("Parsing arguments: %s", arguments)
+    return arguments
 
 
 def _check_types(func_name, types, func_args, defaults):
@@ -245,6 +257,7 @@ def _get_parser_call_method(func):
             instance: the instance of the parser
             args: arguments to be parsed
         """
+        _LOG.debug("Calling %s.parser.call", func_name)
         # Defer this check in the method call so that __init__ can be
         # decorated in class decorated with parse_class
         if func_name == "__init__":

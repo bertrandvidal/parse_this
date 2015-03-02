@@ -6,10 +6,13 @@ from parse_this.core import (_check_types, _get_args_and_defaults,
                              _call_method_from_namespace,
                              _get_parser_call_method, _get_parseable_methods)
 import argparse
+import logging
 import sys
 
 __all__ = ["Self", "Class", "ParseThisError", "parse_this", "create_parser",
            "parse_class"]
+
+_LOG = logging.getLogger(__name__)
 
 
 def parse_this(func, types, args=None, params_delim=":"):
@@ -24,6 +27,7 @@ def parse_this(func, types, args=None, params_delim=":"):
         params_delim: characters used to separate the parameters from their
         help message in the docstring. Defaults to ':'
     """
+    _LOG.debug("Creating parser for %s", func.__name__)
     (func_args, dummy_1, dummy_2, defaults) = getargspec(func)
     types, func_args = _check_types(func.__name__, types, func_args, defaults)
     args_and_defaults = _get_args_and_defaults(func_args, defaults)
@@ -63,6 +67,8 @@ class create_parser(object):
             func: the function for which we want to create an argument parser
         """
         if not hasattr(func, "parser"):
+            _LOG.debug("Creating parser for '%s'%s", func.__name__,
+                          "/%s" % self._name if self._name else "")
             (func_args, _, _, defaults) = getargspec(func)
             self._types, func_args = _check_types(func.__name__, self._types,
                                                   func_args, defaults)
@@ -101,6 +107,7 @@ class parse_class(object):
         Args:
             cls: class to be decorated
         """
+        _LOG.debug("Creating parser for class '%s'", cls.__name__)
         self._cls = cls
         init_parser, methods_to_parse = _get_parseable_methods(cls)
         self._set_class_parser(init_parser, methods_to_parse, cls)
