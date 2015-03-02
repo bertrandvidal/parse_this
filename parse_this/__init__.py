@@ -25,7 +25,7 @@ def parse_this(func, types, args=None, params_delim=":"):
         help message in the docstring. Defaults to ':'
     """
     (func_args, dummy_1, dummy_2, defaults) = getargspec(func)
-    types, func_args = _check_types(types, func_args, defaults)
+    types, func_args = _check_types(func.__name__, types, func_args, defaults)
     args_and_defaults = _get_args_and_defaults(func_args, defaults)
     parser = _get_arg_parser(func, types, args_and_defaults, params_delim)
     arguments = parser.parse_args(_get_args_to_parse(args, sys.argv))
@@ -64,8 +64,8 @@ class create_parser(object):
         """
         if not hasattr(func, "parser"):
             (func_args, _, _, defaults) = getargspec(func)
-            self._types, func_args = _check_types(
-                self._types, func_args, defaults)
+            self._types, func_args = _check_types(func.__name__, self._types,
+                                                  func_args, defaults)
             args_and_defaults = _get_args_and_defaults(func_args, defaults)
             parser = _get_arg_parser(func, self._types, args_and_defaults,
                                      self._params_delim)
