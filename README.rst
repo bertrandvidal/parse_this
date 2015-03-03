@@ -204,12 +204,12 @@ docstring it needs to be in the specific format described below:
     ...
         @create_parser(Self, int, int, params_delim=<delimiter_chars>)
         def method(self, spam, ham):
-        """<description>
-        <blank_line>
-        <arg_name><delimiter_chars><arg_help>
-        <arg_name><delimiter_chars><arg_help>
-        """
-        pass
+          """<description>
+            <blank_line>
+            <arg_name><delimiter_chars><arg_help>
+            <arg_name><delimiter_chars><arg_help>
+          """
+          pass
     ...
 
 -  description: is a multiline description of the method used for the
