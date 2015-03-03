@@ -104,16 +104,19 @@ read on!
    name with ``_`` replaced by ``-``. 'Private' methods, whose name
    start with an ``_``, do not have a subparser by default, as this
    would expose them to the outside. However if you want to expose them
-   you can set the keyword argument ``parse_private=True`` to
+   you can set the keyword argument ``parse_private=True`` in
    ``parse_class``. If exposed their command name will not contain the
-   leading ``-`` as this would be confusing for command parsing
--  When calling ``python script.py --help`` the help message for
-   **every** parser will be displayed making easier to find what you are
-   looking for
+   leading ``-`` as this would be confusing for command parsing. Special
+   methods, such as ``__str__``, can be decorated as well. Their command
+   name will be stripped of all ``_``\ s resulting in command names such
+   as ``str``.
 -  When used in a ``parse_class`` decorated class ``create_parser`` can
    take an extra parameters ``name`` that will be used as the
    sub-command name. The same modifications are made to the ``name``
-   replacing ``_`` with ``_``
+   replacing ``_`` with ``-``
+-  When calling ``python script.py --help`` the help message for
+   **every** parser will be displayed making easier to find what you are
+   looking for
 
 Arguments and types
 ~~~~~~~~~~~~~~~~~~~
@@ -225,6 +228,88 @@ to ``:`` since this is the convention I most often use.
 
 If no docstring is specified a generic - not so useful - help message
 will be generated for the command line and arguments.
+
+Using None as a default value and bool as flags
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Using ``None`` as a default value is common practice in Python but for
+``parse_this`` and ``create_parser`` to work properly the type of the
+argument which defaults to ``None`` needs to be specified. Otherwise a
+``ParseThisError`` will be raised.
+
+.. code:: python
+
+    ...
+
+    @create_parser(str):
+    def function(ham, spam=None):
+      if spam is not None:
+        return ham * spam
+      return ham
+
+    # Will raise ParseThisError: To use default value of 'None' you need to specify the type of the argument 'spam' for the method 'function'
+
+    ...
+
+But specifying the type of ``spam`` will allow ``create_parser`` to work
+properly
+
+.. code:: python
+
+    ...
+
+    @create_parser(str, int)
+    def function(ham, spam=None):
+      if spam is not None:
+        return ham * spam
+      return ham
+
+    # Calling function.parser.call(args="yes".split()) -> 'yes'
+    # Calling function.parser.call(args="yes --spam 3".split()) -> 'yesyesyes'
+    ...
+
+An other common practice is to use ``bool``\ s as flags or switches. All
+arguments of type ``bool``, either typed direclty or inferred from the
+default value, will become optional arguments of the command line. A
+``bool`` argument without default value will default to ``True`` as in
+the following example:
+
+.. code:: python
+
+    ...
+    @create_parser(str, bool)
+    def function(ham, spam):
+      if spam:
+        return ham, spam
+      return ham
+
+    # Calling function.parser.call(args="yes".split()) -> 'yes', True
+    # Calling function.parser.call(args="yes --spam".split()) -> 'yes'
+    ...
+
+Adding ``--spam`` to the arguments will act as a flag/switch setting
+``spam`` to ``False``. Note that ``spam`` as become optional and will be
+given the value ``True`` if ``--spam`` is not among the arguments to
+parse.
+
+Arguments with a boolean default value will act in the same way i.e.
+acting as flag to change the default value:
+
+.. code:: python
+
+    ...
+    @create_parser(str)
+    def function(ham, spam=False):
+      if spam:
+        return ham, spam
+      return ham
+    # Calling function.parser.call(args="yes".split()) -> 'yes'
+    # Calling function.parser.call(args="yes --spam".split()) -> 'yes', True
+    ...
+
+Here everything works as intended and the default value for ``spam`` is
+``False`` and passing ``--spam`` as an argument to be parsed will assign
+it ``True``.
 
 Decorator
 ---------
