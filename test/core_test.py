@@ -114,7 +114,7 @@ def multiline_docstring(one, two, three):
     return one * two, three * three
 
 
-def different_params_delimiter(one, two, three):
+def different_delimiter_charsiter(one, two, three):
     """I am a sneaky function.
 
     Args:
@@ -230,8 +230,8 @@ class TestCore(unittest.TestCase):
                                     "two": "Help message for two",
                                     "three": "noticed you're missing docstring for two and I'm multiline too!"})
 
-    def test_prepare_doc_params_delim(self):
-        (description, help_msg) = _prepare_doc(different_params_delimiter,
+    def test_prepare_doc_delimiter_chars(self):
+        (description, help_msg) = _prepare_doc(different_delimiter_charsiter,
                                                ["one", "two", "three"], "--")
         self.assertEqual(description, "I am a sneaky function.")
         self.assertEqual(help_msg, {"one": "this one is a no brainer even with dashes",

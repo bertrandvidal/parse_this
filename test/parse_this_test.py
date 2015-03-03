@@ -46,7 +46,7 @@ class Dummy(object):
     def __init__(self, a):
         self._a = a
 
-    @create_parser(Self, int, params_delim="--")
+    @create_parser(Self, int, delimiter_chars="--")
     def multiply_all(self, b, c=2):
         """Will multiply everything!
 

@@ -59,7 +59,7 @@ def _get_args_and_defaults(args, defaults):
     return args_and_defaults[::-1]
 
 
-def _prepare_doc(func, args, params_delim):
+def _prepare_doc(func, args, delimiter_chars):
     """From the function docstring get the arg parse description and arguments
         help message. If there is no docstring simple description and help
         message are created.
@@ -67,7 +67,7 @@ def _prepare_doc(func, args, params_delim):
     Args:
         func: the function that needs argument parsing
         args: name of the function arguments
-        params_delim: characters used to separate the parameters from their
+        delimiter_chars: characters used to separate the parameters from their
         help message in the docstring
 
     Returns:
@@ -83,7 +83,7 @@ def _prepare_doc(func, args, params_delim):
     fill_description = True
     arg_name = None
     arg_doc_regex = re.compile("\b*(?P<arg_name>\w+)\s*%s\s*(?P<help_msg>.+)" %
-                               params_delim)
+                               delimiter_chars)
     for line in func.__doc__.splitlines():
         line = line.strip()
         if line and fill_description:
@@ -168,7 +168,7 @@ def _get_default_help_message(func, args, description=None, args_help=None):
     return (description, args_help)
 
 
-def _get_arg_parser(func, types, args_and_defaults, params_delim):
+def _get_arg_parser(func, types, args_and_defaults, delimiter_chars):
     """Return an ArgumentParser for the given function. Arguments are defined
         from the function arguments and their associated defaults.
 
@@ -176,12 +176,12 @@ def _get_arg_parser(func, types, args_and_defaults, params_delim):
         func: function for which we want an ArgumentParser
         types: types to which the command line arguments should be converted to
         args_and_defaults: list of 2-tuples (arg_name, arg_default)
-        params_delim: characters used to separate the parameters from their
+        delimiter_chars: characters used to separate the parameters from their
         help message in the docstring
     """
     _LOG.debug("Creating ArgumentParser for '%s'", func.__name__)
     (description, arg_help) = _prepare_doc(
-        func, [x for (x, _) in args_and_defaults], params_delim)
+        func, [x for (x, _) in args_and_defaults], delimiter_chars)
     parser = argparse.ArgumentParser(description=description)
     for ((arg, default), arg_type) in zip_longest(args_and_defaults, types):
         help_msg = arg_help[arg]

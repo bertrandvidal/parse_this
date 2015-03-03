@@ -15,7 +15,7 @@ __all__ = ["Self", "Class", "ParseThisError", "parse_this", "create_parser",
 _LOG = logging.getLogger(__name__)
 
 
-def parse_this(func, types, args=None, params_delim=":"):
+def parse_this(func, types, args=None, delimiter_chars=":"):
     """Create an ArgParser for the given function converting the command line
        arguments according to the list of types.
 
@@ -24,14 +24,14 @@ def parse_this(func, types, args=None, params_delim=":"):
         types: a list of types - as accepted by argparse - that will be used to
             convert the command line arguments
         args: a list of arguments to be parsed if None sys.argv is used
-        params_delim: characters used to separate the parameters from their
+        delimiter_chars: characters used to separate the parameters from their
         help message in the docstring. Defaults to ':'
     """
     _LOG.debug("Creating parser for %s", func.__name__)
     (func_args, dummy_1, dummy_2, defaults) = getargspec(func)
     types, func_args = _check_types(func.__name__, types, func_args, defaults)
     args_and_defaults = _get_args_and_defaults(func_args, defaults)
-    parser = _get_arg_parser(func, types, args_and_defaults, params_delim)
+    parser = _get_arg_parser(func, types, args_and_defaults, delimiter_chars)
     arguments = parser.parse_args(_get_args_to_parse(args, sys.argv))
     return _call(func, func_args, arguments)
 
@@ -50,14 +50,14 @@ class create_parser(object):
             types: vargs list of types to which the command line arguments
             should be converted to
             options: options to pass to create the parser. Possible values are:
-                -params_delim: characters used to separate the parameters from
-                their help message in the docstring. Defaults to ':'
+                -delimiter_chars: characters used to separate the parameters
+                from their help message in the docstring. Defaults to ':'
                 -name: name that will be used for the parser when used in a
                 class decorated with `parse_class`. If not provided the name
                 of the method will be used
         """
         self._types = types
-        self._params_delim = options.get("params_delim", ":")
+        self._delimiter_chars = options.get("delimiter_chars", ":")
         self._name = options.get("name", None)
 
     def __call__(self, func):
@@ -74,7 +74,7 @@ class create_parser(object):
                                                   func_args, defaults)
             args_and_defaults = _get_args_and_defaults(func_args, defaults)
             parser = _get_arg_parser(func, self._types, args_and_defaults,
-                                     self._params_delim)
+                                     self._delimiter_chars)
             parser.get_name = lambda: self._name
             func.parser = parser
             func.parser.call = _get_parser_call_method(func)
