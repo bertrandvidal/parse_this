@@ -350,7 +350,8 @@ CAVEATS
  * Classmethods cannot be access from the command line in a class decorated
    with `parse_class`
  * When using `create_parser` on a method that has an argument with `None` as
-   a default value its type *must be* past in the list of types.
+   a default value its type *must be* past in the list of types. A `ParseThisError`
+   will be raised otherwise.
 
 
 LICENSE

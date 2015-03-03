@@ -363,7 +363,7 @@ CAVEATS
    decorated with ``parse_class``
 -  When using ``create_parser`` on a method that has an argument with
    ``None`` as a default value its type *must be* past in the list of
-   types.
+   types. A ``ParseThisError`` will be raised otherwise.
 
 LICENSE
 -------
