@@ -194,7 +194,7 @@ Help message
 ~~~~~~~~~~~~
 
 In order to get a help message generated automatically from the method
-docstring it needs to be in a specific format as describe below:
+docstring it needs to be in the specific format described below:
 
 .. code:: python
 
@@ -212,11 +212,12 @@ docstring it needs to be in a specific format as describe below:
 -  description: is a multiline description of the method used for the
    command line
 -  each line of argument help have the following component:
--  arg\_name: the **same** name as the argument of the method
+-  arg\_name: the **same** name as the argument of the method.
 -  delimiter\_chars: one or more chars that separate the argument and
-   its help message
+   its help message. Using whitespaces is not recommended as it could
+   have an expected behavior with multiline help message.
 -  arg\_help: is everything behind the delimiter\_chars until the next
-   argument, **a blank line** or the end of the docstring
+   argument, **a blank line** or the end of the docstring.
 
 The ``delimiter_chars`` can be passed to both ``parse_this`` and
 ``create_parser`` as the keywords argument ``params_delim``. It defaults
@@ -228,7 +229,7 @@ will be generated for the command line and arguments.
 Decorator
 ---------
 
-As a decorator ``create_parser`` will create an argument parser for a
+As a decorator ``create_parser`` will create an argument parser for the
 decorated function. A ``parser`` attribute will be added to the method
 and can be used to parse the command line argument.
 
@@ -256,15 +257,15 @@ Calling this script from the command line as follow:
 
 .. code:: bash
 
-    python script.py yes --two 2
+    python script.py yes --two 3
 
-will return ``'yesyes'`` as expected and all the parsing have been done
-for you.
+will return ``'yesyesyes'`` as expected and all the parsing have been
+done for you.
 
 Note that the function can still be called as any other function from
-any python file. Also it is not possible to stack ``create_parser`` with
-any decorator that would modify the signature of the decorated function
-e.g. using ``functools.wraps``.
+any python file. Also it is **not** possible to stack ``create_parser``
+with any decorator that would modify the signature of the decorated
+function e.g. using ``functools.wraps``.
 
 Function
 --------
@@ -291,8 +292,8 @@ directly.
     if __name__ == "__main__":
         print(parse_this(concatenate_str, [str, int]))
 
-Calling this script with the same command line arguments ``yes --two 2``
-will also return ``'yesyes'`` as expected.
+Calling this script with the same command line arguments ``yes --two 3``
+will also return ``'yesyesyes'`` as expected.
 
 Classmethods
 ------------
@@ -325,9 +326,9 @@ specify where the ``cls`` argument is used.
 
 **Notes**: \* The ``classmethod`` decorator is placed **on top** of the
 ``create_parser`` decorator in order for the method to still be a
-considered a class method. \* It is not possible to decorate a
-``classmethod`` with ``create_parser`` in a class decoraetd with
-``parse_class``.
+considered a class method. \* A ``classmethod`` decorated with
+``create_parser`` in a class decorated with ``parse_class`` will not be
+accessible through the class command line.
 
 INSTALLING PARSE\_THIS
 ----------------------
@@ -359,6 +360,9 @@ CAVEATS
 
 -  ``parse_this`` and ``create_parser`` are not able to be used on
    methods with ``*args`` and ``**kwargs``
+-  A subsequent effect of the previous caveat is that ``create_parser``
+   cannot be stacked with other decorator that would alter the
+   callable's signature
 -  Classmethods cannot be access from the command line in a class
    decorated with ``parse_class``
 -  When using ``create_parser`` on a method that has an argument with
@@ -370,13 +374,6 @@ LICENSE
 
 ``parse_this`` is released under the MIT Licence. See the bundled
 LICENSE file for details.
-
-TODO
-----
-
--  Handle vargs and kwargs - if possible
--  Some default values for paramters e.g. ``None``, [], {} will not be
-   usable. Warns the user when creating the parser.
 
 .. |PyPI latest version badge| image:: https://badge.fury.io/py/parse_this.svg
    :target: https://pypi.python.org/pypi/parse_this
