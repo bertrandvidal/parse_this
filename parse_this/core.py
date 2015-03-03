@@ -186,9 +186,17 @@ def _get_arg_parser(func, types, args_and_defaults, params_delim):
     for ((arg, default), arg_type) in zip_longest(args_and_defaults, types):
         help_msg = arg_help[arg]
         if default is NoDefault:
-            _LOG.debug("Adding positional argument %s.%s", func.__name__, arg)
             arg_type = arg_type or identity_type
-            parser.add_argument(arg, help=help_msg, type=arg_type)
+            if arg_type == bool:
+                _LOG.debug("Adding optional flag %s.%s", func.__name__, arg)
+                parser.add_argument("--%s" % arg, default=True, required=False,
+                                    action="store_false",
+                                    help="%s. Defaults to True if not specified"
+                                    % help_msg)
+            else:
+                _LOG.debug("Adding positional argument %s.%s", func.__name__,
+                           arg)
+                parser.add_argument(arg, help=help_msg, type=arg_type)
         else:
             if default is None and arg_type is None:
                 raise ParseThisError("To use default value of 'None' you need "

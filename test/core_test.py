@@ -144,6 +144,11 @@ def has_flags(a, b=False):
     return a, b
 
 
+@create_parser(bool)
+def has_bool_arguments(a):
+    return a
+
+
 @contextmanager
 def captured_output():
     """Allows to safely capture stdout and stderr in a context manager."""
@@ -232,6 +237,10 @@ class TestCore(unittest.TestCase):
         self.assertEqual(help_msg, {"one": "this one is a no brainer even with dashes",
                                     "two": "Help message for two",
                                     "three": "noticed you're missing docstring for two and I'm multiline too!"})
+
+    def test_get_arg_parser_bool_argument(self):
+        self.assertEqual(has_bool_arguments.parser.call(args=[]), True)
+        self.assertEqual(has_bool_arguments.parser.call(args=["--a"]), False)
 
     def test_get_arg_parser_bool_default_value(self):
         self.assertEqual(has_flags.parser.call(args=["12"]), (12, False))
