@@ -139,6 +139,11 @@ def has_none_default_value(a, b=None):
     return a, b
 
 
+@create_parser(int)
+def has_flags(a, b=False):
+    return a, b
+
+
 @contextmanager
 def captured_output():
     """Allows to safely capture stdout and stderr in a context manager."""
@@ -227,6 +232,10 @@ class TestCore(unittest.TestCase):
         self.assertEqual(help_msg, {"one": "this one is a no brainer even with dashes",
                                     "two": "Help message for two",
                                     "three": "noticed you're missing docstring for two and I'm multiline too!"})
+
+    def test_get_arg_parser_bool_default_value(self):
+        self.assertEqual(has_flags.parser.call(args=["12"]), (12, False))
+        self.assertEqual(has_flags.parser.call(args=["12", "--b"]), (12, True))
 
     def test_get_arg_parser_none_default_value_without_type(self):
         with self.assertRaises(ParseThisError):

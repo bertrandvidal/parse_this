@@ -196,9 +196,15 @@ def _get_arg_parser(func, types, args_and_defaults, params_delim):
                                      "for the method '{}'"
                                      .format(arg, func.__name__))
             arg_type = arg_type or type(default)
-            _LOG.debug("Adding optional argument %s.%s", func.__name__, arg)
-            parser.add_argument("--%s" % arg, help=help_msg,
-                                default=default, type=arg_type)
+            if arg_type == bool:
+                action = "store_false" if default else "store_true"
+                _LOG.debug("Adding optional flag %s.%s", func.__name__, arg)
+                parser.add_argument("--%s" % arg, help=help_msg,
+                                    default=default, action=action)
+            else:
+                _LOG.debug("Adding optional argument %s.%s", func.__name__, arg)
+                parser.add_argument("--%s" % arg, help=help_msg,
+                                    default=default, type=arg_type)
     return parser
 
 
