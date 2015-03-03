@@ -134,6 +134,11 @@ def concatenate_string(string, nb_concat):
     return string * nb_concat
 
 
+@create_parser(int, str)
+def has_none_default_value(a, b=None):
+    return a, b
+
+
 @contextmanager
 def captured_output():
     """Allows to safely capture stdout and stderr in a context manager."""
@@ -222,6 +227,19 @@ class TestCore(unittest.TestCase):
         self.assertEqual(help_msg, {"one": "this one is a no brainer even with dashes",
                                     "two": "Help message for two",
                                     "three": "noticed you're missing docstring for two and I'm multiline too!"})
+
+    def test_get_arg_parser_none_default_value_without_type(self):
+        with self.assertRaises(ParseThisError):
+            @create_parser(int)
+            def have_none_default_value(a, b=None):
+                pass
+
+    def test_get_arg_parser_with_none_default_value(self):
+        self.assertEqual(has_none_default_value.parser.call(args=["12"]),
+                         (12, None))
+        self.assertEqual(has_none_default_value.parser.call(args=["12", "--b",
+                                                                  "yes"]),
+                         (12, "yes"))
 
     def test_get_arg_parser_with_default_value(self):
         parser = _get_arg_parser(parse_me_full_docstring,

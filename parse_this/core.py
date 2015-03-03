@@ -190,10 +190,15 @@ def _get_arg_parser(func, types, args_and_defaults, params_delim):
             arg_type = arg_type or identity_type
             parser.add_argument(arg, help=help_msg, type=arg_type)
         else:
-            _LOG.debug("Adding optional argument %s.%s", func.__name__, arg)
+            if default is None and arg_type is None:
+                raise ParseThisError("To use default value of 'None' you need "
+                                     "to specify the type of the argument '{}' "
+                                     "for the method '{}'"
+                                     .format(arg, func.__name__))
             arg_type = arg_type or type(default)
-            parser.add_argument("--%s" % arg, help=help_msg, default=default,
-                                type=arg_type)
+            _LOG.debug("Adding optional argument %s.%s", func.__name__, arg)
+            parser.add_argument("--%s" % arg, help=help_msg,
+                                default=default, type=arg_type)
     return parser
 
 
