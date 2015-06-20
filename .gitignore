@@ -1,3 +1,6 @@
+# git config file
+.gitconfig
+
 *.py[cod]
 
 # C extensions
