@@ -454,6 +454,15 @@ CAVEATS
    ``None`` as a default value its type *must be* past in the list of
    types. A ``ParseThisError`` will be raised otherwise.
 
+TO DO
+-----
+
+-  Code should be moved out of the parse\_this/\ **init**.py file and
+   into a specific file. The **init** should only be used for imports.
+-  Handle reST formatted docstrings
+-  Handle file arguments
+-  Handle list arguments i.e. argparse's nargs.
+
 LICENSE
 -------
 
