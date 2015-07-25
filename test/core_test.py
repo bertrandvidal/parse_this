@@ -173,7 +173,7 @@ class TestCore(unittest.TestCase):
         self.assertListEqual(sorted(list(args_help.keys())), ["a", "b"])
         (_, args_help) = _get_default_help_message(with_args, ["a", "b"], None,
                                                    {"a": "I have an help message"})
-        self.assertListEqual(list(args_help.keys()), ["a", "b"])
+        self.assertListEqual(sorted(list(args_help.keys())), ["a", "b"])
 
     def test_get_parseable_methods(self):
         (init_parser, method_to_parser) = _get_parseable_methods(Parseable)
