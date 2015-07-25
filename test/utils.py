@@ -6,6 +6,7 @@ try:
 except ImportError:
     from io import StringIO
 
+
 @contextmanager
 def captured_output():
     """Allows to safely capture stdout and stderr in a context manager."""

@@ -197,8 +197,8 @@ class TestCore(unittest.TestCase):
         (description, help_msg) = _prepare_doc(parse_me_full_docstring,
                                                ["one", "two", "three"], ":")
         self.assertEqual(description, "Could use some parsing.")
-        self.assertEqual(help_msg, {"one":"some stuff shouldn't be written down",
-                                    "two":"I can turn 2 syllables words into 6 syllables words",
+        self.assertEqual(help_msg, {"one": "some stuff shouldn't be written down",
+                                    "two": "I can turn 2 syllables words into 6 syllables words",
                                     "three": "I don't like the number three"})
 
     def test_prepare_doc_no_docstring(self):
