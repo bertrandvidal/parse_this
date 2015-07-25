@@ -1,4 +1,6 @@
 from collections import namedtuple
+import unittest
+
 from parse_this import create_parser, parse_class
 from test.utils import captured_output
 from parse_this.core import (_get_args_and_defaults, NoDefault,
@@ -8,7 +10,6 @@ from parse_this.core import (_get_args_and_defaults, NoDefault,
                              ParseThisError, _check_types,
                              _get_parser_call_method, _call,
                              _call_method_from_namespace)
-import unittest
 
 
 def no_docstring():

@@ -1,13 +1,14 @@
 from functools import wraps
 from inspect import getargspec
+import argparse
+import logging
+import sys
+
 from parse_this.core import (_check_types, _get_args_and_defaults,
                              _get_arg_parser, _get_args_to_parse, _call,
                              ParseThisError, Self, Class, FullHelpAction,
                              _call_method_from_namespace,
                              _get_parser_call_method, _get_parseable_methods)
-import argparse
-import logging
-import sys
 
 __all__ = ["Self", "Class", "ParseThisError", "parse_this", "create_parser",
            "parse_class"]

@@ -1,7 +1,8 @@
+import unittest
+
 from parse_this import parse_this, create_parser, parse_class
 from parse_this.core import Self, Class, ParseThisError
 from test.utils import captured_output
-import unittest
 
 
 def parse_me(one, two, three=12):
