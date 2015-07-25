@@ -1,6 +1,6 @@
 from collections import namedtuple
-from contextlib import contextmanager
 from parse_this import create_parser, parse_class
+from test.utils import captured_output
 from parse_this.core import (_get_args_and_defaults, NoDefault,
                              _get_default_help_message, Self,
                              _get_parseable_methods, Class, _prepare_doc,
@@ -8,13 +8,7 @@ from parse_this.core import (_get_args_and_defaults, NoDefault,
                              ParseThisError, _check_types,
                              _get_parser_call_method, _call,
                              _call_method_from_namespace)
-import sys
 import unittest
-
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
 
 
 def no_docstring():
@@ -151,18 +145,6 @@ def has_flags(a, b=False):
 @create_parser(bool)
 def has_bool_arguments(a):
     return a
-
-
-@contextmanager
-def captured_output():
-    """Allows to safely capture stdout and stderr in a context manager."""
-    new_out, new_err = StringIO(), StringIO()
-    old_out, old_err = sys.stdout, sys.stderr
-    try:
-        sys.stdout, sys.stderr = new_out, new_err
-        yield sys.stdout, sys.stderr
-    finally:
-        sys.stdout, sys.stderr = old_out, old_err
 
 
 class TestCore(unittest.TestCase):
