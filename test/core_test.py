@@ -1,4 +1,3 @@
-from StringIO import StringIO
 from collections import namedtuple
 from contextlib import contextmanager
 from parse_this import create_parser, parse_class
@@ -11,6 +10,11 @@ from parse_this.core import (_get_args_and_defaults, NoDefault,
                              _call_method_from_namespace)
 import sys
 import unittest
+
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 
 def no_docstring():
@@ -184,16 +188,16 @@ class TestCore(unittest.TestCase):
 
     def test_get_default_help_message_add_default_args_help(self):
         (_, args_help) = _get_default_help_message(with_args, ["a", "b"])
-        self.assertListEqual(args_help.keys(), ["a", "b"])
+        self.assertListEqual(sorted(list(args_help.keys())), ["a", "b"])
         (_, args_help) = _get_default_help_message(with_args, ["a", "b"], None,
                                                    {"a": "I have an help message"})
-        self.assertListEqual(args_help.keys(), ["a", "b"])
+        self.assertListEqual(list(args_help.keys()), ["a", "b"])
 
     def test_get_parseable_methods(self):
         (init_parser, method_to_parser) = _get_parseable_methods(Parseable)
         self.assertIsNotNone(init_parser)
-        self.assertListEqual(method_to_parser.keys(), ["parseable",
-                                                       "_private_method"])
+        self.assertListEqual(sorted(list(method_to_parser.keys())),
+                             ["_private_method", "parseable"])
 
     def test_get_parseable_methods_do_not_include_classmethod(self):
         (_, method_to_parser) = _get_parseable_methods(Parseable)
