@@ -97,6 +97,7 @@ class TestCreateParser(unittest.TestCase):
 
 @parse_class(description="Hello World", parse_private=True)
 class NeedParsing(object):
+
     """This will be used as the parser description."""
 
     @create_parser(Self, int)
@@ -138,6 +139,7 @@ class NeedParsing(object):
 
 @parse_class()
 class ShowMyDocstring(object):
+
     """This should be the parser description"""
 
     @create_parser(Self, int)

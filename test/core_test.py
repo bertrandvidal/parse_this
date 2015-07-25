@@ -189,7 +189,8 @@ class TestCore(unittest.TestCase):
     def test_prepare_doc_blank_line_in_wrong_place(self):
         (description, help_msg) = _prepare_doc(blank_line_in_wrong_place,
                                                ["one", "two"], ":")
-        self.assertEqual(description, "I put the blank line after arguments ...")
+        self.assertEqual(
+            description, "I put the blank line after arguments ...")
         self.assertEqual(help_msg, {"one": "this help is #1",
                                     "two": "Help message for two"})
 
@@ -204,7 +205,8 @@ class TestCore(unittest.TestCase):
     def test_prepare_doc_no_docstring(self):
         (description, help_msg) = _prepare_doc(parse_me_no_docstring,
                                                ["one", "two", "three"], ":")
-        self.assertEqual(description, "Argument parsing for parse_me_no_docstring")
+        self.assertEqual(
+            description, "Argument parsing for parse_me_no_docstring")
         self.assertEqual(help_msg, {"one": "Help message for one",
                                     "two":  "Help message for two",
                                     "three":  "Help message for three"})

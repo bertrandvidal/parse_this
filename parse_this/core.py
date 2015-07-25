@@ -14,20 +14,24 @@ _LOG = logging.getLogger(__name__)
 
 
 class ParseThisError(Exception):
+
     """Error base class raised by this module."""
 
 
 class NoDefault(object):
+
     """Use to fill the list of args and default to indicate the argument doesn't
         have a default value.
     """
 
 
 class Self(object):
+
     """Special value to use as the type of the self arg of a method."""
 
 
 class Class(object):
+
     """Special value to use as the type of the cls arg of a classmethod."""
 
 
@@ -210,7 +214,8 @@ def _get_arg_parser(func, types, args_and_defaults, delimiter_chars):
                 parser.add_argument("--%s" % arg, help=help_msg,
                                     default=default, action=action)
             else:
-                _LOG.debug("Adding optional argument %s.%s", func.__name__, arg)
+                _LOG.debug(
+                    "Adding optional argument %s.%s", func.__name__, arg)
                 parser.add_argument("--%s" % arg, help=help_msg,
                                     default=default, type=arg_type)
     return parser
@@ -339,6 +344,7 @@ def _call_method_from_namespace(obj, method_name, namespace):
 
 
 class FullHelpAction(argparse._HelpAction):
+
     """Custom HelpAction to display help from all subparsers.
 
     This allows to have the help for all sub-commands when invoking:
