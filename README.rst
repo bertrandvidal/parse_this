@@ -462,6 +462,10 @@ TO DO
 -  Handle reST formatted docstrings
 -  Handle file arguments
 -  Handle list arguments i.e. argparse's nargs.
+-  Python3 version should use the
+   `inspect.Signature <https://docs.python.org/dev/library/inspect.html#inspect.signature>`__
+   class instead of inspect.getargspec which will be deprecated in
+   python3.5
 
 LICENSE
 -------

@@ -445,6 +445,8 @@ TO DO
   * Handle reST formatted docstrings
   * Handle file arguments
   * Handle list arguments i.e. argparse's nargs.
+  * Python3 version should use the [inspect.Signature][inspect_signature]
+    class instead of inspect.getargspec which will be deprecated in python3.5
 
 
 LICENSE
@@ -457,3 +459,4 @@ LICENSE
 [pypi_version]: https://badge.fury.io/py/parse_this.svg "PyPI latest version"
 [landscape_link]: https://landscape.io/github/bertrandvidal/parse_this/master "parse_this on Landscape"
 [landscape]: https://landscape.io/github/bertrandvidal/parse_this/master/landscape.png "Code health"
+[inspect_signature]: https://docs.python.org/dev/library/inspect.html#inspect.signature
