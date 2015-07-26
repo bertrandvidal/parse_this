@@ -1,7 +1,7 @@
 parse_this
 ==========
 
-[![PyPI latest version badge][pypi_version]][pypi_link] [![Code health][landscape]][landscape_link][![Build Status][travis_status]][travis_link]
+[![PyPI latest version badge][pypi_version]][pypi_link] [![Code health][landscape]][landscape_link] [![Build Status][travis_status]][travis_link]
 
 Makes it easy to parse command line arguments for any function, method or classmethod.
 
