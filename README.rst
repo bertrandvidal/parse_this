@@ -1,7 +1,7 @@
 parse\_this
 ===========
 
-|PyPI latest version badge| |Code health|
+|PyPI latest version badge| |Code health|\ |Build Status|
 
 Makes it easy to parse command line arguments for any function, method
 or classmethod.
@@ -477,3 +477,5 @@ LICENSE file for details.
    :target: https://pypi.python.org/pypi/parse_this
 .. |Code health| image:: https://landscape.io/github/bertrandvidal/parse_this/master/landscape.png
    :target: https://landscape.io/github/bertrandvidal/parse_this/master
+.. |Build Status| image:: https://travis-ci.org/bertrandvidal/parse_this.svg
+   :target: https://travis-ci.org/bertrandvidal/parse_this
