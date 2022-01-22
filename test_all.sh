@@ -8,8 +8,7 @@ function test_python_version(){
     virtualenv --prompt="(parse_this_${PY_VERSION})" --python=python"${PY_VERSION}" "${ENV_PATH}"
   fi
   source "${ENV_PATH}"/bin/activate
-  python setup.py develop
-  python setup.py nosetests
+  python -m unittest discover -p "*_test.py"
 }
 
 test_python_version "env_27" "2.7"
