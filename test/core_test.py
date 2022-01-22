@@ -245,7 +245,8 @@ class TestCore(unittest.TestCase):
             {
                 "one": "this one is a no brainer",
                 "two": "Help message for two",
-                "three": "noticed you're missing docstring for two and I'm multiline too!",
+                "three": "noticed you're missing docstring for two and "
+                + "I'm multiline too!",
             },
         )
 
@@ -259,7 +260,8 @@ class TestCore(unittest.TestCase):
             {
                 "one": "this one is a no brainer even with dashes",
                 "two": "Help message for two",
-                "three": "noticed you're missing docstring for two and I'm multiline too!",
+                "three": "noticed you're missing docstring for two and "
+                + "I'm multiline too!",
             },
         )
 
