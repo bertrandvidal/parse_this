@@ -21,7 +21,7 @@ class ParseThisError(Exception):
 class NoDefault(object):
 
     """Use to fill the list of args and default to indicate the argument doesn't
-        have a default value.
+    have a default value.
     """
 
 
@@ -57,9 +57,12 @@ def _get_args_and_defaults(args, defaults):
         defaults: tuple of default values
     """
     defaults = defaults or []
-    args_and_defaults = [(argument, default) for (argument, default)
-                         in zip_longest(args[::-1], defaults[::-1],
-                                        fillvalue=NoDefault)]
+    args_and_defaults = [
+        (argument, default)
+        for (argument, default) in zip_longest(
+            args[::-1], defaults[::-1], fillvalue=NoDefault
+        )
+    ]
     return args_and_defaults[::-1]
 
 
@@ -86,8 +89,9 @@ def _prepare_doc(func, args, delimiter_chars):
     args_help = {}
     fill_description = True
     arg_name = None
-    arg_doc_regex = re.compile("\b*(?P<arg_name>\w+)\s*%s\s*(?P<help_msg>.+)" %
-                               delimiter_chars)
+    arg_doc_regex = re.compile(
+        "\b*(?P<arg_name>\w+)\s*%s\s*(?P<help_msg>.+)" % delimiter_chars
+    )
     for line in func.__doc__.splitlines():
         line = line.strip()
         if line and fill_description:
@@ -111,8 +115,7 @@ def _prepare_doc(func, args, delimiter_chars):
             if not fill_description and args_help:
                 break
             fill_description = False
-    return _get_default_help_message(func, args, " ".join(description),
-                                     args_help)
+    return _get_default_help_message(func, args, " ".join(description), args_help)
 
 
 def _get_parseable_methods(cls):
@@ -166,8 +169,7 @@ def _get_default_help_message(func, args, description=None, args_help=None):
         description = "Argument parsing for %s" % func.__name__
     args_help = args_help or {}
     # If an argument is missing a help message we create a simple one
-    for argument in [arg_name for arg_name in args
-                     if arg_name not in args_help]:
+    for argument in [arg_name for arg_name in args if arg_name not in args_help]:
         args_help[argument] = "Help message for %s" % argument
     return (description, args_help)
 
@@ -185,7 +187,8 @@ def _get_arg_parser(func, types, args_and_defaults, delimiter_chars):
     """
     _LOG.debug("Creating ArgumentParser for '%s'", func.__name__)
     (description, arg_help) = _prepare_doc(
-        func, [x for (x, _) in args_and_defaults], delimiter_chars)
+        func, [x for (x, _) in args_and_defaults], delimiter_chars
+    )
     parser = argparse.ArgumentParser(description=description)
     for ((arg, default), arg_type) in zip_longest(args_and_defaults, types):
         help_msg = arg_help[arg]
@@ -193,31 +196,35 @@ def _get_arg_parser(func, types, args_and_defaults, delimiter_chars):
             arg_type = arg_type or identity_type
             if arg_type == bool:
                 _LOG.debug("Adding optional flag %s.%s", func.__name__, arg)
-                parser.add_argument("--%s" % arg, default=True, required=False,
-                                    action="store_false",
-                                    help="%s. Defaults to True if not specified"
-                                    % help_msg)
+                parser.add_argument(
+                    "--%s" % arg,
+                    default=True,
+                    required=False,
+                    action="store_false",
+                    help="%s. Defaults to True if not specified" % help_msg,
+                )
             else:
-                _LOG.debug("Adding positional argument %s.%s", func.__name__,
-                           arg)
+                _LOG.debug("Adding positional argument %s.%s", func.__name__, arg)
                 parser.add_argument(arg, help=help_msg, type=arg_type)
         else:
             if default is None and arg_type is None:
-                raise ParseThisError("To use default value of 'None' you need "
-                                     "to specify the type of the argument '{}' "
-                                     "for the method '{}'"
-                                     .format(arg, func.__name__))
+                raise ParseThisError(
+                    "To use default value of 'None' you need "
+                    "to specify the type of the argument '{}' "
+                    "for the method '{}'".format(arg, func.__name__)
+                )
             arg_type = arg_type or type(default)
             if arg_type == bool:
                 action = "store_false" if default else "store_true"
                 _LOG.debug("Adding optional flag %s.%s", func.__name__, arg)
-                parser.add_argument("--%s" % arg, help=help_msg,
-                                    default=default, action=action)
+                parser.add_argument(
+                    "--%s" % arg, help=help_msg, default=default, action=action
+                )
             else:
-                _LOG.debug(
-                    "Adding optional argument %s.%s", func.__name__, arg)
-                parser.add_argument("--%s" % arg, help=help_msg,
-                                    default=default, type=arg_type)
+                _LOG.debug("Adding optional argument %s.%s", func.__name__, arg)
+                parser.add_argument(
+                    "--%s" % arg, help=help_msg, default=default, type=arg_type
+                )
     return parser
 
 
@@ -250,11 +257,13 @@ def _check_types(func_name, types, func_args, defaults):
     """
     defaults = defaults or []
     if len(types) > len(func_args):
-        raise ParseThisError("To many types provided for conversion for '{}'."
-                             .format(func_name))
+        raise ParseThisError(
+            "To many types provided for conversion for '{}'.".format(func_name)
+        )
     if len(types) < len(func_args) - len(defaults):
-        raise ParseThisError("Not enough types provided for conversion for '{}'"
-                             .format(func_name))
+        raise ParseThisError(
+            "Not enough types provided for conversion for '{}'".format(func_name)
+        )
     if types and types[0] in [Self, Class]:
         types = types[1:]
         func_args = func_args[1:]
@@ -285,9 +294,13 @@ def _get_parser_call_method(func):
         # Defer this check in the method call so that __init__ can be
         # decorated in class decorated with parse_class
         if func_name == "__init__":
-            raise ParseThisError(("To use 'create_parser' on the"
-                                  "'__init__' you need to decorate the "
-                                  "class with '@parse_class'"))
+            raise ParseThisError(
+                (
+                    "To use 'create_parser' on the"
+                    "'__init__' you need to decorate the "
+                    "class with '@parse_class'"
+                )
+            )
         namespace = parser.parse_args(_get_args_to_parse(args, sys.argv))
         if instance is None:
             # If instance is None we are probably decorating a function not a
@@ -307,8 +320,11 @@ def _get_args_name_from_parser(parser):
     """
     # Retrieve the 'action' destination of the method parser i.e. its
     # argument name. The HelpAction is ignored.
-    return [action.dest for action in parser._actions if not
-            isinstance(action, argparse._HelpAction)]
+    return [
+        action.dest
+        for action in parser._actions
+        if not isinstance(action, argparse._HelpAction)
+    ]
 
 
 def _call(callable_obj, arg_names, namespace):
@@ -320,8 +336,7 @@ def _call(callable_obj, arg_names, namespace):
         arg_names: name of the function arguments
         namespace: the namespace object parsed from the command line
     """
-    arguments = {arg_name: getattr(namespace, arg_name)
-                 for arg_name in arg_names}
+    arguments = {arg_name: getattr(namespace, arg_name) for arg_name in arg_names}
     return callable_obj(**arguments)
 
 
@@ -357,8 +372,11 @@ class FullHelpAction(argparse._HelpAction):
         # Print help for the parser this class is linked to
         parser.print_help()
         # Retrieve sub-parsers of the given parser
-        subparsers_actions = [action for action in parser._actions
-                              if isinstance(action, argparse._SubParsersAction)]
+        subparsers_actions = [
+            action
+            for action in parser._actions
+            if isinstance(action, argparse._SubParsersAction)
+        ]
         for subparser_action in subparsers_actions:
             # Get all subparsers and print their help
             for choice, subparser in subparser_action.choices.items():

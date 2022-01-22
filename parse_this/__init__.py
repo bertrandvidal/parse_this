@@ -4,14 +4,29 @@ import argparse
 import logging
 import sys
 
-from parse_this.core import (_check_types, _get_args_and_defaults,
-                             _get_arg_parser, _get_args_to_parse, _call,
-                             ParseThisError, Self, Class, FullHelpAction,
-                             _call_method_from_namespace,
-                             _get_parser_call_method, _get_parseable_methods)
+from parse_this.core import (
+    _check_types,
+    _get_args_and_defaults,
+    _get_arg_parser,
+    _get_args_to_parse,
+    _call,
+    ParseThisError,
+    Self,
+    Class,
+    FullHelpAction,
+    _call_method_from_namespace,
+    _get_parser_call_method,
+    _get_parseable_methods,
+)
 
-__all__ = ["Self", "Class", "ParseThisError", "parse_this", "create_parser",
-           "parse_class"]
+__all__ = [
+    "Self",
+    "Class",
+    "ParseThisError",
+    "parse_this",
+    "create_parser",
+    "parse_class",
+]
 
 _LOG = logging.getLogger(__name__)
 
@@ -69,14 +84,19 @@ class create_parser(object):
             func: the function for which we want to create an argument parser
         """
         if not hasattr(func, "parser"):
-            _LOG.debug("Creating parser for '%s'%s", func.__name__,
-                       "/%s" % self._name if self._name else "")
+            _LOG.debug(
+                "Creating parser for '%s'%s",
+                func.__name__,
+                "/%s" % self._name if self._name else "",
+            )
             (func_args, _, _, defaults) = getargspec(func)
-            self._types, func_args = _check_types(func.__name__, self._types,
-                                                  func_args, defaults)
+            self._types, func_args = _check_types(
+                func.__name__, self._types, func_args, defaults
+            )
             args_and_defaults = _get_args_and_defaults(func_args, defaults)
-            parser = _get_arg_parser(func, self._types, args_and_defaults,
-                                     self._delimiter_chars)
+            parser = _get_arg_parser(
+                func, self._types, args_and_defaults, self._delimiter_chars
+            )
             parser.get_name = lambda: self._name
             func.parser = parser
             func.parser.call = _get_parser_call_method(func)
@@ -84,6 +104,7 @@ class create_parser(object):
         @wraps(func)
         def decorated(*args, **kwargs):
             return func(*args, **kwargs)
+
         return decorated
 
 
@@ -130,8 +151,9 @@ class parse_class(object):
             pointing to the method real name
         """
         description = "Accessible methods of {}".format(class_name)
-        sub_parsers = top_level_parser.add_subparsers(description=description,
-                                                      dest="method")
+        sub_parsers = top_level_parser.add_subparsers(
+            description=description, dest="method"
+        )
         # Holds the mapping between the name registered for the parser
         # and the method real name. It is useful in the 'inner_call'
         # method retrieve the real method
@@ -151,9 +173,12 @@ class parse_class(object):
                 parser_name = parser_name.strip("_")
             parser_name = parser_name.replace("_", "-")
             parser_to_method[parser_name] = method_name
-            sub_parsers.add_parser(parser_name, parents=[parser],
-                                   add_help=False,
-                                   description=parser.description)
+            sub_parsers.add_parser(
+                parser_name,
+                parents=[parser],
+                add_help=False,
+                description=parser.description,
+            )
         return parser_to_method
 
     def _set_class_parser(self, init_parser, methods_to_parse, cls):
@@ -170,15 +195,18 @@ class parse_class(object):
         """
         top_level_parents = [init_parser] if init_parser else []
         description = self._description or cls.__doc__
-        top_level_parser = argparse.ArgumentParser(description=description,
-                                                   parents=top_level_parents,
-                                                   add_help=False,
-                                                   conflict_handler="resolve")
-        top_level_parser.add_argument("-h", "--help", action=FullHelpAction,
-                                      help="Display this help message")
-        parser_to_method = self._add_sub_parsers(top_level_parser,
-                                                 methods_to_parse,
-                                                 cls.__name__)
+        top_level_parser = argparse.ArgumentParser(
+            description=description,
+            parents=top_level_parents,
+            add_help=False,
+            conflict_handler="resolve",
+        )
+        top_level_parser.add_argument(
+            "-h", "--help", action=FullHelpAction, help="Display this help message"
+        )
+        parser_to_method = self._add_sub_parsers(
+            top_level_parser, methods_to_parse, cls.__name__
+        )
         # Update the dict with the __init__ method so we can instantiate
         # the decorated class
         if init_parser:
@@ -194,6 +222,7 @@ class parse_class(object):
             parser_to_method: mapping of the parser registered name
             to the method it is linked to
         """
+
         def inner_call(args=None, instance=None):
             """Allows to call the method invoked from the command line or
             provided argument.
@@ -211,15 +240,18 @@ class parse_class(object):
                 # If the __init__ method is not part of the method to
                 # decorate we cannot instantiate the class
                 if "__init__" not in parser_to_method:
-                    raise ParseThisError(("'__init__' method is not decorated. "
-                                          "Please provide an instance to "
-                                          "'{}.parser.call' or decorate the "
-                                          "'__init___' method with "
-                                          "'create_parser'"
-                                          .format(self._cls.__name__)))
+                    raise ParseThisError(
+                        (
+                            "'__init__' method is not decorated. "
+                            "Please provide an instance to "
+                            "'{}.parser.call' or decorate the "
+                            "'__init___' method with "
+                            "'create_parser'".format(self._cls.__name__)
+                        )
+                    )
                 # We instantiate the class from the command line arguments
-                instance = _call_method_from_namespace(self._cls, "__init__",
-                                                       namespace)
+                instance = _call_method_from_namespace(self._cls, "__init__", namespace)
             method_name = parser_to_method[namespace.method]
             return _call_method_from_namespace(instance, method_name, namespace)
+
         return inner_call
