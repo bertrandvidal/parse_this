@@ -439,8 +439,8 @@ CAVEATS
 TO DO
 -----
 
-  * Code should be moved out of the parse_this/__init__.py file and into a
-    specific file. The __init__ should only be used for imports.
+  * Code should be moved out of the `parse_this/__init__.py` file and into a
+    specific file. The `__init__` should only be used for imports.
   * Handle reST formatted docstrings
   * Handle file arguments
   * Handle list arguments i.e. argparse's nargs.
