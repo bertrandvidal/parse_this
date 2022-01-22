@@ -116,11 +116,11 @@ If you feel like you may need more customization and details, please read on!
 Both `parse_this` and `create_parser` need a list of types to which arguments
 will be converted to. Any Python standard type can be used, two special values
 are used for the `self` and `cls` respectively `Self` and `Class`.
-There is no need to provide a type for keyword agurments since it is infered
+There is no need to provide a type for keyword arguments since it is inferred
 from the default value of the argument. If your method signature contains
 `arg_with_default=12` `parse_this` expect an `int` where `arg_with_default` is.
 
-If this is the containt of `test.py`:
+If this is the content of `test.py`:
 
 ```python
 from __future__ import print_function
@@ -254,7 +254,7 @@ def function(ham, spam=None):
 ```
 
 An other common practice is to use `bool`s as flags or switches. All arguments
-of type `bool`, either typed direclty or inferred from the default value, will
+of type `bool`, either typed directly or inferred from the default value, will
 become optional arguments of the command line. A `bool` argument without default
 value will default to `True` as in the following example:
 
