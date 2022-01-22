@@ -2,7 +2,7 @@
 import os
 from setuptools import setup
 
-README_PATH = os.path.join(os.path.dirname(__file__), 'README.rst')
+README_PATH = os.path.join(os.path.dirname(__file__), 'README.md')
 with open(README_PATH, "r") as README_FILE:
     README = README_FILE.read()
 
