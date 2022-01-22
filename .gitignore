@@ -39,4 +39,4 @@ test_results.xml
 .pydevproject
 
 # Virtualenv directory
-env/
+env*/
