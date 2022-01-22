@@ -40,3 +40,4 @@ test_results.xml
 
 # Virtualenv directory
 env*/
+parse_this.iml
