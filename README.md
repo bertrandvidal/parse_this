@@ -419,7 +419,7 @@ RUNNING TESTS
 To check that everything is running fine you can run the following command:
 
 ```bash
-python -m pip install --upgrade pip && python -m pip install pytest && pytest
+python -m pip install --upgrade pip && python -m pip install -r requirements.txt && pytest
 ```
 
 CAVEATS
