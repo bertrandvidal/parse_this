@@ -13,4 +13,4 @@ function test_python_version(){
 }
 
 test_python_version "env_27" "2.7"
-test_python_version "env_34" "3.4"
+test_python_version "env_39" "3.9"

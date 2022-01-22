@@ -23,7 +23,7 @@ setup(
         "Intended Audience :: Information Technology",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 2.7",
-        "Programming Language :: Python :: 3.4",
+        "Programming Language :: Python :: 3.9",
     ],
     setup_requires=[
         "nose",
