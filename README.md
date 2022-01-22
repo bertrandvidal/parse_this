@@ -1,7 +1,7 @@
 parse_this
 ==========
 
-[![PyPI latest version badge][pypi_version]][pypi_link] [![Code health][landscape]][landscape_link] [![Build Status][travis_status]][travis_link]
+[![PyPI latest version badge][pypi_version]][pypi_link] [![Build Status][travis_status]][travis_link]
 
 Makes it easy to parse command line arguments for any function, method or classmethod.
 
@@ -457,8 +457,6 @@ LICENSE
 
 [pypi_link]: https://pypi.python.org/pypi/parse_this "parse_this on PyPI"
 [pypi_version]: https://badge.fury.io/py/parse_this.svg "PyPI latest version"
-[landscape_link]: https://landscape.io/github/bertrandvidal/parse_this/master "parse_this on Landscape"
-[landscape]: https://landscape.io/github/bertrandvidal/parse_this/master/landscape.png "Code health"
 [inspect_signature]: https://docs.python.org/dev/library/inspect.html#inspect.signature
 [travis_status]: https://travis-ci.org/bertrandvidal/parse_this.svg
 [travis_link]: https://travis-ci.org/bertrandvidal/parse_this
