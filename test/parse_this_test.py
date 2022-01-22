@@ -21,13 +21,13 @@ def parse_me(one, two, three=12):
 
 
 class TestParseThis(unittest.TestCase):
-
     def test_parse_this_return_value(self):
-        self.assertEqual(parse_this(parse_me, [str, int], "yes 2".split()),
-                         ("yesyes", 144))
-        self.assertEqual(parse_this(parse_me, [str, int],
-                                    "no 3 --three 2".split()),
-                         ("nonono", 4))
+        self.assertEqual(
+            parse_this(parse_me, [str, int], "yes 2".split()), ("yesyes", 144)
+        )
+        self.assertEqual(
+            parse_this(parse_me, [str, int], "no 3 --three 2".split()), ("nonono", 4)
+        )
 
 
 @create_parser(str, int)
@@ -43,7 +43,6 @@ def i_am_parseable(one, two, three=12):
 
 
 class Dummy(object):
-
     def __init__(self, a):
         self._a = a
 
@@ -67,19 +66,16 @@ class Dummy(object):
 
 
 class NeedParseClassDecorator(object):
-
     @create_parser(Self, int)
     def __init__(self, a):
         self._a = a
 
 
 class TestCreateParser(unittest.TestCase):
-
     def test_create_parser_on_function(self):
         parser = i_am_parseable.parser
         self.assertEqual(parser.description, "I too want to be parseable.")
-        self.assertEqual(parser.call(args="yes 2 --three 3".split()),
-                         ("yesyes", 9))
+        self.assertEqual(parser.call(args="yes 2 --three 3".split()), ("yesyes", 9))
 
     def test_create_parser_on_method(self):
         parser = Dummy.multiply_all.parser
@@ -153,7 +149,6 @@ class ShowMyDocstring(object):
 
 @parse_class()
 class NeedInitDecorator(object):
-
     def __init__(self, val):
         self._val = val
 
@@ -163,11 +158,11 @@ class NeedInitDecorator(object):
 
 
 class TestParseClass(unittest.TestCase):
-
     def test_parse_class_description(self):
         self.assertEqual(NeedParsing.parser.description, "Hello World")
-        self.assertEqual(ShowMyDocstring.parser.description,
-                         "This should be the parser description")
+        self.assertEqual(
+            ShowMyDocstring.parser.description, "This should be the parser description"
+        )
 
     def test_parse_class_add_parser(self):
         self.assertTrue(hasattr(NeedParsing, "parser"))
@@ -177,8 +172,9 @@ class TestParseClass(unittest.TestCase):
     def test_parse_class_subparsers(self):
         parser = NeedParsing.parser
         self.assertEqual(parser.call("12 multiply-self-arg 2".split()), 24)
-        self.assertEqual(parser.call("12 could-you-parse-me yes 2 --three 4".split()),
-                         ("yesyes", 16))
+        self.assertEqual(
+            parser.call("12 could-you-parse-me yes 2 --three 4".split()), ("yesyes", 16)
+        )
 
     def test_parse_class_expose_private_method(self):
         parser = NeedParsing.parser
@@ -198,8 +194,9 @@ class TestParseClass(unittest.TestCase):
     def test_parse_class_method_is_still_parseable(self):
         need_parsing = NeedParsing(12)
         parser = need_parsing.could_you_parse_me.parser
-        self.assertEqual(parser.call(need_parsing, "yes 2 --three 3".split()),
-                         ("yesyes", 9))
+        self.assertEqual(
+            parser.call(need_parsing, "yes 2 --three 3".split()), ("yesyes", 9)
+        )
 
     def test_parse_class_init_need_decoration(self):
         with self.assertRaises(ParseThisError):
@@ -207,15 +204,18 @@ class TestParseClass(unittest.TestCase):
 
     def test_parse_class_need_init_decorator_with_instance(self):
         instance = NeedInitDecorator(2)
-        self.assertEqual(NeedInitDecorator.parser.call("do-stuff 12".split(),
-                                                       instance), 12)
-        self.assertEqual(NeedInitDecorator.parser.call("do-stuff 12 --div 3".split(),
-                                                       instance), 8)
+        self.assertEqual(
+            NeedInitDecorator.parser.call("do-stuff 12".split(), instance), 12
+        )
+        self.assertEqual(
+            NeedInitDecorator.parser.call("do-stuff 12 --div 3".split(), instance), 8
+        )
 
     def test_parse_class_classmethod_are_not_sub_command(self):
         with captured_output():
             with self.assertRaises(SystemExit):
                 NeedParsing.parser.call("12 parse-me-if-you-can one 2")
+
 
 if __name__ == "__main__":
     unittest.main()
