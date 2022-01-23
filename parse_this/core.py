@@ -90,7 +90,7 @@ def _prepare_doc(func, args, delimiter_chars):
     fill_description = True
     arg_name = None
     arg_doc_regex = re.compile(
-        "\b*(?P<arg_name>\w+)\s*%s\s*(?P<help_msg>.+)" % delimiter_chars
+        "\b*(?P<arg_name>\w+)\s*%s\s*(?P<help_msg>.+)" % delimiter_chars  # noqa: W605
     )
     for line in func.__doc__.splitlines():
         line = line.strip()
