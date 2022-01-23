@@ -8,7 +8,7 @@ with open(README_PATH, "r") as README_FILE:
 
 setup(
     name="parse_this",
-    version="1.0.3",
+    version="2.0.0",
     description=(
         "Makes it easy to create a command line interface for any "
         "function, method or classmethod.."
@@ -24,6 +24,9 @@ setup(
         "Intended Audience :: Developers",
         "Intended Audience :: Information Technology",
         "Operating System :: OS Independent",
+        "Programming Language :: Python :: 3 :: Only"
+        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
     ],
 )
