@@ -1,6 +1,5 @@
-from contextlib import contextmanager
 import sys
-
+from contextlib import contextmanager
 from io import StringIO
 
 
