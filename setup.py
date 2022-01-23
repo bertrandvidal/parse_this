@@ -2,15 +2,17 @@
 import os
 from setuptools import setup
 
-README_PATH = os.path.join(os.path.dirname(__file__), 'README.md')
+README_PATH = os.path.join(os.path.dirname(__file__), "README.md")
 with open(README_PATH, "r") as README_FILE:
     README = README_FILE.read()
 
 setup(
     name="parse_this",
     version="1.0.3",
-    description=("Makes it easy to create a command line interface for any "
-                 "function, method or classmethod.."),
+    description=(
+        "Makes it easy to create a command line interface for any "
+        "function, method or classmethod.."
+    ),
     long_description=README,
     packages=["parse_this", "test"],
     author="Bertrand Vidal",
