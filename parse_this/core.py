@@ -1,14 +1,9 @@
-from __future__ import print_function
 import argparse
 import logging
 import re
 import sys
 
-
-try:
-    from itertools import izip_longest as zip_longest
-except ImportError:
-    from itertools import zip_longest
+from itertools import zip_longest
 
 _LOG = logging.getLogger(__name__)
 

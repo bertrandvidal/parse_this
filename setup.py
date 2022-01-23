@@ -22,7 +22,6 @@ setup(
         "Intended Audience :: Developers",
         "Intended Audience :: Information Technology",
         "Operating System :: OS Independent",
-        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3.9",
     ],
 )
