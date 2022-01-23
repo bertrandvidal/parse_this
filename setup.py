@@ -14,6 +14,7 @@ setup(
         "function, method or classmethod.."
     ),
     long_description=README,
+    long_description_content_type="text/markdown",
     packages=["parse_this", "test"],
     author="Bertrand Vidal",
     author_email="vidal.bertrand@gmail.com",
