@@ -1,4 +1,4 @@
-name: parse_this tests
+name: parse_this pre-submit queues
 
 on:
   push:
