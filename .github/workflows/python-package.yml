@@ -1,8 +1,6 @@
 name: parse_this pre-submit queues
 
 on:
-  push:
-    branches: [ master ]
   pull_request:
     branches: [ master ]
 
