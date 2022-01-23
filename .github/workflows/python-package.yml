@@ -25,6 +25,11 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: black formatter
+      uses: psf/black@stable
+      with:
+        options: "--check --verbose"
+        src: "./parse_this ./test"
     - name: lint with flake8
       run: |
         flake8 parse_this test --count --show-source --statistics
