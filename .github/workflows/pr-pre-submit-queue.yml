@@ -34,7 +34,7 @@ jobs:
         flake8 parse_this test --count --show-source --statistics
     - name: test with pytest
       run: |
-        pytest --cache-clear --cov=parse_this --no-cov-on-fail test/ > pytest-coverage.txt
+        pytest --cache-clear --cov=parse_this --cov-fail-under=95 --no-cov-on-fail test/ > pytest-coverage.txt
     - name: add coverage as PR comment
       uses: coroo/pytest-coverage-commentator@v1.0.2
       with:
