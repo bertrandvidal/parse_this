@@ -2,7 +2,8 @@ name: parse_this pre-submit queues
 
 on:
   pull_request:
-    branches: [ master ]
+    branches:
+      - "*"
 
 jobs:
   build:
