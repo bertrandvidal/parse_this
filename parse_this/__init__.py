@@ -1,5 +1,5 @@
 from functools import wraps
-from inspect import getargspec
+from inspect import getfullargspec
 import argparse
 import logging
 import sys
@@ -44,7 +44,7 @@ def parse_this(func, types, args=None, delimiter_chars=":"):
         help message in the docstring. Defaults to ':'
     """
     _LOG.debug("Creating parser for %s", func.__name__)
-    (func_args, dummy_1, dummy_2, defaults) = getargspec(func)
+    (func_args, _, _, defaults, _, _, _) = getfullargspec(func)
     types, func_args = _check_types(func.__name__, types, func_args, defaults)
     args_and_defaults = _get_args_and_defaults(func_args, defaults)
     parser = _get_arg_parser(func, types, args_and_defaults, delimiter_chars)
@@ -89,7 +89,7 @@ class create_parser(object):
                 func.__name__,
                 "/%s" % self._name if self._name else "",
             )
-            (func_args, _, _, defaults) = getargspec(func)
+            (func_args, _, _, defaults, _, _, _) = getfullargspec(func)
             self._types, func_args = _check_types(
                 func.__name__, self._types, func_args, defaults
             )
