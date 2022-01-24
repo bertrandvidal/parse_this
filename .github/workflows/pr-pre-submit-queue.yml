@@ -2,7 +2,8 @@ name: parse_this pre-submit queues
 
 on:
   pull_request:
-    branches: [ master ]
+    branches:
+      - "*"
 
 jobs:
   build:
@@ -33,4 +34,8 @@ jobs:
         flake8 parse_this test --count --show-source --statistics
     - name: test with pytest
       run: |
-        pytest
+        pytest --cache-clear --cov=parse_this --no-cov-on-fail test/ > pytest-coverage.txt
+    - name: add coverage as PR comment
+      uses: coroo/pytest-coverage-commentator@v1.0.2
+      with:
+        pytest-coverage: pytest-coverage.txt
