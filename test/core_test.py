@@ -18,6 +18,7 @@ from parse_this.core import (
     _get_parser_call_method,
     _call,
     _call_method_from_namespace,
+    identity_type,
 )
 
 
@@ -156,6 +157,9 @@ def has_bool_arguments(a):
 
 
 class TestCore(unittest.TestCase):
+    def test_identity_type(self):
+        self.assertEqual(None, identity_type(None))
+
     def test_get_args_and_defaults_fill_no_default(self):
         args_and_defaults = _get_args_and_defaults(
             ["first", "second", "third"], ("default_value",)
