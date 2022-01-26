@@ -114,7 +114,7 @@ If you feel like you may need more customization and details, please read on!
 
 Both `parse_this` and `create_parser` need a list of types to which arguments
 will be converted to. Any Python standard type can be used, two special values
-are used for the `self` and `cls` respectively `Self` and `Class`.
+are used for the `self` and `cls`: `Self` and `Class` respectively.
 There is no need to provide a type for keyword arguments since it is inferred
 from the default value of the argument. If your method signature contains
 `arg_with_default=12` `parse_this` expect an `int` where `arg_with_default` is.
