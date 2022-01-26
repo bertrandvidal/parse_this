@@ -186,16 +186,15 @@ In order to get a help message generated automatically from the method docstring
 it needs to be in the specific format described below:
 
 ```python
-...
-    @create_parser(Self, int, int, params_delim=<delimiter_chars>)
-    def method(self, spam, ham):
-      """<description>
-        <blank_line>
-        <arg_name><delimiter_chars><arg_help>
-        <arg_name><delimiter_chars><arg_help>
-      """
-      pass
-...
+from parse_this import Self, create_parser
+@create_parser(Self, int, int, params_delim="--")
+def method(self, spam, ham):
+  """<description>
+    <blank_line>
+    <arg_name><params_delim><arg_help>
+    <arg_name><params_delim><arg_help>
+  """
+  pass
 ```
 
 * description: is a multiline description of the method used for the command line
@@ -207,7 +206,7 @@ it needs to be in the specific format described below:
   * arg_help: is everything behind the delimiter_chars until the next argument,
     **a blank line** or the end of the docstring.
 
-The `delimiter_chars` can be passed to both `parse_this` and `create_parser` as
+The `params_delim` can be passed to both `parse_this` and `create_parser` as
 the keywords argument `params_delim`. It defaults to `:` since this is the
 convention I most often use.
 
