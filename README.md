@@ -458,7 +458,7 @@ CONTRIBUTING AND DEV
 --------------------
 
 ```sh
-virtualenv --py python3 --prompt="parse_this_39" venv
+virtualenv --py python3 --prompt="(parse_this_39)" venv
 source venv/bin/activate
 pip install -r requirements.txt
 pre-commit install
