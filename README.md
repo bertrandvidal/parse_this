@@ -24,7 +24,6 @@ entire class. For that you will need to use the `parse_class` class decorator.
 
 ```python
 # script.py
-from __future__ import print_function
 from parse_this import Self, create_parser, parse_class
 
 
@@ -123,7 +122,6 @@ from the default value of the argument. If your method signature contains
 If this is the content of `test.py`:
 
 ```python
-from __future__ import print_function
 from parse_this import create_parser, Self
 
 
@@ -303,7 +301,6 @@ function. A `parser` attribute will be added to the method and can be used to
 parse the command line argument.
 
 ```python
-from __future__ import print_function
 from parse_this import create_parser
 
 
@@ -341,7 +338,6 @@ Function
 As a function `parse_this` will handle the command line arguments directly.
 
 ```python
-from __future__ import print_function
 from parse_this import parse_this
 
 
