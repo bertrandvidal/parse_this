@@ -24,6 +24,13 @@ jobs:
             pip install build
         - name: build package
           run: python -m build
+        - name: tag master
+        - run: |
+            : # extract version from setup.py
+            VERSION=$(awk -F '=' '/version=[0-9.]*/ { print substr($2, 2, length($2) - 3) }' setup.py)
+            : # tag the commit on top of which the PR is merged
+            git tag v${VERSION} ${{ github.event.pull_request.base.ref }}
+            git push origin v${VERSION}
         - name: publish package
           uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
           with:
