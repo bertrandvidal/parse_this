@@ -465,6 +465,6 @@ pre-commit install
 pytest
 ```
 
-[pypi_link]: https://pypi.python.org/pypi/parse_this "parse_this on PyPI"
+[pypi_link]: https://pypi.org/project/parse-this/ "parse_this on PyPI"
 [pypi_version]: https://badge.fury.io/py/parse_this.svg "PyPI latest version"
 [inspect_signature]: https://docs.python.org/dev/library/inspect.html#inspect.signature
