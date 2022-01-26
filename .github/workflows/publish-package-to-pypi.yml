@@ -25,7 +25,7 @@ jobs:
         - name: build package
           run: python -m build
         - name: tag master
-        - run: |
+          run: |
             : # extract version from setup.py
             VERSION=$(awk -F '=' '/version=[0-9.]*/ { print substr($2, 2, length($2) - 3) }' setup.py)
             : # tag the commit on top of which the PR is merged
