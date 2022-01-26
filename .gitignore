@@ -42,3 +42,4 @@ test_results.xml
 env*/
 parse_this.iml
 pytest-coverage.txt
+venv/
