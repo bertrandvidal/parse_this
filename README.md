@@ -164,9 +164,9 @@ optional arguments:
   --an_other_int AN_OTHER_INT  guess what? I got a default value
 ```
 
-The method `parse_me_if_you_can` expect an `int` of the name `an_int`, a `str`
-of the name `a_string` and other `int` with the name `an_other_int` and a default
-value of 12. So does the parser !!! As displayed by the `--help` command.
+The method `parse_me_if_you_can` expect an `int` with the name `an_int`, a `str`
+with the name `a_string` and other `int` with the name `an_other_int` and a default
+value of 12. So does the parser as displayed by the `--help` command.
 
 Note: `create_parser` cannot decorate the `__init__` method of a class unless
 the class is itself decorated with `parse_class`. A `ParseThisError` will be
