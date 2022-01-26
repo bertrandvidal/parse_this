@@ -119,7 +119,7 @@ There is no need to provide a type for keyword arguments since it is inferred
 from the default value of the argument. If your method signature contains
 `arg_with_default=12` `parse_this` expect an `int` where `arg_with_default` is.
 
-If this is the content of `test.py`:
+If this is the content of `parse_me.py`:
 
 ```python
 from parse_this import create_parser, Self
@@ -148,10 +148,10 @@ if __name__ == "__main__":
     print(INeedParsing.parse_me_if_you_can.parser.call(need_parsing))
 ```
 
-The following would be the output of the command line `python test.py --help`:
+The following would be the output of the command line `python parse_me.py --help`:
 
 ```bash
-usage: test.py [-h] [--an_other_int AN_OTHER_INT] an_int a_string
+usage: parse_me.py [-h] [--an_other_int AN_OTHER_INT] an_int a_string
 
 I dare you to parse me !!!
 
@@ -173,7 +173,7 @@ the class is itself decorated with `parse_class`. A `ParseThisError` will be
 raised if you attempt to use the `call` method of such a parser.
 
 
-The following would be the output of the command line `python test.py 2 yes --default 4`:
+The following would be the output of the command line `python parse_me.py 2 yes --default 4`:
 
 ```bash
 ('yesyes', 8)
