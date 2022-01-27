@@ -110,7 +110,8 @@ If you feel like you may need more customization and details, please read on!
   will be displayed making easier to find what you are looking for
 
 
-###Arguments and types
+Arguments and types
+-------------------
 
 Both `parse_this` and `create_parser` need a list of types to which arguments
 will be converted to. Any Python standard type can be used, two special values
@@ -180,7 +181,8 @@ The following would be the output of the command line `python parse_me.py 2 yes 
 ```
 
 
-###Help message
+Help message
+------------
 
 In order to get a help message generated automatically from the method docstring
 it needs to be in the specific format described below:
@@ -214,40 +216,39 @@ If no docstring is specified a generic - not so useful - help message will
 be generated for the command line and arguments.
 
 
-###Using None as a default value and bool as flags
+Using None as a default value and bool as flags
+-----------------------------------------------
 
 Using `None` as a default value is common practice in Python but for `parse_this`
 and `create_parser` to work properly the type of the argument which defaults
 to `None` needs to be specified. Otherwise a `ParseThisError` will be raised.
 
 ```python
-...
+from parse_this import create_parser
 
-@create_parser(str):
-def function(ham, spam=None):
+@create_parser(str)
+def parrot(ham, spam=None):
   if spam is not None:
     return ham * spam
   return ham
 
-# Will raise ParseThisError: To use default value of 'None' you need to specify the type of the argument 'spam' for the method 'function'
-
-...
+# Will raise ParseThisError: To use default value of 'None' you need to specify
+# the type of the argument 'spam' for the method 'parrot'
 ```
 
-But specifying the type of `spam` will allow `create_parser` to work properly
+Specifying the type of `spam` will allow `create_parser` to work properly
 
 ```python
-...
+from parse_this import create_parser
 
 @create_parser(str, int)
-def function(ham, spam=None):
+def parrot(ham, spam=None):
   if spam is not None:
     return ham * spam
   return ham
 
 # Calling function.parser.call(args="yes".split()) -> 'yes'
 # Calling function.parser.call(args="yes --spam 3".split()) -> 'yesyesyes'
-...
 ```
 
 An other common practice is to use `bool`s as flags or switches. All arguments
@@ -256,16 +257,16 @@ become optional arguments of the command line. A `bool` argument without default
 value will default to `True` as in the following example:
 
 ```python
-...
+from parse_this import create_parser
+
 @create_parser(str, bool)
-def function(ham, spam):
+def parrot(ham, spam):
   if spam:
     return ham, spam
   return ham
 
 # Calling function.parser.call(args="yes".split()) -> 'yes', True
 # Calling function.parser.call(args="yes --spam".split()) -> 'yes'
-...
 ```
 
 Adding `--spam` to the arguments will act as a flag/switch setting `spam` to
@@ -273,19 +274,17 @@ Adding `--spam` to the arguments will act as a flag/switch setting `spam` to
 if `--spam` is not among the arguments to parse.
 
 
-Arguments with a boolean default value will act in the same way i.e. acting as
-flag to change the default value:
-
+Arguments with a boolean default value will act as a flag to change the default value:
 ```python
-...
+from parse_this import create_parser
+
 @create_parser(str)
-def function(ham, spam=False):
+def parrot(ham, spam=False):
   if spam:
     return ham, spam
   return ham
 # Calling function.parser.call(args="yes".split()) -> 'yes'
 # Calling function.parser.call(args="yes --spam".split()) -> 'yes', True
-...
 ```
 
 Here everything works as intended and the default value for `spam` is `False`
@@ -301,7 +300,6 @@ parse the command line argument.
 
 ```python
 from parse_this import create_parser
-
 
 @create_parser(str, int)
 def concatenate_str(one, two=2):
@@ -324,7 +322,7 @@ Calling this script from the command line as follow:
 python script.py yes --two 3
 ```
 
-will return `'yesyesyes'` as expected and all the parsing have been done for you.
+will return `'yesyesyes'` as expected and all the parsing has been done for you.
 
 Note that the function can still be called as any other function from any python
 file. Also it is **not** possible to stack `create_parser` with any decorator that
@@ -364,9 +362,10 @@ Classmethods
 In a similar fashion you can parse line arguments for classmethods:
 
 ```python
+from parse_this import create_parser, Class
 
 class MyClass(object):
-...
+
     @classmethod
     @create_parser(Class, int, str, params_delim="--")
     def parse_me_if_you_can(cls, an_int, a_string, default=12):
@@ -378,10 +377,8 @@ class MyClass(object):
             default -- guess what I got a default value
         """
         return a_string * an_int, default * default
-...
 
 MyClass.parse_me_if_you_can.parser.call(MyClass)
-
 ```
 The output will be the same as using `create_parser` on a regular method.
 The only difference is the use of the special value `Class` to specify where
@@ -394,17 +391,13 @@ the `cls` argument is used.
     will not be accessible through the class command line.
 
 
-INSTALLING PARSE_THIS
----------------------
+Installing `parse_this`
+-----------------------
 
 `parse_this` can be installed using the following command:
 
 ```bash
 pip install parse_this
-```
-or
-```bash
-easy_install parse_this
 ```
 
 
@@ -443,13 +436,13 @@ TO DO
     class instead of inspect.getargspec which will be deprecated in python3.5
 
 
-LICENSE
+License
 -------
 
 `parse_this` is released under the MIT Licence. See the bundled LICENSE file for details.
 
 
-CONTRIBUTING AND DEV
+Contributing and dev
 --------------------
 
 ```sh
