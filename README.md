@@ -454,5 +454,5 @@ pytest
 ```
 
 [pypi_link]: https://pypi.org/project/parse-this/ "parse_this on PyPI"
-[pypi_version]: https://badge.fury.io/py/parse_this.svg "PyPI latest version"
+[pypi_version]: https://badge.fury.io/py/parse-this.svg "PyPI latest version"
 [inspect_signature]: https://docs.python.org/dev/library/inspect.html#inspect.signature
