@@ -446,7 +446,7 @@ Contributing and dev
 --------------------
 
 ```sh
-virtualenv --py python3 --prompt="(parse_this_39)" venv
+python3 -m venv --clear --upgrade-deps --prompt "parse-this-39" venv
 source venv/bin/activate
 pip install -r requirements.txt
 pre-commit install
