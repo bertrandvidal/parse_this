@@ -32,6 +32,10 @@ jobs:
     - name: lint with flake8
       run: |
         flake8 parse_this test --count --show-source --statistics
+    - name: type checking
+      uses: jpetrucciani/mypy-check@master
+      with:
+        path: "parse_this test"
     - name: test with pytest
       run: |
         pytest --cache-clear --cov=parse_this --cov-fail-under=95 --no-cov-on-fail test/ > pytest-coverage.txt
