@@ -49,13 +49,14 @@ class MethodParser(object):
                 func.__name__,
                 "/%s" % self._name if self._name else "",
             )
-            (func_args, _, _, defaults, _, _, _) = getfullargspec(func)
+            (func_args, _, _, defaults, _, _, annotations) = getfullargspec(func)
+            _LOG.error(f"{func.__name__} - {getfullargspec(func)}")
             self._types, func_args = _check_types(
                 func.__name__, self._types, func_args, defaults
             )
             args_and_defaults = _get_args_and_defaults(func_args, defaults)
             parser = _get_arg_parser(
-                func, self._types, args_and_defaults, self._delimiter_chars
+                func, self._types, annotations, args_and_defaults, self._delimiter_chars
             )
             parser.get_name = lambda: self._name
             func.parser = parser

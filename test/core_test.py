@@ -292,6 +292,7 @@ class TestCore(unittest.TestCase):
         parser = _get_arg_parser(
             parse_me_full_docstring,
             [str, int],
+            {},
             [("one", _NO_DEFAULT), ("two", _NO_DEFAULT), ("three", 12)],
             ":",
         )
@@ -304,6 +305,7 @@ class TestCore(unittest.TestCase):
         parser = _get_arg_parser(
             parse_me_full_docstring,
             [str, int],
+            {},
             [("one", _NO_DEFAULT), ("two", _NO_DEFAULT), ("three", 12)],
             ":",
         )
@@ -316,6 +318,7 @@ class TestCore(unittest.TestCase):
         parser = _get_arg_parser(
             parse_me_full_docstring,
             [str, int],
+            {},
             [("one", _NO_DEFAULT), ("two", _NO_DEFAULT), ("three", 12)],
             ":",
         )
@@ -328,6 +331,7 @@ class TestCore(unittest.TestCase):
         parser = _get_arg_parser(
             parse_me_full_docstring,
             [str, int],
+            {},
             [("one", _NO_DEFAULT), ("two", _NO_DEFAULT), ("three", 12)],
             ":",
         )

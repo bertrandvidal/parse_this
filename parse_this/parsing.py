@@ -42,13 +42,15 @@ def _get_parseable_methods(cls):
     return init_parser, methods_to_parse
 
 
-def _get_arg_parser(func, types, args_and_defaults, delimiter_chars):
+def _get_arg_parser(func, types, annotations, args_and_defaults, delimiter_chars):
     """Return an ArgumentParser for the given function. Arguments are defined
         from the function arguments and their associated defaults.
 
     Args:
         func: function for which we want an ArgumentParser
         types: types to which the command line arguments should be converted to
+        annotations: is a dictionary mapping parameter names to annotations,
+        takes precedence over types
         args_and_defaults: list of 2-tuples (arg_name, arg_default)
         delimiter_chars: characters used to separate the parameters from their
         help message in the docstring
@@ -61,7 +63,7 @@ def _get_arg_parser(func, types, args_and_defaults, delimiter_chars):
     for ((arg, default), arg_type) in zip_longest(args_and_defaults, types):
         help_msg = arg_help[arg]
         if default is _NO_DEFAULT:
-            arg_type = arg_type or (lambda x: x)
+            arg_type = annotations.get(arg) or arg_type or (lambda x: x)
             if arg_type == bool:
                 _LOG.debug("Adding optional flag %s.%s", func.__name__, arg)
                 parser.add_argument(
