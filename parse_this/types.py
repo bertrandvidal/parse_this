@@ -19,7 +19,7 @@ def _check_types(func_name, types, func_args, defaults):
     defaults = defaults or []
     if len(types) > len(func_args):
         raise ParseThisException(
-            "To many types provided for conversion for '{}'.".format(func_name)
+            "Too many types provided for conversion for '{}'.".format(func_name)
         )
     if len(types) < len(func_args) - len(defaults):
         raise ParseThisException(
