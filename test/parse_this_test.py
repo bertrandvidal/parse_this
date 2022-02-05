@@ -1,6 +1,6 @@
 import unittest
 
-from parse_this import Class, Self, parse_this, create_parser, parse_class
+from parse_this import Class, Self, create_parser, parse_class, parse_this
 from parse_this.exception import ParseThisException
 from test.utils import captured_output
 
