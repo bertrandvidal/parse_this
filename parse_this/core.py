@@ -12,19 +12,6 @@ _LOG = logging.getLogger(__name__)
 _NO_DEFAULT = object()
 
 
-def identity_type(obj):
-    """Return the object as is.
-
-    Args:
-        obj: the object to be 'cast'
-
-    Note:
-        This method is the callable used by the ArgumentParser to parse the
-        command line arguments.
-    """
-    return obj
-
-
 def _get_args_and_defaults(args, defaults):
     """Return a list of 2-tuples - the argument name and its default value or
         a special value that indicates there is no default value.
@@ -95,7 +82,7 @@ def _get_arg_parser(func, types, args_and_defaults, delimiter_chars):
     for ((arg, default), arg_type) in zip_longest(args_and_defaults, types):
         help_msg = arg_help[arg]
         if default is _NO_DEFAULT:
-            arg_type = arg_type or identity_type
+            arg_type = arg_type or (lambda x: x)
             if arg_type == bool:
                 _LOG.debug("Adding optional flag %s.%s", func.__name__, arg)
                 parser.add_argument(
