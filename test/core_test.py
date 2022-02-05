@@ -1,7 +1,7 @@
 import unittest
 from collections import namedtuple
 
-from parse_this import Class, Self, create_parser, parse_class
+from parse_this import create_parser, parse_class
 from parse_this.args import _get_args_and_defaults, _get_args_to_parse
 from parse_this.call import (
     _call,
@@ -29,46 +29,46 @@ def with_args(a, b):
 
 @parse_class()
 class Parseable(object):
-    @create_parser(Self, int)
+    @create_parser()
     def __init__(self, a: int):
         self._a = a
 
-    @create_parser(Self, int)
+    @create_parser()
     def _private_method(self, b: int):
         return self._a * b
 
     def not_parseable(self, c: int):
         return self._a * c
 
-    @create_parser(Self, int)
+    @create_parser()
     def parseable(self, d: int):
         return self._a * d
 
     @classmethod
-    @create_parser(Class, int)
+    @create_parser()
     def cls_method(cls, e: int):
         return e * e
 
 
 @parse_class(parse_private=True)
 class ParseableWithPrivateMethod(object):
-    @create_parser(Self, int)
+    @create_parser()
     def __init__(self, a: int):
         self._a = a
 
-    @create_parser(Self, int)
+    @create_parser()
     def _private_method(self, b: int):
         return self._a * b
 
     def not_parseable(self, c: int):
         return self._a * c
 
-    @create_parser(Self, int)
+    @create_parser()
     def parseable(self, d: int):
         return self._a * d
 
     @classmethod
-    @create_parser(Class, int)
+    @create_parser()
     def cls_method(cls, e: int):
         return e * e
 
@@ -133,22 +133,22 @@ def different_delimiter_charsiter(one: int, two: int, three: int):
     return one * two, three * three
 
 
-@create_parser(str, int)
+@create_parser()
 def concatenate_string(string: str, nb_concat: int):
     return string * nb_concat
 
 
-@create_parser(int, str)
+@create_parser()
 def has_none_default_value(a: int, b: str = None):
     return a, b
 
 
-@create_parser(int)
+@create_parser()
 def has_flags(a: int, b: bool = False):
     return a, b
 
 
-@create_parser(bool)
+@create_parser()
 def has_bool_arguments(a: bool):
     return a
 
