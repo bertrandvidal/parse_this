@@ -139,12 +139,12 @@ def _get_parseable_methods(cls):
                 init_parser = obj.parser
             else:
                 methods_to_parse[obj.__name__] = obj.parser
-    return (init_parser, methods_to_parse)
+    return init_parser, methods_to_parse
 
 
 def _get_default_help_message(func, args, description=None, args_help=None):
     """Create a default description for the parser and help message for the
-    agurments if they are missing.
+    arguments if they are missing.
 
     Args:
         func: the method we are creating a parser for
@@ -258,7 +258,7 @@ def _check_types(func_name, types, func_args, defaults):
     if types and types[0] in [Self, Class]:
         types = types[1:]
         func_args = func_args[1:]
-    return (types, func_args)
+    return types, func_args
 
 
 def _get_parser_call_method(func):
