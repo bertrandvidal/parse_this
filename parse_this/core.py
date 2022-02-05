@@ -356,7 +356,7 @@ class FullHelpAction(argparse._HelpAction):
     This allows to have the help for all sub-commands when invoking:
     '<script.py> --help' rather than a somewhat incomplete help message only
     describing the name of the sub-commands.
-    Note: taken from http://stackoverflow.com/a/24122778/2003420
+    Note: taken from https://stackoverflow.com/a/24122778/2003420
     """
 
     def __call__(self, parser, namespace, values, option_string=None):
