@@ -4,20 +4,20 @@ import sys
 from functools import wraps
 from inspect import getfullargspec
 
-from parse_this.help.action import FullHelpAction
 from parse_this.core import (
-    _check_types,
-    _get_args_and_defaults,
-    _get_arg_parser,
-    _get_args_to_parse,
-    _call,
-    Self,
     Class,
+    Self,
+    _call,
     _call_method_from_namespace,
-    _get_parser_call_method,
+    _check_types,
+    _get_arg_parser,
+    _get_args_and_defaults,
+    _get_args_to_parse,
     _get_parseable_methods,
+    _get_parser_call_method,
 )
 from parse_this.exception import ParseThisException
+from parse_this.help.action import FullHelpAction
 
 __all__ = [
     "Self",

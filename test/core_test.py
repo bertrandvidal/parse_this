@@ -4,8 +4,8 @@ import unittest
 from parse_this import create_parser, parse_class
 from test.utils import captured_output
 from parse_this.core import (
+    _NO_DEFAULT,
     _get_args_and_defaults,
-    NoDefault,
     Self,
     _get_parseable_methods,
     Class,
@@ -165,7 +165,11 @@ class TestCore(unittest.TestCase):
         )
         self.assertListEqual(
             args_and_defaults,
-            [("first", NoDefault), ("second", NoDefault), ("third", "default_value")],
+            [
+                ("first", _NO_DEFAULT),
+                ("second", _NO_DEFAULT),
+                ("third", "default_value"),
+            ],
         )
 
     def test_get_args_and_defaults_no_args(self):
@@ -174,7 +178,7 @@ class TestCore(unittest.TestCase):
     def test_get_args_and_defaults_no_default(self):
         self.assertListEqual(
             _get_args_and_defaults(["first", "second"], ()),
-            [("first", NoDefault), ("second", NoDefault)],
+            [("first", _NO_DEFAULT), ("second", _NO_DEFAULT)],
         )
 
     def test_get_default_help_message_no_docstring(self):
@@ -293,7 +297,7 @@ class TestCore(unittest.TestCase):
         parser = _get_arg_parser(
             parse_me_full_docstring,
             [str, int],
-            [("one", NoDefault), ("two", NoDefault), ("three", 12)],
+            [("one", _NO_DEFAULT), ("two", _NO_DEFAULT), ("three", 12)],
             ":",
         )
         namespace = parser.parse_args("yes 42".split())
@@ -305,7 +309,7 @@ class TestCore(unittest.TestCase):
         parser = _get_arg_parser(
             parse_me_full_docstring,
             [str, int],
-            [("one", NoDefault), ("two", NoDefault), ("three", 12)],
+            [("one", _NO_DEFAULT), ("two", _NO_DEFAULT), ("three", 12)],
             ":",
         )
         namespace = parser.parse_args("no 12 --three=23".split())
@@ -317,7 +321,7 @@ class TestCore(unittest.TestCase):
         parser = _get_arg_parser(
             parse_me_full_docstring,
             [str, int],
-            [("one", NoDefault), ("two", NoDefault), ("three", 12)],
+            [("one", _NO_DEFAULT), ("two", _NO_DEFAULT), ("three", 12)],
             ":",
         )
         with captured_output():
@@ -329,7 +333,7 @@ class TestCore(unittest.TestCase):
         parser = _get_arg_parser(
             parse_me_full_docstring,
             [str, int],
-            [("one", NoDefault), ("two", NoDefault), ("three", 12)],
+            [("one", _NO_DEFAULT), ("two", _NO_DEFAULT), ("three", 12)],
             ":",
         )
         with captured_output():

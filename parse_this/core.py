@@ -1,7 +1,6 @@
 import argparse
 import logging
 import sys
-
 from itertools import zip_longest
 
 from parse_this.exception import ParseThisException
@@ -9,11 +8,7 @@ from parse_this.help.description import prepare_doc
 
 _LOG = logging.getLogger(__name__)
 
-
-class NoDefault(object):
-    """Use to fill the list of args and default to indicate the argument doesn't
-    have a default value.
-    """
+_NO_DEFAULT = object()
 
 
 class Self(object):
@@ -49,7 +44,7 @@ def _get_args_and_defaults(args, defaults):
     args_and_defaults = [
         (argument, default)
         for (argument, default) in zip_longest(
-            args[::-1], defaults[::-1], fillvalue=NoDefault
+            args[::-1], defaults[::-1], fillvalue=_NO_DEFAULT
         )
     ]
     return args_and_defaults[::-1]
@@ -106,7 +101,7 @@ def _get_arg_parser(func, types, args_and_defaults, delimiter_chars):
     parser = argparse.ArgumentParser(description=description)
     for ((arg, default), arg_type) in zip_longest(args_and_defaults, types):
         help_msg = arg_help[arg]
-        if default is NoDefault:
+        if default is _NO_DEFAULT:
             arg_type = arg_type or identity_type
             if arg_type == bool:
                 _LOG.debug("Adding optional flag %s.%s", func.__name__, arg)
