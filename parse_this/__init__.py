@@ -11,13 +11,13 @@ from parse_this.core import (
     _get_arg_parser,
     _get_args_to_parse,
     _call,
-    ParseThisException,
     Self,
     Class,
     _call_method_from_namespace,
     _get_parser_call_method,
     _get_parseable_methods,
 )
+from parse_this.exception import ParseThisException
 
 __all__ = [
     "Self",

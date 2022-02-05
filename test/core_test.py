@@ -11,13 +11,13 @@ from parse_this.core import (
     Class,
     _get_arg_parser,
     _get_args_to_parse,
-    ParseThisException,
     _check_types,
     _get_parser_call_method,
     _call,
     _call_method_from_namespace,
     identity_type,
 )
+from parse_this.exception import ParseThisException
 from parse_this.help.description import prepare_doc, _get_default_help_message
 
 

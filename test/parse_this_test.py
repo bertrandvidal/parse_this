@@ -1,7 +1,8 @@
 import unittest
 
 from parse_this import parse_this, create_parser, parse_class
-from parse_this.core import Self, Class, ParseThisException
+from parse_this.core import Self, Class
+from parse_this.exception import ParseThisException
 from test.utils import captured_output
 
 

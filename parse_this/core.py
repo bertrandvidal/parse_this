@@ -4,13 +4,10 @@ import sys
 
 from itertools import zip_longest
 
+from parse_this.exception import ParseThisException
 from parse_this.help.description import prepare_doc
 
 _LOG = logging.getLogger(__name__)
-
-
-class ParseThisException(Exception):
-    """Error base class raised by this module."""
 
 
 class NoDefault(object):
