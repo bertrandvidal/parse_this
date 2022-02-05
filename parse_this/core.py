@@ -9,24 +9,20 @@ _LOG = logging.getLogger(__name__)
 
 
 class ParseThisError(Exception):
-
     """Error base class raised by this module."""
 
 
 class NoDefault(object):
-
     """Use to fill the list of args and default to indicate the argument doesn't
     have a default value.
     """
 
 
 class Self(object):
-
     """Special value to use as the type of the self arg of a method."""
 
 
 class Class(object):
-
     """Special value to use as the type of the cls arg of a classmethod."""
 
 
