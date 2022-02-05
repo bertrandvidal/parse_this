@@ -407,7 +407,7 @@ RUNNING TESTS
 To check that everything is running fine you can run the following command:
 
 ```bash
-python -m pip install --upgrade pip && python -m pip install -r requirements.txt && pytest
+python -m pip install --upgrade pip && python -m pip install -r requirements-dev.txt && pytest
 ```
 
 CAVEATS
@@ -448,7 +448,7 @@ Contributing and dev
 ```sh
 python3 -m venv --clear --upgrade-deps --prompt "parse-this-39" venv
 source venv/bin/activate
-pip install -r requirements.txt
+pip install -r requirements-dev.txt
 pre-commit install
 pytest
 ```

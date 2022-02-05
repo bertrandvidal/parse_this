@@ -28,6 +28,8 @@ jobs:
 
     - name: pip-secure-install
       uses: brettcannon/pip-secure-install@v1.0.0
+      with:
+        requirements-file: requirements-dev.txt
 
     - name: black formatter
       uses: psf/black@stable
