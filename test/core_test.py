@@ -9,13 +9,13 @@ from parse_this.core import (
     _get_parseable_methods,
     _get_arg_parser,
     _get_args_to_parse,
-    _check_types,
     _get_parser_call_method,
     _call,
     _call_method_from_namespace,
 )
 from parse_this.exception import ParseThisException
 from parse_this.help.description import prepare_doc, _get_default_help_message
+from parse_this.types import _check_types
 
 
 def no_docstring():
