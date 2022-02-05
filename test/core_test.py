@@ -84,7 +84,7 @@ def blank_line_in_wrong_place(one: int, two: int):
     return one * two
 
 
-def parse_me_full_docstring(one: int, two: int, three: int = 12):
+def parse_me_full_docstring(one: str, two: int, three: int = 12):
     """Could use some parsing.
 
     Args:
@@ -139,7 +139,7 @@ def concatenate_string(string: str, nb_concat: int):
 
 
 @create_parser(int, str)
-def has_none_default_value(a: int, b: int = None):
+def has_none_default_value(a: int, b: str = None):
     return a, b
 
 
@@ -305,7 +305,7 @@ class TestCore(unittest.TestCase):
         parser = _get_arg_parser(
             parse_me_full_docstring,
             [str, int],
-            {},
+            {"one": str, "two": int, "three": int},
             [("one", _NO_DEFAULT), ("two", _NO_DEFAULT), ("three", 12)],
             ":",
         )
@@ -318,7 +318,7 @@ class TestCore(unittest.TestCase):
         parser = _get_arg_parser(
             parse_me_full_docstring,
             [str, int],
-            {},
+            {"one": str, "two": int, "three": int},
             [("one", _NO_DEFAULT), ("two", _NO_DEFAULT), ("three", 12)],
             ":",
         )
@@ -331,7 +331,7 @@ class TestCore(unittest.TestCase):
         parser = _get_arg_parser(
             parse_me_full_docstring,
             [str, int],
-            {},
+            {"one": str, "two": int, "three": int},
             [("one", _NO_DEFAULT), ("two", _NO_DEFAULT), ("three", 12)],
             ":",
         )
@@ -344,7 +344,7 @@ class TestCore(unittest.TestCase):
         parser = _get_arg_parser(
             parse_me_full_docstring,
             [str, int],
-            {},
+            {"one": str, "two": int, "three": int},
             [("one", _NO_DEFAULT), ("two", _NO_DEFAULT), ("three", 12)],
             ":",
         )

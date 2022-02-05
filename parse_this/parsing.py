@@ -1,6 +1,5 @@
 import argparse
 import logging
-from itertools import zip_longest
 
 from parse_this.exception import ParseThisException
 from parse_this.help.description import prepare_doc
@@ -60,10 +59,11 @@ def _get_arg_parser(func, types, annotations, args_and_defaults, delimiter_chars
         func, [x for (x, _) in args_and_defaults], delimiter_chars
     )
     parser = argparse.ArgumentParser(description=description)
-    for ((arg, default), arg_type) in zip_longest(args_and_defaults, types):
+    for (arg, default) in args_and_defaults:
         help_msg = arg_help[arg]
+        arg_type = annotations.get(arg)
         if default is _NO_DEFAULT:
-            arg_type = annotations.get(arg) or arg_type or (lambda x: x)
+            arg_type = arg_type or (lambda x: x)
             if arg_type == bool:
                 _LOG.debug("Adding optional flag %s.%s", func.__name__, arg)
                 parser.add_argument(
