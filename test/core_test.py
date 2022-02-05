@@ -6,11 +6,9 @@ from test.utils import captured_output
 from parse_this.core import (
     _get_args_and_defaults,
     NoDefault,
-    _get_default_help_message,
     Self,
     _get_parseable_methods,
     Class,
-    _prepare_doc,
     _get_arg_parser,
     _get_args_to_parse,
     ParseThisError,
@@ -20,6 +18,7 @@ from parse_this.core import (
     _call_method_from_namespace,
     identity_type,
 )
+from parse_this.help.description import prepare_doc, _get_default_help_message
 
 
 def no_docstring():
@@ -203,7 +202,7 @@ class TestCore(unittest.TestCase):
         self.assertNotIn("cls_method", method_to_parser.keys())
 
     def test_prepare_doc_blank_line_in_wrong_place(self):
-        (description, help_msg) = _prepare_doc(
+        (description, help_msg) = prepare_doc(
             blank_line_in_wrong_place, ["one", "two"], ":"
         )
         self.assertEqual(description, "I put the blank line after arguments ...")
@@ -212,7 +211,7 @@ class TestCore(unittest.TestCase):
         )
 
     def test_prepare_doc_full_docstring(self):
-        (description, help_msg) = _prepare_doc(
+        (description, help_msg) = prepare_doc(
             parse_me_full_docstring, ["one", "two", "three"], ":"
         )
         self.assertEqual(description, "Could use some parsing.")
@@ -226,7 +225,7 @@ class TestCore(unittest.TestCase):
         )
 
     def test_prepare_doc_no_docstring(self):
-        (description, help_msg) = _prepare_doc(
+        (description, help_msg) = prepare_doc(
             parse_me_no_docstring, ["one", "two", "three"], ":"
         )
         self.assertEqual(description, "Argument parsing for parse_me_no_docstring")
@@ -240,7 +239,7 @@ class TestCore(unittest.TestCase):
         )
 
     def test_prepare_doc_will_you_dare(self):
-        (description, help_msg) = _prepare_doc(
+        (description, help_msg) = prepare_doc(
             multiline_docstring, ["one", "two", "three"], ":"
         )
         self.assertEqual(description, "I am a sneaky function.")
@@ -255,7 +254,7 @@ class TestCore(unittest.TestCase):
         )
 
     def test_prepare_doc_delimiter_chars(self):
-        (description, help_msg) = _prepare_doc(
+        (description, help_msg) = prepare_doc(
             different_delimiter_charsiter, ["one", "two", "three"], "--"
         )
         self.assertEqual(description, "I am a sneaky function.")
