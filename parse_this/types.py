@@ -1,31 +1,35 @@
 from parse_this.exception import ParseThisException
-from parse_this.values import Class, Self
 
 
-def _check_types(func_name, types, func_args, defaults):
+def _check_types(func_name, annotations, func_args, defaults):
     """Make sure that enough types were given to ensure conversion. Also remove
-       potential Self/Class arguments.
+       potential 'self'/'cls' from the function arguments.
 
     Args:
         func_name: name of the decorated function
-        types: a list of Python types to which the argument will be converted
+        annotations: annotations extract from a function signature
         func_args: list of function arguments name
         defaults: tuple of default values for the function argument
 
     Raises:
-        ParseThisException: if the number of types for conversion does not match
-            the number of function's arguments
+        ParseThisException: we cannot infer the type of all of the arguments using
+        the annotations and the default values
     """
     defaults = defaults or []
-    if len(types) > len(func_args):
+    types_annotations = dict(annotations)
+
+    if "return" in types_annotations:
+        del types_annotations["return"]
+
+    if func_args and func_args[0] in ("self", "cls"):
+        func_args = func_args[1:]
+
+    if len(types_annotations) > len(func_args):
         raise ParseThisException(
             "Too many types provided for conversion for '{}'.".format(func_name)
         )
-    if len(types) < len(func_args) - len(defaults):
+    if len(types_annotations) < len(func_args) - len(defaults):
         raise ParseThisException(
             "Not enough types provided for conversion for '{}'".format(func_name)
         )
-    if types and types[0] in [Self, Class]:
-        types = types[1:]
-        func_args = func_args[1:]
-    return types, func_args
+    return func_args

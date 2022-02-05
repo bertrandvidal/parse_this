@@ -367,52 +367,66 @@ class TestCore(unittest.TestCase):
 
     def test_check_types_not_enough_types_provided(self):
         self.assertRaises(
-            ParseThisException, _check_types, "function", [], ["i_dont_have_a_type"], ()
+            ParseThisException, _check_types, "function", {}, ["i_dont_have_a_type"], ()
         )
 
     def test_check_types_too_many_types_provided(self):
         self.assertRaises(
-            ParseThisException, _check_types, "function", [int, str], ["i_am_alone"], ()
+            ParseThisException,
+            _check_types,
+            "function",
+            {"a": int, "b": int},
+            ["i_am_alone"],
+            (),
         )
 
     def test_check_types_with_default(self):
-        types = [int, str]
         func_args = ["i_am_alone", "i_have_a_default_value"]
         self.assertEqual(
-            _check_types("function", types, func_args, ("default_value",)),
-            (types, func_args),
+            _check_types(
+                "function",
+                {"i_am_an_int": int, "i_have_a_default_value": str},
+                func_args,
+                ("default_value",),
+            ),
+            func_args,
         )
 
     def test_check_types_with_default_type_not_specified(self):
-        types = [int]
         func_args = ["i_am_an_int", "i_have_a_default_value"]
         self.assertEqual(
-            _check_types("function", types, func_args, ("default_value",)),
-            (types, func_args),
+            _check_types(
+                "function", {"i_am_an_int": int}, func_args, ("default_value",)
+            ),
+            func_args,
         )
 
     def test_check_types_remove_self(self):
-        types = [int]
         func_args = ["i_am_an_int", "i_have_a_default_value"]
         self.assertEqual(
             _check_types(
-                "function", [Self] + types, ["self"] + func_args, ("default_value",)
+                "function",
+                {"i_am_an_int": int},
+                ["self"] + func_args,
+                ("default_value",),
             ),
-            ([int], func_args),
+            func_args,
         )
 
     def test_check_types_remove_class(self):
-        types = [int]
         func_args = ["i_am_an_int", "i_have_a_default_value"]
         self.assertEqual(
             _check_types(
-                "function", [Class] + types, ["cls"] + func_args, ("default_value",)
+                "function",
+                {"i_am_an_int": int},
+                ["cls"] + func_args,
+                ("default_value",),
             ),
-            ([int], func_args),
+            func_args,
         )
 
     def test_check_types_no_args(self):
-        self.assertEqual(_check_types("function", [], [], ()), ([], []))
+        self.assertEqual(_check_types("function", {}, [], ()), [])
 
     def test_get_parser_call_method_returns_callable(self):
         call_method = _get_parser_call_method(concatenate_string)
