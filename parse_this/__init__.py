@@ -7,12 +7,14 @@ from parse_this.args import _get_args_and_defaults, _get_args_to_parse
 from parse_this.core import (
     _call,
     _call_method_from_namespace,
-    _get_arg_parser,
-    _get_parseable_methods,
     _get_parser_call_method,
 )
 from parse_this.exception import ParseThisException
 from parse_this.help.action import FullHelpAction
+from parse_this.parser import (
+    _get_arg_parser,
+    _get_parseable_methods,
+)
 from parse_this.types import _check_types
 from parse_this.values import Class, Self
 

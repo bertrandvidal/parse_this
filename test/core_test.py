@@ -2,19 +2,20 @@ import unittest
 from collections import namedtuple
 
 from parse_this import Class, Self, create_parser, parse_class
-from parse_this.args import _get_args_and_defaults
+from parse_this.args import _get_args_and_defaults, _get_args_to_parse
 from parse_this.core import (
-    _NO_DEFAULT,
     _call,
     _call_method_from_namespace,
-    _get_arg_parser,
-    _get_args_to_parse,
-    _get_parseable_methods,
     _get_parser_call_method,
 )
 from parse_this.exception import ParseThisException
 from parse_this.help.description import _get_default_help_message, prepare_doc
+from parse_this.parser import (
+    _get_arg_parser,
+    _get_parseable_methods,
+)
 from parse_this.types import _check_types
+from parse_this.values import _NO_DEFAULT
 from test.utils import captured_output
 
 
