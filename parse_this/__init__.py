@@ -11,7 +11,7 @@ from parse_this.core import (
     _get_arg_parser,
     _get_args_to_parse,
     _call,
-    ParseThisError,
+    ParseThisException,
     Self,
     Class,
     _call_method_from_namespace,
@@ -22,7 +22,7 @@ from parse_this.core import (
 __all__ = [
     "Self",
     "Class",
-    "ParseThisError",
+    "ParseThisException",
     "parse_this",
     "create_parser",
     "parse_class",
@@ -237,7 +237,7 @@ class parse_class(object):
                 # If the __init__ method is not part of the method to
                 # decorate we cannot instantiate the class
                 if "__init__" not in parser_to_method:
-                    raise ParseThisError(
+                    raise ParseThisException(
                         (
                             "'__init__' method is not decorated. "
                             "Please provide an instance to "

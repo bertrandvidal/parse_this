@@ -170,7 +170,7 @@ with the name `a_string` and other `int` with the name `an_other_int` and a defa
 value of 12. So does the parser as displayed by the `--help` command.
 
 Note: `create_parser` cannot decorate the `__init__` method of a class unless
-the class is itself decorated with `parse_class`. A `ParseThisError` will be
+the class is itself decorated with `parse_class`. A `ParseThisException` will be
 raised if you attempt to use the `call` method of such a parser.
 
 
@@ -221,7 +221,7 @@ Using None as a default value and bool as flags
 
 Using `None` as a default value is common practice in Python but for `parse_this`
 and `create_parser` to work properly the type of the argument which defaults
-to `None` needs to be specified. Otherwise a `ParseThisError` will be raised.
+to `None` needs to be specified. Otherwise a `ParseThisException` will be raised.
 
 ```python
 from parse_this import create_parser
@@ -232,7 +232,7 @@ def parrot(ham, spam=None):
     return ham * spam
   return ham
 
-# Will raise ParseThisError: To use default value of 'None' you need to specify
+# Will raise ParseThisException: To use default value of 'None' you need to specify
 # the type of the argument 'spam' for the method 'parrot'
 ```
 
@@ -420,7 +420,7 @@ CAVEATS
  * Classmethods cannot be access from the command line in a class decorated
    with `parse_class`
  * When using `create_parser` on a method that has an argument with `None` as
-   a default value its type *must be* past in the list of types. A `ParseThisError`
+   a default value its type *must be* past in the list of types. A `ParseThisException`
    will be raised otherwise.
 
 

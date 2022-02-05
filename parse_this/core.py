@@ -9,7 +9,7 @@ from parse_this.help.description import prepare_doc
 _LOG = logging.getLogger(__name__)
 
 
-class ParseThisError(Exception):
+class ParseThisException(Exception):
     """Error base class raised by this module."""
 
 
@@ -125,7 +125,7 @@ def _get_arg_parser(func, types, args_and_defaults, delimiter_chars):
                 parser.add_argument(arg, help=help_msg, type=arg_type)
         else:
             if default is None and arg_type is None:
-                raise ParseThisError(
+                raise ParseThisException(
                     "To use default value of 'None' you need "
                     "to specify the type of the argument '{}' "
                     "for the method '{}'".format(arg, func.__name__)
@@ -169,16 +169,16 @@ def _check_types(func_name, types, func_args, defaults):
         defaults: tuple of default values for the function argument
 
     Raises:
-        ParseThisError: if the number of types for conversion does not match
+        ParseThisException: if the number of types for conversion does not match
             the number of function's arguments
     """
     defaults = defaults or []
     if len(types) > len(func_args):
-        raise ParseThisError(
+        raise ParseThisException(
             "To many types provided for conversion for '{}'.".format(func_name)
         )
     if len(types) < len(func_args) - len(defaults):
-        raise ParseThisError(
+        raise ParseThisException(
             "Not enough types provided for conversion for '{}'".format(func_name)
         )
     if types and types[0] in [Self, Class]:
@@ -194,7 +194,7 @@ def _get_parser_call_method(func):
         func: the decorated function
 
     Raises:
-        ParseThisError if the decorated method is __init__, __init__ can
+        ParseThisException if the decorated method is __init__, __init__ can
         only be decorated in a class decorated by parse_class
     """
     func_name = func.__name__
@@ -211,7 +211,7 @@ def _get_parser_call_method(func):
         # Defer this check in the method call so that __init__ can be
         # decorated in class decorated with parse_class
         if func_name == "__init__":
-            raise ParseThisError(
+            raise ParseThisException(
                 (
                     "To use 'create_parser' on the"
                     "'__init__' you need to decorate the "
