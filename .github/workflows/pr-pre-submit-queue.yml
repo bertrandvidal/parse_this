@@ -16,27 +16,34 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+
     - name: set up python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
+
     - name: pip-secure-install
       uses: brettcannon/pip-secure-install@v1.0.0
+
     - name: black formatter
       uses: psf/black@stable
       with:
         options: "--check --verbose"
         src: "./parse_this ./test"
+
     - name: lint with flake8
       run: |
         flake8 parse_this test --count --show-source --statistics
+
     - name: type checking
       uses: jpetrucciani/mypy-check@master
       with:
         path: "parse_this test"
+
     - name: test with pytest
       run: |
         pytest --cache-clear --cov=parse_this --cov-fail-under=95 --no-cov-on-fail test/ > pytest-coverage.txt
+
     - name: add coverage as PR comment
       uses: coroo/pytest-coverage-commentator@v1.0.2
       with:
