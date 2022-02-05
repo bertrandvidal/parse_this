@@ -3,7 +3,7 @@ from collections import namedtuple
 
 from parse_this import Class, Self, create_parser, parse_class
 from parse_this.args import _get_args_and_defaults, _get_args_to_parse
-from parse_this.core import (
+from parse_this.call import (
     _call,
     _call_method_from_namespace,
     _get_parser_call_method,
