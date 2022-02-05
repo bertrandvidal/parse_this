@@ -51,7 +51,7 @@ def parse_this(func, types, args=None, delimiter_chars=":"):
     return _call(func, func_args, arguments)
 
 
-class create_parser(object):
+class MethodParser(object):
     """Creates an argument parser for the decorated function.
 
     Note:
@@ -106,7 +106,10 @@ class create_parser(object):
         return decorated
 
 
-class parse_class(object):
+create_parser = MethodParser
+
+
+class ClassParser(object):
     """Allows to create a global argument parser for a class along with
     subparsers with each if its properly decorated methods."""
 
@@ -251,3 +254,6 @@ class parse_class(object):
             return _call_method_from_namespace(instance, method_name, namespace)
 
         return inner_call
+
+
+parse_class = ClassParser
