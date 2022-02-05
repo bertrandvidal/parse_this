@@ -53,7 +53,6 @@ def parse_this(func, types, args=None, delimiter_chars=":"):
 
 
 class create_parser(object):
-
     """Creates an argument parser for the decorated function.
 
     Note:
@@ -109,7 +108,6 @@ class create_parser(object):
 
 
 class parse_class(object):
-
     """Allows to create a global argument parser for a class along with
     subparsers with each if its properly decorated methods."""
 

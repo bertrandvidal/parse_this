@@ -350,7 +350,6 @@ def _call_method_from_namespace(obj, method_name, namespace):
 
 
 class FullHelpAction(argparse._HelpAction):
-
     """Custom HelpAction to display help from all subparsers.
 
     This allows to have the help for all sub-commands when invoking:
