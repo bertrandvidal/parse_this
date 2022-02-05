@@ -1,25 +1,22 @@
-from collections import namedtuple
 import unittest
+from collections import namedtuple
 
-from parse_this import create_parser, parse_class
-from test.utils import captured_output
-from parse_this.core import (
-    _get_args_and_defaults,
-    NoDefault,
-    _get_default_help_message,
-    Self,
-    _get_parseable_methods,
-    Class,
-    _prepare_doc,
-    _get_arg_parser,
-    _get_args_to_parse,
-    ParseThisError,
-    _check_types,
-    _get_parser_call_method,
+from parse_this import Class, Self, create_parser, parse_class
+from parse_this.args import _get_args_and_defaults, _get_args_to_parse
+from parse_this.call import (
     _call,
     _call_method_from_namespace,
-    identity_type,
+    _get_parser_call_method,
 )
+from parse_this.exception import ParseThisException
+from parse_this.help.description import _get_default_help_message, prepare_doc
+from parse_this.parsing import (
+    _get_arg_parser,
+    _get_parseable_methods,
+)
+from parse_this.types import _check_types
+from parse_this.values import _NO_DEFAULT
+from test.utils import captured_output
 
 
 def no_docstring():
@@ -157,16 +154,17 @@ def has_bool_arguments(a):
 
 
 class TestCore(unittest.TestCase):
-    def test_identity_type(self):
-        self.assertEqual(None, identity_type(None))
-
     def test_get_args_and_defaults_fill_no_default(self):
         args_and_defaults = _get_args_and_defaults(
             ["first", "second", "third"], ("default_value",)
         )
         self.assertListEqual(
             args_and_defaults,
-            [("first", NoDefault), ("second", NoDefault), ("third", "default_value")],
+            [
+                ("first", _NO_DEFAULT),
+                ("second", _NO_DEFAULT),
+                ("third", "default_value"),
+            ],
         )
 
     def test_get_args_and_defaults_no_args(self):
@@ -175,7 +173,7 @@ class TestCore(unittest.TestCase):
     def test_get_args_and_defaults_no_default(self):
         self.assertListEqual(
             _get_args_and_defaults(["first", "second"], ()),
-            [("first", NoDefault), ("second", NoDefault)],
+            [("first", _NO_DEFAULT), ("second", _NO_DEFAULT)],
         )
 
     def test_get_default_help_message_no_docstring(self):
@@ -203,7 +201,7 @@ class TestCore(unittest.TestCase):
         self.assertNotIn("cls_method", method_to_parser.keys())
 
     def test_prepare_doc_blank_line_in_wrong_place(self):
-        (description, help_msg) = _prepare_doc(
+        (description, help_msg) = prepare_doc(
             blank_line_in_wrong_place, ["one", "two"], ":"
         )
         self.assertEqual(description, "I put the blank line after arguments ...")
@@ -212,7 +210,7 @@ class TestCore(unittest.TestCase):
         )
 
     def test_prepare_doc_full_docstring(self):
-        (description, help_msg) = _prepare_doc(
+        (description, help_msg) = prepare_doc(
             parse_me_full_docstring, ["one", "two", "three"], ":"
         )
         self.assertEqual(description, "Could use some parsing.")
@@ -226,7 +224,7 @@ class TestCore(unittest.TestCase):
         )
 
     def test_prepare_doc_no_docstring(self):
-        (description, help_msg) = _prepare_doc(
+        (description, help_msg) = prepare_doc(
             parse_me_no_docstring, ["one", "two", "three"], ":"
         )
         self.assertEqual(description, "Argument parsing for parse_me_no_docstring")
@@ -240,7 +238,7 @@ class TestCore(unittest.TestCase):
         )
 
     def test_prepare_doc_will_you_dare(self):
-        (description, help_msg) = _prepare_doc(
+        (description, help_msg) = prepare_doc(
             multiline_docstring, ["one", "two", "three"], ":"
         )
         self.assertEqual(description, "I am a sneaky function.")
@@ -255,7 +253,7 @@ class TestCore(unittest.TestCase):
         )
 
     def test_prepare_doc_delimiter_chars(self):
-        (description, help_msg) = _prepare_doc(
+        (description, help_msg) = prepare_doc(
             different_delimiter_charsiter, ["one", "two", "three"], "--"
         )
         self.assertEqual(description, "I am a sneaky function.")
@@ -278,7 +276,7 @@ class TestCore(unittest.TestCase):
         self.assertEqual(has_flags.parser.call(args=["12", "--b"]), (12, True))
 
     def test_get_arg_parser_none_default_value_without_type(self):
-        with self.assertRaises(ParseThisError):
+        with self.assertRaises(ParseThisException):
 
             @create_parser(int)
             def have_none_default_value(a, b=None):
@@ -294,7 +292,7 @@ class TestCore(unittest.TestCase):
         parser = _get_arg_parser(
             parse_me_full_docstring,
             [str, int],
-            [("one", NoDefault), ("two", NoDefault), ("three", 12)],
+            [("one", _NO_DEFAULT), ("two", _NO_DEFAULT), ("three", 12)],
             ":",
         )
         namespace = parser.parse_args("yes 42".split())
@@ -306,7 +304,7 @@ class TestCore(unittest.TestCase):
         parser = _get_arg_parser(
             parse_me_full_docstring,
             [str, int],
-            [("one", NoDefault), ("two", NoDefault), ("three", 12)],
+            [("one", _NO_DEFAULT), ("two", _NO_DEFAULT), ("three", 12)],
             ":",
         )
         namespace = parser.parse_args("no 12 --three=23".split())
@@ -318,7 +316,7 @@ class TestCore(unittest.TestCase):
         parser = _get_arg_parser(
             parse_me_full_docstring,
             [str, int],
-            [("one", NoDefault), ("two", NoDefault), ("three", 12)],
+            [("one", _NO_DEFAULT), ("two", _NO_DEFAULT), ("three", 12)],
             ":",
         )
         with captured_output():
@@ -330,7 +328,7 @@ class TestCore(unittest.TestCase):
         parser = _get_arg_parser(
             parse_me_full_docstring,
             [str, int],
-            [("one", NoDefault), ("two", NoDefault), ("three", 12)],
+            [("one", _NO_DEFAULT), ("two", _NO_DEFAULT), ("three", 12)],
             ":",
         )
         with captured_output():
@@ -357,12 +355,12 @@ class TestCore(unittest.TestCase):
 
     def test_check_types_not_enough_types_provided(self):
         self.assertRaises(
-            ParseThisError, _check_types, "function", [], ["i_dont_have_a_type"], ()
+            ParseThisException, _check_types, "function", [], ["i_dont_have_a_type"], ()
         )
 
     def test_check_types_too_many_types_provided(self):
         self.assertRaises(
-            ParseThisError, _check_types, "function", [int, str], ["i_am_alone"], ()
+            ParseThisException, _check_types, "function", [int, str], ["i_am_alone"], ()
         )
 
     def test_check_types_with_default(self):
@@ -410,7 +408,7 @@ class TestCore(unittest.TestCase):
 
     def test_get_parser_call_method_raise_on_init(self):
         call_method = _get_parser_call_method(Parseable.__init__)
-        self.assertRaises(ParseThisError, call_method, None)
+        self.assertRaises(ParseThisException, call_method, None)
 
     def test_get_parser_call_method_execution(self):
         call_method = _get_parser_call_method(Parseable.parseable)

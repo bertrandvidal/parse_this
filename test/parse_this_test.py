@@ -1,7 +1,7 @@
 import unittest
 
-from parse_this import parse_this, create_parser, parse_class
-from parse_this.core import Self, Class, ParseThisError
+from parse_this import Class, Self, create_parser, parse_class, parse_this
+from parse_this.exception import ParseThisException
 from test.utils import captured_output
 
 
@@ -88,7 +88,7 @@ class TestCreateParser(unittest.TestCase):
 
     def test_create_parser_on_init(self):
         parser = NeedParseClassDecorator.__init__.parser
-        self.assertRaises(ParseThisError, parser.call, None, ["2"])
+        self.assertRaises(ParseThisException, parser.call, None, ["2"])
 
 
 @parse_class(description="Hello World", parse_private=True)
@@ -199,7 +199,7 @@ class TestParseClass(unittest.TestCase):
         )
 
     def test_parse_class_init_need_decoration(self):
-        with self.assertRaises(ParseThisError):
+        with self.assertRaises(ParseThisException):
             NeedInitDecorator.parser.call("do-stuff 12".split())
 
     def test_parse_class_need_init_decorator_with_instance(self):
