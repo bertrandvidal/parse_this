@@ -288,6 +288,19 @@ class TestCore(unittest.TestCase):
             has_none_default_value.parser.call(args=["12", "--b", "yes"]), (12, "yes")
         )
 
+    def test_get_arg_parser_annotation_take_precedence(self):
+        parser = _get_arg_parser(
+            parse_me_full_docstring,
+            [dict, dict, dict],
+            {"one": int, "two": int, "three": int},
+            [("one", _NO_DEFAULT), ("two", _NO_DEFAULT), ("three", _NO_DEFAULT)],
+            ":",
+        )
+        namespace = parser.parse_args("1 2 3".split())
+        self.assertEqual(namespace.one, 1)
+        self.assertEqual(namespace.two, 2)
+        self.assertEqual(namespace.three, 3)
+
     def test_get_arg_parser_with_default_value(self):
         parser = _get_arg_parser(
             parse_me_full_docstring,
