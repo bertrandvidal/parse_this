@@ -162,7 +162,7 @@ def _get_default_help_message(func, args, description=None, args_help=None):
     # If an argument is missing a help message we create a simple one
     for argument in [arg_name for arg_name in args if arg_name not in args_help]:
         args_help[argument] = "Help message for %s" % argument
-    return (description, args_help)
+    return description, args_help
 
 
 def _get_arg_parser(func, types, args_and_defaults, delimiter_chars):
