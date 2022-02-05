@@ -1,8 +1,8 @@
-from functools import wraps
-from inspect import getfullargspec
 import argparse
 import logging
 import sys
+from functools import wraps
+from inspect import getfullargspec
 
 from parse_this.core import (
     _check_types,
@@ -226,11 +226,10 @@ class parse_class(object):
             provided argument.
 
             Args:
-                args: list of arguments to parse, defaults to command line
-                arguments
-                instance: an instance of the decorated class. If instance is
-                None, the default, and __init__ is decorated the object will be
-                instantiated on the fly from the command line arguments
+                args: list of arguments to parse, defaults to command line arguments
+                instance: an instance of the decorated class. If instance is None,
+                    the default, and __init__ is decorated the object will be
+                    instantiated on the fly from the command line arguments
             """
             parser = self._cls.parser
             namespace = parser.parse_args(_get_args_to_parse(args, sys.argv))
