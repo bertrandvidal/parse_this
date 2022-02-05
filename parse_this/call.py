@@ -2,7 +2,7 @@ import logging
 
 from parse_this.args import _get_args_to_parse
 from parse_this.exception import ParseThisException
-from parse_this.parser import _get_args_name_from_parser
+from parse_this.parsing import _get_args_name_from_parser
 
 _LOG = logging.getLogger(__name__)
 

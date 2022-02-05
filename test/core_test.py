@@ -10,7 +10,7 @@ from parse_this.call import (
 )
 from parse_this.exception import ParseThisException
 from parse_this.help.description import _get_default_help_message, prepare_doc
-from parse_this.parser import (
+from parse_this.parsing import (
     _get_arg_parser,
     _get_parseable_methods,
 )
