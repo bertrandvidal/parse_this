@@ -1,3 +1,6 @@
+_NO_DEFAULT = object()
+
+
 class Self(object):
     """Special value to use as the type of the self arg of a method."""
 

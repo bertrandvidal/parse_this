@@ -5,11 +5,9 @@ from itertools import zip_longest
 
 from parse_this.exception import ParseThisException
 from parse_this.help.description import prepare_doc
-from parse_this.values import Class, Self
+from parse_this.values import Class, Self, _NO_DEFAULT
 
 _LOG = logging.getLogger(__name__)
-
-_NO_DEFAULT = object()
 
 
 def _get_args_and_defaults(args, defaults):
