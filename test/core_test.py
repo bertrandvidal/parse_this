@@ -30,50 +30,50 @@ def with_args(a, b):
 @parse_class()
 class Parseable(object):
     @create_parser(Self, int)
-    def __init__(self, a):
+    def __init__(self, a: int):
         self._a = a
 
     @create_parser(Self, int)
-    def _private_method(self, b):
+    def _private_method(self, b: int):
         return self._a * b
 
-    def not_parseable(self, c):
+    def not_parseable(self, c: int):
         return self._a * c
 
     @create_parser(Self, int)
-    def parseable(self, d):
+    def parseable(self, d: int):
         return self._a * d
 
     @classmethod
     @create_parser(Class, int)
-    def cls_method(cls, e):
+    def cls_method(cls, e: int):
         return e * e
 
 
 @parse_class(parse_private=True)
 class ParseableWithPrivateMethod(object):
     @create_parser(Self, int)
-    def __init__(self, a):
+    def __init__(self, a: int):
         self._a = a
 
     @create_parser(Self, int)
-    def _private_method(self, b):
+    def _private_method(self, b: int):
         return self._a * b
 
-    def not_parseable(self, c):
+    def not_parseable(self, c: int):
         return self._a * c
 
     @create_parser(Self, int)
-    def parseable(self, d):
+    def parseable(self, d: int):
         return self._a * d
 
     @classmethod
     @create_parser(Class, int)
-    def cls_method(cls, e):
+    def cls_method(cls, e: int):
         return e * e
 
 
-def blank_line_in_wrong_place(one, two):
+def blank_line_in_wrong_place(one: int, two: int):
     """I put the blank line after arguments ...
 
     Args:
@@ -84,7 +84,7 @@ def blank_line_in_wrong_place(one, two):
     return one * two
 
 
-def parse_me_full_docstring(one, two, three=12):
+def parse_me_full_docstring(one: int, two: int, three: int = 12):
     """Could use some parsing.
 
     Args:
@@ -99,11 +99,11 @@ def parse_me_full_docstring(one, two, three=12):
     return one * two, three * three
 
 
-def parse_me_no_docstring(one, two, three):
+def parse_me_no_docstring(one: int, two: int, three: int):
     return one * two, three * three
 
 
-def multiline_docstring(one, two, three):
+def multiline_docstring(one: int, two: int, three: int):
     """I am a sneaky function.
 
     Args:
@@ -118,7 +118,7 @@ def multiline_docstring(one, two, three):
     return one * two, three * three
 
 
-def different_delimiter_charsiter(one, two, three):
+def different_delimiter_charsiter(one: int, two: int, three: int):
     """I am a sneaky function.
 
     Args:
@@ -134,22 +134,22 @@ def different_delimiter_charsiter(one, two, three):
 
 
 @create_parser(str, int)
-def concatenate_string(string, nb_concat):
+def concatenate_string(string: str, nb_concat: int):
     return string * nb_concat
 
 
 @create_parser(int, str)
-def has_none_default_value(a, b=None):
+def has_none_default_value(a: int, b: int = None):
     return a, b
 
 
 @create_parser(int)
-def has_flags(a, b=False):
+def has_flags(a: int, b: bool = False):
     return a, b
 
 
 @create_parser(bool)
-def has_bool_arguments(a):
+def has_bool_arguments(a: bool):
     return a
 
 
@@ -279,7 +279,7 @@ class TestCore(unittest.TestCase):
         with self.assertRaises(ParseThisException):
 
             @create_parser(int)
-            def have_none_default_value(a, b=None):
+            def have_none_default_value(a: int, b=None):
                 pass
 
     def test_get_arg_parser_with_none_default_value(self):

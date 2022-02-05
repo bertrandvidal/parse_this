@@ -5,7 +5,7 @@ from parse_this.exception import ParseThisException
 from test.utils import captured_output
 
 
-def parse_me(one, two, three=12):
+def parse_me(one: str, two: int, three: int = 12):
     """Could use some parsing.
 
     Args:
@@ -31,7 +31,7 @@ class TestParseThis(unittest.TestCase):
 
 
 @create_parser(str, int)
-def i_am_parseable(one, two, three=12):
+def i_am_parseable(one: str, two: int, three: int = 12):
     """I too want to be parseable.
 
     Args:
@@ -47,7 +47,7 @@ class Dummy(object):
         self._a = a
 
     @create_parser(Self, int, delimiter_chars="--")
-    def multiply_all(self, b, c=2):
+    def multiply_all(self, b: int, c: int = 2):
         """Will multiply everything!
 
         Args:
@@ -61,13 +61,13 @@ class Dummy(object):
 
     @classmethod
     @create_parser(Class, int)
-    def mult(cls, d, e=2):
+    def mult(cls, d: int, e: int = 2):
         return d * e
 
 
 class NeedParseClassDecorator(object):
     @create_parser(Self, int)
-    def __init__(self, a):
+    def __init__(self, a: int):
         self._a = a
 
 
@@ -97,7 +97,7 @@ class NeedParsing(object):
     """This will be used as the parser description."""
 
     @create_parser(Self, int)
-    def __init__(self, four):
+    def __init__(self, four: int):
         """
         Args:
             four: an int that will be used to multiply stuff
@@ -105,11 +105,11 @@ class NeedParsing(object):
         self._four = four
 
     @create_parser(Self, int)
-    def multiply_self_arg(self, num):
+    def multiply_self_arg(self, num: int):
         return self._four * num
 
     @create_parser(Self, int)
-    def _private_method(self, num):
+    def _private_method(self, num: int):
         return self._four * num
 
     @create_parser(Self)
@@ -117,7 +117,7 @@ class NeedParsing(object):
         return str(self._four)
 
     @create_parser(Self, str, int)
-    def could_you_parse_me(self, one, two, three=12):
+    def could_you_parse_me(self, one: str, two: int, three: int = 12):
         """I would like some arg parsing please.
 
         Args:
@@ -129,7 +129,7 @@ class NeedParsing(object):
 
     @classmethod
     @create_parser(Class, str, int)
-    def parse_me_if_you_can(cls, one, two, three=12):
+    def parse_me_if_you_can(cls, one: str, two: int, three: int = 12):
         return one * two, three * three
 
 
@@ -139,7 +139,7 @@ class ShowMyDocstring(object):
     """This should be the parser description"""
 
     @create_parser(Self, int)
-    def _will_not_appear(self, num):
+    def _will_not_appear(self, num: int):
         return num * num
 
     @create_parser(Self)
@@ -149,11 +149,11 @@ class ShowMyDocstring(object):
 
 @parse_class()
 class NeedInitDecorator(object):
-    def __init__(self, val):
+    def __init__(self, val: int):
         self._val = val
 
     @create_parser(Self, int)
-    def do_stuff(self, num, div=2):
+    def do_stuff(self, num: int, div: int = 2):
         return self._val * num / div
 
 
