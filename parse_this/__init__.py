@@ -23,14 +23,12 @@ __all__ = [
 _LOG = logging.getLogger(__name__)
 
 
-def parse_this(func, types, args=None, delimiter_chars=":"):
+def parse_this(func, args=None, delimiter_chars=":"):
     """Create an ArgParser for the given function converting the command line
        arguments according to the list of types.
 
     Args:
         func: the function for which the command line arguments to be parsed
-        types: a list of types - as accepted by argparse - that will be used to
-            convert the command line arguments
         args: a list of arguments to be parsed if None sys.argv is used
         delimiter_chars: characters used to separate the parameters from their
         help message in the docstring. Defaults to ':'
