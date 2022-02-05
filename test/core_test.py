@@ -3,9 +3,9 @@ import unittest
 
 from parse_this import Class, Self, create_parser, parse_class
 from test.utils import captured_output
+from parse_this.args import _get_args_and_defaults
 from parse_this.core import (
     _NO_DEFAULT,
-    _get_args_and_defaults,
     _get_parseable_methods,
     _get_arg_parser,
     _get_args_to_parse,
