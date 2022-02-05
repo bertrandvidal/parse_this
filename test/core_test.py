@@ -118,7 +118,7 @@ def multiline_docstring(one: int, two: int, three: int):
     return one * two, three * three
 
 
-def different_delimiter_charsiter(one: int, two: int, three: int):
+def different_delimiter_chars(one: int, two: int, three: int):
     """I am a sneaky function.
 
     Args:
@@ -254,7 +254,7 @@ class TestCore(unittest.TestCase):
 
     def test_prepare_doc_delimiter_chars(self):
         (description, help_msg) = prepare_doc(
-            different_delimiter_charsiter, ["one", "two", "three"], "--"
+            different_delimiter_chars, ["one", "two", "three"], "--"
         )
         self.assertEqual(description, "I am a sneaky function.")
         self.assertEqual(

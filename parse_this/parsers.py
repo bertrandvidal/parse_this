@@ -21,21 +21,17 @@ class MethodParser(object):
         decorated with 'parse_class'
     """
 
-    def __init__(self, *types, **options):
+    def __init__(self, delimiter_chars=":", name=None):
         """
         Args:
-            types: vargs list of types to which the command line arguments
-            should be converted to
-            options: options to pass to create the parser. Possible values are:
-                -delimiter_chars: characters used to separate the parameters
-                from their help message in the docstring. Defaults to ':'
-                -name: name that will be used for the parser when used in a
-                class decorated with `parse_class`. If not provided the name
-                of the method will be used
+            delimiter_chars: characters used to separate the parameters from their
+            help message in the docstring.
+            name: name that will be used for the parser when used in a class
+            decorated with `parse_class`. If not provided the name of the method will
+            be used
         """
-        self._types = types
-        self._delimiter_chars = options.get("delimiter_chars", ":")
-        self._name = options.get("name", None)
+        self._delimiter_chars = delimiter_chars
+        self._name = name
 
     def __call__(self, func):
         """Add an argument parser attribute `parser` to the decorated function.
