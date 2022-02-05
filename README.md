@@ -1,7 +1,7 @@
 parse_this
 ==========
 
-[![PyPI latest version badge][pypi_version]][pypi_link]
+[![PyPI latest version badge][pypi_version]][pypi_link] ![supported python versions][python_version]
 
 Makes it easy to parse command line arguments for any function, method or classmethod.
 
@@ -432,4 +432,5 @@ pytest
 
 [pypi_link]: https://pypi.org/project/parse-this/ "parse_this on PyPI"
 [pypi_version]: https://badge.fury.io/py/parse-this.svg "PyPI latest version"
+[python_version]: https://img.shields.io/badge/python-3.8--3.9--3.10-green
 [inspect_signature]: https://docs.python.org/dev/library/inspect.html#inspect.signature
