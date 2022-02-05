@@ -5,8 +5,6 @@ from functools import wraps
 from inspect import getfullargspec
 
 from parse_this.core import (
-    Class,
-    Self,
     _call,
     _call_method_from_namespace,
     _check_types,
@@ -18,6 +16,7 @@ from parse_this.core import (
 )
 from parse_this.exception import ParseThisException
 from parse_this.help.action import FullHelpAction
+from parse_this.values import Class, Self
 
 __all__ = [
     "Self",

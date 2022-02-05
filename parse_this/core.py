@@ -5,18 +5,11 @@ from itertools import zip_longest
 
 from parse_this.exception import ParseThisException
 from parse_this.help.description import prepare_doc
+from parse_this.values import Class, Self
 
 _LOG = logging.getLogger(__name__)
 
 _NO_DEFAULT = object()
-
-
-class Self(object):
-    """Special value to use as the type of the self arg of a method."""
-
-
-class Class(object):
-    """Special value to use as the type of the cls arg of a classmethod."""
 
 
 def identity_type(obj):

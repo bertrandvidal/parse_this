@@ -1,14 +1,12 @@
 from collections import namedtuple
 import unittest
 
-from parse_this import create_parser, parse_class
+from parse_this import Class, Self, create_parser, parse_class
 from test.utils import captured_output
 from parse_this.core import (
     _NO_DEFAULT,
     _get_args_and_defaults,
-    Self,
     _get_parseable_methods,
-    Class,
     _get_arg_parser,
     _get_args_to_parse,
     _check_types,
