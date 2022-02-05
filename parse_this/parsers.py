@@ -55,7 +55,7 @@ class MethodParser(object):
             )
             args_and_defaults = _get_args_and_defaults(func_args, defaults)
             parser = _get_arg_parser(
-                func, self._types, annotations, args_and_defaults, self._delimiter_chars
+                func, annotations, args_and_defaults, self._delimiter_chars
             )
             parser.get_name = lambda: self._name
             func.parser = parser

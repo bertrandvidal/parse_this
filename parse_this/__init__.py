@@ -42,9 +42,7 @@ def parse_this(func, types, args=None, delimiter_chars=":"):
     (func_args, _, _, defaults, _, _, annotations) = getfullargspec(func)
     types, func_args = _check_types(func.__name__, types, func_args, defaults)
     args_and_defaults = _get_args_and_defaults(func_args, defaults)
-    parser = _get_arg_parser(
-        func, types, annotations, args_and_defaults, delimiter_chars
-    )
+    parser = _get_arg_parser(func, annotations, args_and_defaults, delimiter_chars)
     arguments = parser.parse_args(_get_args_to_parse(args))
     return _call(func, func_args, arguments)
 

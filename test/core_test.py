@@ -291,7 +291,6 @@ class TestCore(unittest.TestCase):
     def test_get_arg_parser_annotation_take_precedence(self):
         parser = _get_arg_parser(
             parse_me_full_docstring,
-            [dict, dict, dict],
             {"one": int, "two": int, "three": int},
             [("one", _NO_DEFAULT), ("two", _NO_DEFAULT), ("three", _NO_DEFAULT)],
             ":",
@@ -304,7 +303,6 @@ class TestCore(unittest.TestCase):
     def test_get_arg_parser_with_default_value(self):
         parser = _get_arg_parser(
             parse_me_full_docstring,
-            [str, int],
             {"one": str, "two": int, "three": int},
             [("one", _NO_DEFAULT), ("two", _NO_DEFAULT), ("three", 12)],
             ":",
@@ -317,7 +315,6 @@ class TestCore(unittest.TestCase):
     def test_get_arg_parser_without_default_value(self):
         parser = _get_arg_parser(
             parse_me_full_docstring,
-            [str, int],
             {"one": str, "two": int, "three": int},
             [("one", _NO_DEFAULT), ("two", _NO_DEFAULT), ("three", 12)],
             ":",
@@ -330,7 +327,6 @@ class TestCore(unittest.TestCase):
     def test_get_arg_parser_required_arguments(self):
         parser = _get_arg_parser(
             parse_me_full_docstring,
-            [str, int],
             {"one": str, "two": int, "three": int},
             [("one", _NO_DEFAULT), ("two", _NO_DEFAULT), ("three", 12)],
             ":",
@@ -343,7 +339,6 @@ class TestCore(unittest.TestCase):
     def test_get_arg_parser_argument_type(self):
         parser = _get_arg_parser(
             parse_me_full_docstring,
-            [str, int],
             {"one": str, "two": int, "three": int},
             [("one", _NO_DEFAULT), ("two", _NO_DEFAULT), ("three", 12)],
             ":",
