@@ -4,6 +4,7 @@ import sys
 from functools import wraps
 from inspect import getfullargspec
 
+from parse_this.help.parse_action import FullHelpAction
 from parse_this.core import (
     _check_types,
     _get_args_and_defaults,
@@ -13,7 +14,6 @@ from parse_this.core import (
     ParseThisError,
     Self,
     Class,
-    FullHelpAction,
     _call_method_from_namespace,
     _get_parser_call_method,
     _get_parseable_methods,
