@@ -24,15 +24,15 @@ entire class. For that you will need to use the `parse_class` class decorator.
 
 ```python
 # script.py
-from parse_this import Self, create_parser, parse_class
+from parse_this import create_parser, parse_class
 
 
 @parse_class()
 class ParseMePlease(object):
     """This will be the description of the parser."""
 
-    @create_parser(Self, int)
-    def __init__(self, foo, ham=1):
+    @create_parser()
+    def __init__(self, foo: int, ham: int = 1):
         """Get ready to be parsed!
 
         Args:
@@ -42,8 +42,8 @@ class ParseMePlease(object):
         self._foo = foo
         self._ham = ham
 
-    @create_parser(Self, int, int)
-    def do_stuff(self, bar, spam=1):
+    @create_parser()
+    def do_stuff(self, bar: int, spam: int = 1):
         """Can do incredible stuff with bar and spam.
 
         Args:
@@ -114,8 +114,7 @@ Arguments and types
 -------------------
 
 Both `parse_this` and `create_parser` need a list of types to which arguments
-will be converted to. Any Python standard type can be used, two special values
-are used for the `self` and `cls`: `Self` and `Class` respectively.
+will be converted to. Any Python builtin type can be used.
 There is no need to provide a type for keyword arguments since it is inferred
 from the default value of the argument. If your method signature contains
 `arg_with_default=12` `parse_this` expect an `int` where `arg_with_default` is.
@@ -123,7 +122,7 @@ from the default value of the argument. If your method signature contains
 If this is the content of `parse_me.py`:
 
 ```python
-from parse_this import create_parser, Self
+from parse_this import create_parser
 
 
 class INeedParsing(object):
@@ -132,8 +131,8 @@ class INeedParsing(object):
     def __init__(self, an_argument):
         self._an_arg = an_argument
 
-    @create_parser(Self, int, str, params_delim="--")
-    def parse_me_if_you_can(self, an_int, a_string, an_other_int=12):
+    @create_parser(delimiter_chars="--")
+    def parse_me_if_you_can(self, an_int: int, a_string: str, an_other_int: int = 12):
         """I dare you to parse me !!!
 
         Args:
@@ -157,12 +156,13 @@ usage: parse_me.py [-h] [--an_other_int AN_OTHER_INT] an_int a_string
 I dare you to parse me !!!
 
 positional arguments:
-  an_int             int are pretty cool
-  a_string           string aren't that nice
+  an_int                int are pretty cool
+  a_string              string aren't that nice
 
 optional arguments:
-  -h, --help         show this help message and exit
-  --an_other_int AN_OTHER_INT  guess what? I got a default value
+  -h, --help            show this help message and exit
+  --an_other_int AN_OTHER_INT
+                        guess what? I got a default value
 ```
 
 The method `parse_me_if_you_can` expect an `int` with the name `an_int`, a `str`
@@ -188,15 +188,17 @@ In order to get a help message generated automatically from the method docstring
 it needs to be in the specific format described below:
 
 ```python
-from parse_this import Self, create_parser
-@create_parser(Self, int, int, params_delim="--")
-def method(self, spam, ham):
-  """<description>
-    <blank_line>
-    <arg_name><params_delim><arg_help>
-    <arg_name><params_delim><arg_help>
-  """
-  pass
+from parse_this import create_parser
+
+
+@create_parser(delimiter_chars="--")
+def method(self, spam: int, ham: int):
+    """<description>
+      <blank_line>
+      <arg_name><delimiter_chars><arg_help>
+      <arg_name><delimiter_chars><arg_help>
+    """
+    pass
 ```
 
 * description: is a multiline description of the method used for the command line
@@ -208,8 +210,8 @@ def method(self, spam, ham):
   * arg_help: is everything behind the delimiter_chars until the next argument,
     **a blank line** or the end of the docstring.
 
-The `params_delim` can be passed to both `parse_this` and `create_parser` as
-the keywords argument `params_delim`. It defaults to `:` since this is the
+The `delimiter_chars` can be passed to both `parse_this` and `create_parser` as
+the keywords argument `delimiter_chars`. It defaults to `:` since this is the
 convention I most often use.
 
 If no docstring is specified a generic - not so useful - help message will
@@ -226,11 +228,12 @@ to `None` needs to be specified. Otherwise a `ParseThisException` will be raised
 ```python
 from parse_this import create_parser
 
-@create_parser(str)
-def parrot(ham, spam=None):
-  if spam is not None:
-    return ham * spam
-  return ham
+
+@create_parser()
+def parrot(ham: str, spam=None):
+    if spam is not None:
+        return ham * spam
+    return ham
 
 # Will raise ParseThisException: To use default value of 'None' you need to specify
 # the type of the argument 'spam' for the method 'parrot'
@@ -241,11 +244,12 @@ Specifying the type of `spam` will allow `create_parser` to work properly
 ```python
 from parse_this import create_parser
 
-@create_parser(str, int)
-def parrot(ham, spam=None):
-  if spam is not None:
-    return ham * spam
-  return ham
+
+@create_parser()
+def parrot(ham: str, spam: int = None):
+    if spam is not None:
+        return ham * spam
+    return ham
 
 # Calling function.parser.call(args="yes".split()) -> 'yes'
 # Calling function.parser.call(args="yes --spam 3".split()) -> 'yesyesyes'
@@ -265,8 +269,8 @@ def parrot(ham, spam):
     return ham, spam
   return ham
 
-# Calling function.parser.call(args="yes".split()) -> 'yes', True
-# Calling function.parser.call(args="yes --spam".split()) -> 'yes'
+# Calling parrot.parser.call(args="yes".split()) -> 'yes', True
+# Calling parrot.parser.call(args="yes --spam".split()) -> 'yes'
 ```
 
 Adding `--spam` to the arguments will act as a flag/switch setting `spam` to
@@ -278,13 +282,15 @@ Arguments with a boolean default value will act as a flag to change the default 
 ```python
 from parse_this import create_parser
 
-@create_parser(str)
-def parrot(ham, spam=False):
-  if spam:
-    return ham, spam
-  return ham
-# Calling function.parser.call(args="yes".split()) -> 'yes'
-# Calling function.parser.call(args="yes --spam".split()) -> 'yes', True
+
+@create_parser()
+def parrot(ham: str, spam=False):
+    if spam:
+        return ham, spam
+    return ham
+
+# Calling parrot.parser.call(args="yes".split()) -> 'yes'
+# Calling parrot.parser.call(args="yes --spam".split()) -> ('yes', True)
 ```
 
 Here everything works as intended and the default value for `spam` is `False`
@@ -301,8 +307,9 @@ parse the command line argument.
 ```python
 from parse_this import create_parser
 
-@create_parser(str, int)
-def concatenate_str(one, two=2):
+
+@create_parser()
+def concatenate_str(one: str, two: int = 2):
     """Concatenates a string with itself a given number of times.
 
     Args:
@@ -349,7 +356,7 @@ def concatenate_str(one, two=2):
 
 
 if __name__ == "__main__":
-    print(parse_this(concatenate_str, [str, int]))
+    print(parse_this(concatenate_str))
 ```
 
 Calling this script with the same command line arguments `yes --two 3` will also
@@ -362,13 +369,14 @@ Classmethods
 In a similar fashion you can parse line arguments for classmethods:
 
 ```python
-from parse_this import create_parser, Class
+from parse_this import create_parser
+
 
 class MyClass(object):
 
     @classmethod
-    @create_parser(Class, int, str, params_delim="--")
-    def parse_me_if_you_can(cls, an_int, a_string, default=12):
+    @create_parser(delimiter_chars="--")
+    def parse_me_if_you_can(cls, an_int: int, a_string: str, default: int = 12):
         """I dare you to parse me !!!
 
         Args:
@@ -378,11 +386,11 @@ class MyClass(object):
         """
         return a_string * an_int, default * default
 
+
 MyClass.parse_me_if_you_can.parser.call(MyClass)
 ```
+
 The output will be the same as using `create_parser` on a regular method.
-The only difference is the use of the special value `Class` to specify where
-the `cls` argument is used.
 
 **Notes**:
   * The `classmethod` decorator is placed **on top** of the `create_parser`
@@ -404,7 +412,7 @@ pip install parse_this
 RUNNING TESTS
 -------------
 
-To check that everything is running fine you can run the following command:
+To check that everything is running fine you can run the following command after cloning the repo:
 
 ```bash
 python -m pip install --upgrade pip && python -m pip install -r requirements.txt && pytest
