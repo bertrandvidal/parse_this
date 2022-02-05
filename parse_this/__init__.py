@@ -11,11 +11,8 @@ from parse_this.parsing import (
     _get_arg_parser,
 )
 from parse_this.types import _check_types
-from parse_this.values import Class, Self
 
 __all__ = [
-    "Self",
-    "Class",
     "ParseThisException",
     "parse_this",
     "create_parser",
