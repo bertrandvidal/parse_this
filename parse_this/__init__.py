@@ -1,6 +1,5 @@
 import argparse
 import logging
-import sys
 from functools import wraps
 from inspect import getfullargspec
 
@@ -46,7 +45,7 @@ def parse_this(func, types, args=None, delimiter_chars=":"):
     types, func_args = _check_types(func.__name__, types, func_args, defaults)
     args_and_defaults = _get_args_and_defaults(func_args, defaults)
     parser = _get_arg_parser(func, types, args_and_defaults, delimiter_chars)
-    arguments = parser.parse_args(_get_args_to_parse(args, sys.argv))
+    arguments = parser.parse_args(_get_args_to_parse(args))
     return _call(func, func_args, arguments)
 
 
@@ -230,7 +229,7 @@ class parse_class(object):
                     instantiated on the fly from the command line arguments
             """
             parser = self._cls.parser
-            namespace = parser.parse_args(_get_args_to_parse(args, sys.argv))
+            namespace = parser.parse_args(_get_args_to_parse(args))
             if instance is None:
                 # If the __init__ method is not part of the method to
                 # decorate we cannot instantiate the class

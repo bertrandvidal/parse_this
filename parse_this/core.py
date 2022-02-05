@@ -1,6 +1,5 @@
 import argparse
 import logging
-import sys
 from itertools import zip_longest
 
 from parse_this.args import _get_args_to_parse
@@ -158,7 +157,7 @@ def _get_parser_call_method(func):
                     "class with '@parse_class'"
                 )
             )
-        namespace = parser.parse_args(_get_args_to_parse(args, sys.argv))
+        namespace = parser.parse_args(_get_args_to_parse(args))
         if instance is None:
             # If instance is None we are probably decorating a function not a
             # method and don't need the instance

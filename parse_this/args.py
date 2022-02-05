@@ -1,4 +1,5 @@
 import logging
+import sys
 from itertools import zip_longest
 
 from parse_this.values import _NO_DEFAULT
@@ -24,14 +25,16 @@ def _get_args_and_defaults(args, defaults):
     return args_and_defaults[::-1]
 
 
-def _get_args_to_parse(args, sys_argv):
+def _get_args_to_parse(args, cli_arguments=None):
     """Return the given arguments if it is not None else sys.argv if it contains
         something, an empty list otherwise.
 
     Args:
         args: argument to be parsed
-        sys_argv: arguments of the command line i.e. sys.argv
+        cli_arguments: arguments from the command line, defaults to sys.argv; mostly
+        for testing purposes
     """
-    arguments = args if args is not None else sys_argv[1:]
+    cli_arguments = cli_arguments if cli_arguments is not None else sys.argv
+    arguments = args if args is not None else cli_arguments[1:]
     _LOG.debug("Parsing arguments: %s", arguments)
     return arguments
