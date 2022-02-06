@@ -38,8 +38,12 @@ jobs:
         path: "parse_this test"
     - name: test with pytest
       run: |
-        pytest --cache-clear --cov=parse_this --cov-fail-under=95 --no-cov-on-fail test/ > pytest-coverage.txt
+        pytest --cache-clear --cov=parse_this --cov-fail-under=95 --no-cov-on-fail --cov-report=xml test/
     - name: add coverage as PR comment
-      uses: coroo/pytest-coverage-commentator@v1.0.2
+      uses: orgoro/coverage@v2.1
       with:
-        pytest-coverage: pytest-coverage.txt
+        coverageFile: coverage.xml
+        token: ${{ secrets.GITHUB_TOKEN }}
+        thresholdAll: 0.95
+        thresholdNew: 0.95
+        thresholdModified: 0.95
