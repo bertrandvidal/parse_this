@@ -1,7 +1,7 @@
 import unittest
 from collections import namedtuple
 
-from parse_this import Class, Self, create_parser, parse_class
+from parse_this import create_parser, parse_class
 from parse_this.args import _get_args_and_defaults, _get_args_to_parse
 from parse_this.call import (
     _call,
@@ -29,51 +29,51 @@ def with_args(a, b):
 
 @parse_class()
 class Parseable(object):
-    @create_parser(Self, int)
-    def __init__(self, a):
+    @create_parser()
+    def __init__(self, a: int):
         self._a = a
 
-    @create_parser(Self, int)
-    def _private_method(self, b):
+    @create_parser()
+    def _private_method(self, b: int):
         return self._a * b
 
-    def not_parseable(self, c):
+    def not_parseable(self, c: int):
         return self._a * c
 
-    @create_parser(Self, int)
-    def parseable(self, d):
+    @create_parser()
+    def parseable(self, d: int):
         return self._a * d
 
     @classmethod
-    @create_parser(Class, int)
-    def cls_method(cls, e):
+    @create_parser()
+    def cls_method(cls, e: int):
         return e * e
 
 
 @parse_class(parse_private=True)
 class ParseableWithPrivateMethod(object):
-    @create_parser(Self, int)
-    def __init__(self, a):
+    @create_parser()
+    def __init__(self, a: int):
         self._a = a
 
-    @create_parser(Self, int)
-    def _private_method(self, b):
+    @create_parser()
+    def _private_method(self, b: int):
         return self._a * b
 
-    def not_parseable(self, c):
+    def not_parseable(self, c: int):
         return self._a * c
 
-    @create_parser(Self, int)
-    def parseable(self, d):
+    @create_parser()
+    def parseable(self, d: int):
         return self._a * d
 
     @classmethod
-    @create_parser(Class, int)
-    def cls_method(cls, e):
+    @create_parser()
+    def cls_method(cls, e: int):
         return e * e
 
 
-def blank_line_in_wrong_place(one, two):
+def blank_line_in_wrong_place(one: int, two: int):
     """I put the blank line after arguments ...
 
     Args:
@@ -84,7 +84,7 @@ def blank_line_in_wrong_place(one, two):
     return one * two
 
 
-def parse_me_full_docstring(one, two, three=12):
+def parse_me_full_docstring(one: str, two: int, three: int = 12):
     """Could use some parsing.
 
     Args:
@@ -99,11 +99,11 @@ def parse_me_full_docstring(one, two, three=12):
     return one * two, three * three
 
 
-def parse_me_no_docstring(one, two, three):
+def parse_me_no_docstring(one: int, two: int, three: int):
     return one * two, three * three
 
 
-def multiline_docstring(one, two, three):
+def multiline_docstring(one: int, two: int, three: int):
     """I am a sneaky function.
 
     Args:
@@ -118,7 +118,7 @@ def multiline_docstring(one, two, three):
     return one * two, three * three
 
 
-def different_delimiter_charsiter(one, two, three):
+def different_delimiter_chars(one: int, two: int, three: int):
     """I am a sneaky function.
 
     Args:
@@ -133,23 +133,23 @@ def different_delimiter_charsiter(one, two, three):
     return one * two, three * three
 
 
-@create_parser(str, int)
-def concatenate_string(string, nb_concat):
+@create_parser()
+def concatenate_string(string: str, nb_concat: int):
     return string * nb_concat
 
 
-@create_parser(int, str)
-def has_none_default_value(a, b=None):
+@create_parser()
+def has_none_default_value(a: int, b: str = None):
     return a, b
 
 
-@create_parser(int)
-def has_flags(a, b=False):
+@create_parser()
+def has_flags(a: int, b: bool = False):
     return a, b
 
 
-@create_parser(bool)
-def has_bool_arguments(a):
+@create_parser()
+def has_bool_arguments(a: bool):
     return a
 
 
@@ -254,7 +254,7 @@ class TestCore(unittest.TestCase):
 
     def test_prepare_doc_delimiter_chars(self):
         (description, help_msg) = prepare_doc(
-            different_delimiter_charsiter, ["one", "two", "three"], "--"
+            different_delimiter_chars, ["one", "two", "three"], "--"
         )
         self.assertEqual(description, "I am a sneaky function.")
         self.assertEqual(
@@ -279,7 +279,7 @@ class TestCore(unittest.TestCase):
         with self.assertRaises(ParseThisException):
 
             @create_parser(int)
-            def have_none_default_value(a, b=None):
+            def have_none_default_value(a: int, b=None):
                 pass
 
     def test_get_arg_parser_with_none_default_value(self):
@@ -288,10 +288,22 @@ class TestCore(unittest.TestCase):
             has_none_default_value.parser.call(args=["12", "--b", "yes"]), (12, "yes")
         )
 
+    def test_get_arg_parser_annotation_take_precedence(self):
+        parser = _get_arg_parser(
+            parse_me_full_docstring,
+            {"one": int, "two": int, "three": int},
+            [("one", _NO_DEFAULT), ("two", _NO_DEFAULT), ("three", _NO_DEFAULT)],
+            ":",
+        )
+        namespace = parser.parse_args("1 2 3".split())
+        self.assertEqual(namespace.one, 1)
+        self.assertEqual(namespace.two, 2)
+        self.assertEqual(namespace.three, 3)
+
     def test_get_arg_parser_with_default_value(self):
         parser = _get_arg_parser(
             parse_me_full_docstring,
-            [str, int],
+            {"one": str, "two": int, "three": int},
             [("one", _NO_DEFAULT), ("two", _NO_DEFAULT), ("three", 12)],
             ":",
         )
@@ -303,7 +315,7 @@ class TestCore(unittest.TestCase):
     def test_get_arg_parser_without_default_value(self):
         parser = _get_arg_parser(
             parse_me_full_docstring,
-            [str, int],
+            {"one": str, "two": int, "three": int},
             [("one", _NO_DEFAULT), ("two", _NO_DEFAULT), ("three", 12)],
             ":",
         )
@@ -315,7 +327,7 @@ class TestCore(unittest.TestCase):
     def test_get_arg_parser_required_arguments(self):
         parser = _get_arg_parser(
             parse_me_full_docstring,
-            [str, int],
+            {"one": str, "two": int, "three": int},
             [("one", _NO_DEFAULT), ("two", _NO_DEFAULT), ("three", 12)],
             ":",
         )
@@ -327,7 +339,7 @@ class TestCore(unittest.TestCase):
     def test_get_arg_parser_argument_type(self):
         parser = _get_arg_parser(
             parse_me_full_docstring,
-            [str, int],
+            {"one": str, "two": int, "three": int},
             [("one", _NO_DEFAULT), ("two", _NO_DEFAULT), ("three", 12)],
             ":",
         )
@@ -355,52 +367,66 @@ class TestCore(unittest.TestCase):
 
     def test_check_types_not_enough_types_provided(self):
         self.assertRaises(
-            ParseThisException, _check_types, "function", [], ["i_dont_have_a_type"], ()
+            ParseThisException, _check_types, "function", {}, ["i_dont_have_a_type"], ()
         )
 
     def test_check_types_too_many_types_provided(self):
         self.assertRaises(
-            ParseThisException, _check_types, "function", [int, str], ["i_am_alone"], ()
+            ParseThisException,
+            _check_types,
+            "function",
+            {"a": int, "b": int},
+            ["i_am_alone"],
+            (),
         )
 
     def test_check_types_with_default(self):
-        types = [int, str]
         func_args = ["i_am_alone", "i_have_a_default_value"]
         self.assertEqual(
-            _check_types("function", types, func_args, ("default_value",)),
-            (types, func_args),
+            _check_types(
+                "function",
+                {"i_am_an_int": int, "i_have_a_default_value": str},
+                func_args,
+                ("default_value",),
+            ),
+            func_args,
         )
 
     def test_check_types_with_default_type_not_specified(self):
-        types = [int]
         func_args = ["i_am_an_int", "i_have_a_default_value"]
         self.assertEqual(
-            _check_types("function", types, func_args, ("default_value",)),
-            (types, func_args),
+            _check_types(
+                "function", {"i_am_an_int": int}, func_args, ("default_value",)
+            ),
+            func_args,
         )
 
     def test_check_types_remove_self(self):
-        types = [int]
         func_args = ["i_am_an_int", "i_have_a_default_value"]
         self.assertEqual(
             _check_types(
-                "function", [Self] + types, ["self"] + func_args, ("default_value",)
+                "function",
+                {"i_am_an_int": int},
+                ["self"] + func_args,
+                ("default_value",),
             ),
-            ([int], func_args),
+            func_args,
         )
 
     def test_check_types_remove_class(self):
-        types = [int]
         func_args = ["i_am_an_int", "i_have_a_default_value"]
         self.assertEqual(
             _check_types(
-                "function", [Class] + types, ["cls"] + func_args, ("default_value",)
+                "function",
+                {"i_am_an_int": int},
+                ["cls"] + func_args,
+                ("default_value",),
             ),
-            ([int], func_args),
+            func_args,
         )
 
     def test_check_types_no_args(self):
-        self.assertEqual(_check_types("function", [], [], ()), ([], []))
+        self.assertEqual(_check_types("function", {}, [], ()), [])
 
     def test_get_parser_call_method_returns_callable(self):
         call_method = _get_parser_call_method(concatenate_string)

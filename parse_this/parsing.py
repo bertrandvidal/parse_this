@@ -1,6 +1,5 @@
 import argparse
 import logging
-from itertools import zip_longest
 
 from parse_this.exception import ParseThisException
 from parse_this.help.description import prepare_doc
@@ -42,13 +41,13 @@ def _get_parseable_methods(cls):
     return init_parser, methods_to_parse
 
 
-def _get_arg_parser(func, types, args_and_defaults, delimiter_chars):
+def _get_arg_parser(func, annotations, args_and_defaults, delimiter_chars):
     """Return an ArgumentParser for the given function. Arguments are defined
         from the function arguments and their associated defaults.
 
     Args:
         func: function for which we want an ArgumentParser
-        types: types to which the command line arguments should be converted to
+        annotations: is a dictionary mapping parameter names to annotations
         args_and_defaults: list of 2-tuples (arg_name, arg_default)
         delimiter_chars: characters used to separate the parameters from their
         help message in the docstring
@@ -58,8 +57,9 @@ def _get_arg_parser(func, types, args_and_defaults, delimiter_chars):
         func, [x for (x, _) in args_and_defaults], delimiter_chars
     )
     parser = argparse.ArgumentParser(description=description)
-    for ((arg, default), arg_type) in zip_longest(args_and_defaults, types):
+    for (arg, default) in args_and_defaults:
         help_msg = arg_help[arg]
+        arg_type = annotations.get(arg)
         if default is _NO_DEFAULT:
             arg_type = arg_type or (lambda x: x)
             if arg_type == bool:

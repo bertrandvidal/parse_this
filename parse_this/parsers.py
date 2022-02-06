@@ -21,21 +21,17 @@ class MethodParser(object):
         decorated with 'parse_class'
     """
 
-    def __init__(self, *types, **options):
+    def __init__(self, delimiter_chars=":", name=None):
         """
         Args:
-            types: vargs list of types to which the command line arguments
-            should be converted to
-            options: options to pass to create the parser. Possible values are:
-                -delimiter_chars: characters used to separate the parameters
-                from their help message in the docstring. Defaults to ':'
-                -name: name that will be used for the parser when used in a
-                class decorated with `parse_class`. If not provided the name
-                of the method will be used
+            delimiter_chars: characters used to separate the parameters from their
+            help message in the docstring.
+            name: name that will be used for the parser when used in a class
+            decorated with `parse_class`. If not provided the name of the method will
+            be used
         """
-        self._types = types
-        self._delimiter_chars = options.get("delimiter_chars", ":")
-        self._name = options.get("name", None)
+        self._delimiter_chars = delimiter_chars
+        self._name = name
 
     def __call__(self, func):
         """Add an argument parser attribute `parser` to the decorated function.
@@ -49,13 +45,11 @@ class MethodParser(object):
                 func.__name__,
                 "/%s" % self._name if self._name else "",
             )
-            (func_args, _, _, defaults, _, _, _) = getfullargspec(func)
-            self._types, func_args = _check_types(
-                func.__name__, self._types, func_args, defaults
-            )
+            (func_args, _, _, defaults, _, _, annotations) = getfullargspec(func)
+            func_args = _check_types(func.__name__, annotations, func_args, defaults)
             args_and_defaults = _get_args_and_defaults(func_args, defaults)
             parser = _get_arg_parser(
-                func, self._types, args_and_defaults, self._delimiter_chars
+                func, annotations, args_and_defaults, self._delimiter_chars
             )
             parser.get_name = lambda: self._name
             func.parser = parser
