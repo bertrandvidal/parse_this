@@ -63,7 +63,9 @@ def _get_arg_parser(func, annotations, args_and_defaults, delimiter_chars):
         if default is _NO_DEFAULT:
             arg_type = arg_type or (lambda x: x)
             if arg_type == bool:
-                _LOG.debug("Adding optional flag %s.%s", func.__name__, arg)
+                _LOG.debug(
+                    "Adding optional flag %s.%s (default: True)", func.__name__, arg
+                )
                 parser.add_argument(
                     "--%s" % arg,
                     default=True,
@@ -72,7 +74,9 @@ def _get_arg_parser(func, annotations, args_and_defaults, delimiter_chars):
                     help="%s. Defaults to True if not specified" % help_msg,
                 )
             else:
-                _LOG.debug("Adding positional argument %s.%s", func.__name__, arg)
+                _LOG.debug(
+                    "Adding positional argument %s.%s: %s", func.__name__, arg, arg_type
+                )
                 parser.add_argument(arg, help=help_msg, type=arg_type)
         else:
             if default is None and arg_type is None:
@@ -84,12 +88,23 @@ def _get_arg_parser(func, annotations, args_and_defaults, delimiter_chars):
             arg_type = arg_type or type(default)
             if arg_type == bool:
                 action = "store_false" if default else "store_true"
-                _LOG.debug("Adding optional flag %s.%s", func.__name__, arg)
+                _LOG.debug(
+                    "Adding optional flag %s.%s (default: %s)",
+                    func.__name__,
+                    arg,
+                    default,
+                )
                 parser.add_argument(
                     "--%s" % arg, help=help_msg, default=default, action=action
                 )
             else:
-                _LOG.debug("Adding optional argument %s.%s", func.__name__, arg)
+                _LOG.debug(
+                    "Adding optional argument %s.%s: %s (default: %s)",
+                    func.__name__,
+                    arg,
+                    arg_type,
+                    default,
+                )
                 parser.add_argument(
                     "--%s" % arg, help=help_msg, default=default, type=arg_type
                 )
