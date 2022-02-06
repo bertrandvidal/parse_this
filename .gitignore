@@ -43,3 +43,4 @@ env*/
 parse_this.iml
 pytest-coverage.txt
 venv/
+coverage.xml
