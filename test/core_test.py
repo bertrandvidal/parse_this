@@ -428,6 +428,9 @@ class TestCore(unittest.TestCase):
     def test_check_types_no_args(self):
         self.assertEqual(_check_types("function", {}, [], ()), [])
 
+    def test_check_types_return_annotation(self):
+        self.assertEqual(_check_types("function", {"return": int}, [], ()), [])
+
     def test_get_parser_call_method_returns_callable(self):
         call_method = _get_parser_call_method(concatenate_string)
         self.assertTrue(callable(call_method))
