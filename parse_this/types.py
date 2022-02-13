@@ -1,7 +1,14 @@
+from typing import Callable, Dict, List, Tuple
+
 from parse_this.exception import ParseThisException
 
 
-def _check_types(func_name, annotations, func_args, defaults):
+def _check_types(
+    func_name: str,
+    annotations: Dict[str, Callable],
+    func_args: List[str],
+    defaults: Tuple,
+):
     """Make sure that enough types were given to ensure conversion. Also remove
        potential 'self'/'cls' from the function arguments.
 
@@ -15,7 +22,7 @@ def _check_types(func_name, annotations, func_args, defaults):
         ParseThisException: we cannot infer the type of all of the arguments using
         the annotations and the default values
     """
-    defaults = defaults or []
+    defaults = defaults or ()
     types_annotations = dict(annotations)
 
     if "return" in types_annotations:

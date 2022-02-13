@@ -1,4 +1,6 @@
 import logging
+from argparse import Namespace
+from typing import Callable, List
 
 from parse_this.args import _get_args_to_parse
 from parse_this.exception import ParseThisException
@@ -7,7 +9,7 @@ from parse_this.parsing import _get_args_name_from_parser
 _LOG = logging.getLogger(__name__)
 
 
-def _get_parser_call_method(func):
+def _get_parser_call_method(func: Callable):
     """Returns the method that is linked to the 'call' method of the parser
 
     Args:
@@ -18,7 +20,7 @@ def _get_parser_call_method(func):
         only be decorated in a class decorated by parse_class
     """
     func_name = func.__name__
-    parser = func.parser
+    parser = func.parser  # type: ignore[attr-defined]
 
     def inner_call(instance=None, args=None):
         """This is method attached to <parser>.call.
@@ -49,7 +51,7 @@ def _get_parser_call_method(func):
     return inner_call
 
 
-def _call(callable_obj, arg_names, namespace):
+def _call(callable_obj: Callable, arg_names: List[str], namespace: Namespace):
     """Actually calls the callable with the namespace parsed from the command
     line.
 
@@ -62,7 +64,7 @@ def _call(callable_obj, arg_names, namespace):
     return callable_obj(**arguments)
 
 
-def _call_method_from_namespace(obj, method_name, namespace):
+def _call_method_from_namespace(obj: Callable, method_name: str, namespace: Namespace):
     """Call the method, retrieved from obj, with the correct arguments via
     the namespace
 

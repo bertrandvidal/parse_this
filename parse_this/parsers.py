@@ -1,7 +1,9 @@
-import argparse
 import logging
+import typing
+from argparse import ArgumentParser
 from functools import wraps
 from inspect import getfullargspec
+from typing import Callable, Dict, Optional, Type
 
 from parse_this.args import _get_args_and_defaults, _get_args_to_parse
 from parse_this.call import _call_method_from_namespace, _get_parser_call_method
@@ -21,7 +23,10 @@ class MethodParser(object):
         decorated with 'parse_class'
     """
 
-    def __init__(self, delimiter_chars=":", name=None):
+    _name: Optional[str]
+    _delimiter_chars: str
+
+    def __init__(self, delimiter_chars: str = ":", name: str = None):
         """
         Args:
             delimiter_chars: characters used to separate the parameters from their
@@ -33,7 +38,7 @@ class MethodParser(object):
         self._delimiter_chars = delimiter_chars
         self._name = name
 
-    def __call__(self, func):
+    def __call__(self, func: Callable):
         """Add an argument parser attribute `parser` to the decorated function.
 
         Args:
@@ -52,8 +57,7 @@ class MethodParser(object):
                 func, annotations, args_and_defaults, self._delimiter_chars
             )
             parser.get_name = lambda: self._name
-            func.parser = parser
-            func.parser.call = _get_parser_call_method(func)
+            self._set_function_parser(func, parser)
 
         @wraps(func)
         def decorated(*args, **kwargs):
@@ -61,12 +65,21 @@ class MethodParser(object):
 
         return decorated
 
+    @typing.no_type_check
+    def _set_function_parser(self, func: Callable, parser: ArgumentParser):
+        func.parser = parser
+        func.parser.call = _get_parser_call_method(func)
+
 
 class ClassParser(object):
     """Allows to create a global argument parser for a class along with
     subparsers with each if its properly decorated methods."""
 
-    def __init__(self, description=None, parse_private=False):
+    _parse_private: bool
+    _description: Optional[str]
+    _cls: Type = None
+
+    def __init__(self, description: str = None, parse_private: bool = False):
         """
 
         Args:
@@ -77,9 +90,8 @@ class ClassParser(object):
         """
         self._description = description
         self._parse_private = parse_private
-        self._cls = None
 
-    def __call__(self, cls):
+    def __call__(self, cls: Type):
         """
         Args:
             cls: class to be decorated
@@ -90,7 +102,12 @@ class ClassParser(object):
         self._set_class_parser(init_parser, methods_to_parse, cls)
         return cls
 
-    def _add_sub_parsers(self, top_level_parser, methods_to_parse, class_name):
+    def _add_sub_parsers(
+        self,
+        top_level_parser,
+        methods_to_parse: Dict[str, ArgumentParser],
+        class_name: str,
+    ):
         """Add all the sub-parsers to the top_level_parser.
 
         Args:
@@ -114,7 +131,8 @@ class ClassParser(object):
         for method_name, parser in methods_to_parse.items():
             # We use the name provided in 'create_parser` or the name of the
             # decorated method
-            parser_name = parser.get_name() or method_name
+            # TODO(bvidal): this is likely not covered by test
+            parser_name = parser.get_name() or method_name  # type: ignore[attr-defined]
             # Make the method name compatible for the argument parsing
             if parser_name.startswith("_"):
                 if not self._parse_private:
@@ -134,7 +152,12 @@ class ClassParser(object):
             )
         return parser_to_method
 
-    def _set_class_parser(self, init_parser, methods_to_parse, cls):
+    def _set_class_parser(
+        self,
+        init_parser: ArgumentParser,
+        methods_to_parse: Dict[str, ArgumentParser],
+        cls: Type,
+    ):
         """Creates the complete argument parser for the decorated class.
 
         Args:
@@ -148,7 +171,7 @@ class ClassParser(object):
         """
         top_level_parents = [init_parser] if init_parser else []
         description = self._description or cls.__doc__
-        top_level_parser = argparse.ArgumentParser(
+        top_level_parser = ArgumentParser(
             description=description,
             parents=top_level_parents,
             add_help=False,
@@ -164,10 +187,16 @@ class ClassParser(object):
         # the decorated class
         if init_parser:
             parser_to_method["__init__"] = "__init__"
-        top_level_parser.call = self._get_parser_call_method(parser_to_method)
+        self._set_parser_call_method(parser_to_method, top_level_parser)
         cls.parser = top_level_parser
 
-    def _get_parser_call_method(self, parser_to_method):
+    @typing.no_type_check
+    def _set_parser_call_method(
+        self, parser_to_method: Dict[str, str], top_level_parser: ArgumentParser
+    ):
+        top_level_parser.call = self._get_parser_call_method(parser_to_method)
+
+    def _get_parser_call_method(self, parser_to_method: Dict[str, Callable]):
         """Return the parser special method 'call' that handles sub-command
             calling.
 
