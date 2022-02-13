@@ -1,55 +1,9 @@
 import unittest
 
-from parse_this import create_parser, parse_class
 from parse_this.parsing import _get_arg_parser, _get_parseable_methods
 from parse_this.values import _NO_DEFAULT
+from test.helpers import Parseable, ParseableWithPrivateMethod
 from test.utils import captured_output
-
-
-@parse_class()
-class Parseable(object):
-    @create_parser()
-    def __init__(self, a: int):
-        self._a = a
-
-    @create_parser()
-    def _private_method(self, b: int):
-        return self._a * b
-
-    def not_parseable(self, c: int):
-        return self._a * c
-
-    @create_parser()
-    def parseable(self, d: int):
-        return self._a * d
-
-    @classmethod
-    @create_parser()
-    def cls_method(cls, e: int):
-        return e * e
-
-
-@parse_class(parse_private=True)
-class ParseableWithPrivateMethod(object):
-    @create_parser()
-    def __init__(self, a: int):
-        self._a = a
-
-    @create_parser()
-    def _private_method(self, b: int):
-        return self._a * b
-
-    def not_parseable(self, c: int):
-        return self._a * c
-
-    @create_parser()
-    def parseable(self, d: int):
-        return self._a * d
-
-    @classmethod
-    @create_parser()
-    def cls_method(cls, e: int):
-        return e * e
 
 
 def parse_me_full_docstring(one: str, two: int, three: int = 12):
