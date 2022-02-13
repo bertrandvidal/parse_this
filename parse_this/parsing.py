@@ -1,14 +1,15 @@
-import argparse
 import logging
+from argparse import ArgumentParser, _HelpAction
+from typing import Any, Callable, Dict, List, Tuple, Type
 
+from parse_this.args import _NO_DEFAULT
 from parse_this.exception import ParseThisException
 from parse_this.help.description import prepare_doc
-from parse_this.args import _NO_DEFAULT
 
 _LOG = logging.getLogger(__name__)
 
 
-def _get_parseable_methods(cls):
+def _get_parseable_methods(cls: Type):
     """Return all methods of cls that are parseable i.e. have been decorated
     by '@create_parser'.
 
@@ -41,7 +42,12 @@ def _get_parseable_methods(cls):
     return init_parser, methods_to_parse
 
 
-def _get_arg_parser(func, annotations, args_and_defaults, delimiter_chars):
+def _get_arg_parser(
+    func: Callable,
+    annotations: Dict[str, Callable],
+    args_and_defaults: List[Tuple[str, Any]],
+    delimiter_chars: str,
+):
     """Return an ArgumentParser for the given function. Arguments are defined
         from the function arguments and their associated defaults.
 
@@ -56,7 +62,7 @@ def _get_arg_parser(func, annotations, args_and_defaults, delimiter_chars):
     (description, arg_help) = prepare_doc(
         func, [x for (x, _) in args_and_defaults], delimiter_chars
     )
-    parser = argparse.ArgumentParser(description=description)
+    parser = ArgumentParser(description=description)
     for (arg, default) in args_and_defaults:
         help_msg = arg_help[arg]
         arg_type = annotations.get(arg)
@@ -111,7 +117,7 @@ def _get_arg_parser(func, annotations, args_and_defaults, delimiter_chars):
     return parser
 
 
-def _get_args_name_from_parser(parser):
+def _get_args_name_from_parser(parser: ArgumentParser):
     """Retrieve the name of the function argument linked to the given parser.
 
     Args:
@@ -120,7 +126,5 @@ def _get_args_name_from_parser(parser):
     # Retrieve the 'action' destination of the method parser i.e. its
     # argument name. The HelpAction is ignored.
     return [
-        action.dest
-        for action in parser._actions
-        if not isinstance(action, argparse._HelpAction)
+        action.dest for action in parser._actions if not isinstance(action, _HelpAction)
     ]
