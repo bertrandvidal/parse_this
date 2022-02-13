@@ -1,9 +1,9 @@
 import unittest
 
 from parse_this import create_parser
+from parse_this.args import _NO_DEFAULT
 from parse_this.exception import ParseThisException
 from parse_this.parsing import _get_arg_parser, _get_parseable_methods
-from parse_this.values import _NO_DEFAULT
 from test.helpers import (
     Parseable,
     has_bool_arguments,

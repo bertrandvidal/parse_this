@@ -2,7 +2,7 @@ import logging
 import sys
 from itertools import zip_longest
 
-from parse_this.values import _NO_DEFAULT
+_NO_DEFAULT = object()
 
 _LOG = logging.getLogger(__name__)
 

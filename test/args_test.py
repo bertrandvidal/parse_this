@@ -1,7 +1,6 @@
 import unittest
 
-from parse_this.args import _get_args_and_defaults, _get_args_to_parse
-from parse_this.values import _NO_DEFAULT
+from parse_this.args import _NO_DEFAULT, _get_args_and_defaults, _get_args_to_parse
 
 
 class TestArgs(unittest.TestCase):

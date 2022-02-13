@@ -3,7 +3,7 @@ import logging
 
 from parse_this.exception import ParseThisException
 from parse_this.help.description import prepare_doc
-from parse_this.values import _NO_DEFAULT
+from parse_this.args import _NO_DEFAULT
 
 _LOG = logging.getLogger(__name__)
 
