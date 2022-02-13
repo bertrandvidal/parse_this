@@ -4,7 +4,7 @@ from parse_this.exception import ParseThisException
 from parse_this.types import _check_types
 
 
-class TestCore(unittest.TestCase):
+class TestTypes(unittest.TestCase):
     def test_check_types_not_enough_types_provided(self):
         self.assertRaises(
             ParseThisException, _check_types, "function", {}, ["i_dont_have_a_type"], ()
