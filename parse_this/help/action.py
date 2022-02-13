@@ -1,4 +1,5 @@
 import argparse
+from typing import Any, Optional, Sequence, Union
 
 
 class FullHelpAction(argparse._HelpAction):
@@ -10,7 +11,13 @@ class FullHelpAction(argparse._HelpAction):
     Note: taken from https://stackoverflow.com/a/24122778/2003420
     """
 
-    def __call__(self, parser, namespace, values, option_string=None):
+    def __call__(
+        self,
+        parser: argparse.ArgumentParser,
+        namespace: argparse.Namespace,
+        values: Union[str, Sequence[Any], None],
+        option_string: Optional[str] = None,
+    ):
         # Print help for the parser this class is linked to
         parser.print_help()
         # Retrieve sub-parsers of the given parser
