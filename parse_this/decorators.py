@@ -1,5 +1,6 @@
 import logging
 from inspect import getfullargspec
+from typing import Callable, List
 
 from parse_this.args import _get_args_and_defaults, _get_args_to_parse
 from parse_this.call import (
@@ -11,11 +12,10 @@ from parse_this.parsing import (
 )
 from parse_this.types import _check_types
 
-
 _LOG = logging.getLogger(__name__)
 
 
-def parse_this(func, args=None, delimiter_chars=":"):
+def parse_this(func: Callable, args: List[str] = None, delimiter_chars: str = ":"):
     """Create an ArgParser for the given function converting the command line
        arguments according to the list of types.
 
