@@ -404,8 +404,8 @@ CAVEATS
 * A subsequent effect of the previous caveat is that `create_parser` cannot be stacked with other decorator that would
   alter the callable's signature
 * Classmethods cannot be access from the command line in a class decorated with `parse_class`
-* When using `create_parser` on a method that has an argument with `None` as a default value its type *must be* past in
-  the list of types. A `ParseThisException` will be raised otherwise.
+* When using `create_parser` on a method that has an argument with `None` as a default value it *must be* annotated.
+  A `ParseThisException` will be raised otherwise.
 
 TO DO
 -----
