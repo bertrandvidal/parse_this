@@ -1,70 +1,23 @@
 import unittest
 
-from parse_this import create_parser, parse_class, parse_this
+from parse_this import parse_this
 from parse_this.exception import ParseThisException
+from test.helpers import (
+    Dummy,
+    NeedInitDecorator,
+    NeedParseClassDecorator,
+    NeedParsing,
+    ShowMyDocstring,
+    i_am_parseable,
+    parse_me,
+)
 from test.utils import captured_output
-
-
-def parse_me(one: str, two: int, three: int = 12):
-    """Could use some parsing.
-
-    Args:
-        one: some stuff shouldn't be written down
-        two: I can turn 2 syllables words into 6 syllables words
-        three: I don't like the number three
-
-    Returns:
-        the first string argument concatenated with itself 'two' times and the
-        last parameters multiplied by itself
-    """
-    return one * two, three * three
 
 
 class TestParseThis(unittest.TestCase):
     def test_parse_this_return_value(self):
         self.assertEqual(parse_this(parse_me, "yes 2".split()), ("yesyes", 144))
         self.assertEqual(parse_this(parse_me, "no 3 --three 2".split()), ("nonono", 4))
-
-
-@create_parser()
-def i_am_parseable(one: str, two: int, three: int = 12):
-    """I too want to be parseable.
-
-    Args:
-      one: the one and only
-      two: for the money
-      three: don't like the number three
-    """
-    return one * two, three * three
-
-
-class Dummy(object):
-    def __init__(self, a):
-        self._a = a
-
-    @create_parser(delimiter_chars="--")
-    def multiply_all(self, b: int, c: int = 2):
-        """Will multiply everything!
-
-        Args:
-            b -- the Queen B
-            c -- a useless value
-
-        Returns:
-            Everything multiplied
-        """
-        return self._a * b * c
-
-    @classmethod
-    @create_parser()
-    def mult(cls, d: int, e: int = 2):
-        return d * e
-
-
-class NeedParseClassDecorator(object):
-    @create_parser()
-    def __init__(self, a: int):
-        self._a = a
 
 
 class TestCreateParser(unittest.TestCase):
@@ -85,72 +38,6 @@ class TestCreateParser(unittest.TestCase):
     def test_create_parser_on_init(self):
         parser = NeedParseClassDecorator.__init__.parser
         self.assertRaises(ParseThisException, parser.call, None, ["2"])
-
-
-@parse_class(description="Hello World", parse_private=True)
-class NeedParsing(object):
-
-    """This will be used as the parser description."""
-
-    @create_parser()
-    def __init__(self, four: int):
-        """
-        Args:
-            four: an int that will be used to multiply stuff
-        """
-        self._four = four
-
-    @create_parser()
-    def multiply_self_arg(self, num: int):
-        return self._four * num
-
-    @create_parser()
-    def _private_method(self, num: int):
-        return self._four * num
-
-    @create_parser()
-    def __str__(self):
-        return str(self._four)
-
-    @create_parser()
-    def could_you_parse_me(self, one: str, two: int, three: int = 12):
-        """I would like some arg parsing please.
-
-        Args:
-          one: and only one
-          two: will never be first
-          three: I don't like the number three
-        """
-        return one * two, three * three
-
-    @classmethod
-    @create_parser()
-    def parse_me_if_you_can(cls, one: str, two: int, three: int = 12):
-        return one * two, three * three
-
-
-@parse_class()
-class ShowMyDocstring(object):
-
-    """This should be the parser description"""
-
-    @create_parser()
-    def _will_not_appear(self, num: int):
-        return num * num
-
-    @create_parser()
-    def __str__(self):
-        return self.__class__.__name__
-
-
-@parse_class()
-class NeedInitDecorator(object):
-    def __init__(self, val: int):
-        self._val = val
-
-    @create_parser()
-    def do_stuff(self, num: int, div: int = 2):
-        return self._val * num / div
 
 
 class TestParseClass(unittest.TestCase):

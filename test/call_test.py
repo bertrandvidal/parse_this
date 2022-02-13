@@ -1,23 +1,13 @@
 import unittest
 from collections import namedtuple
 
-from parse_this import create_parser
 from parse_this.call import (
     _call,
     _call_method_from_namespace,
     _get_parser_call_method,
 )
 from parse_this.exception import ParseThisException
-from test.helpers import Parseable
-
-
-def parse_me_no_docstring(one: int, two: int, three: int):
-    return one * two, three * three
-
-
-@create_parser()
-def concatenate_string(string: str, nb_concat: int):
-    return string * nb_concat
+from test.helpers import Parseable, concatenate_string, parse_me_no_docstring
 
 
 class TestCall(unittest.TestCase):

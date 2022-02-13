@@ -1,76 +1,18 @@
 import unittest
 
 from parse_this.help.description import _get_default_help_message, prepare_doc
-from test.helpers import Parseable, ParseableWithPrivateMethod
+from test.helpers import (
+    Parseable,
+    ParseableWithPrivateMethod,
+    blank_line_in_wrong_place,
+    different_delimiter_chars,
+    multiline_docstring,
+    no_docstring,
+    parse_me_full_docstring,
+    parse_me_no_docstring,
+    with_args,
+)
 from test.utils import captured_output
-
-
-def no_docstring():
-    pass
-
-
-def with_args(a, b):
-    pass
-
-
-def blank_line_in_wrong_place(one: int, two: int):
-    """I put the blank line after arguments ...
-
-    Args:
-        one: this help is #1
-
-        two: this once won't appear sadly
-    """
-    return one * two
-
-
-def parse_me_full_docstring(one: str, two: int, three: int = 12):
-    """Could use some parsing.
-
-    Args:
-        one: some stuff shouldn't be written down
-        two: I can turn 2 syllables words into 6 syllables words
-        three: I don't like the number three
-
-    Returns:
-        the first string argument concatenated with itself 'two' times and the
-        last parameters multiplied by itself
-    """
-    return one * two, three * three
-
-
-def parse_me_no_docstring(one: int, two: int, three: int):
-    return one * two, three * three
-
-
-def multiline_docstring(one: int, two: int, three: int):
-    """I am a sneaky function.
-
-    Args:
-        one: this one is a no brainer
-        three: noticed you're missing docstring for two and
-          I'm multiline too!
-
-    Returns:
-        the first string argument concatenated with itself 'two' times and the
-        last parameters multiplied by itself
-    """
-    return one * two, three * three
-
-
-def different_delimiter_chars(one: int, two: int, three: int):
-    """I am a sneaky function.
-
-    Args:
-        one -- this one is a no brainer even with dashes
-        three -- noticed you're missing docstring for two and
-          I'm multiline too!
-
-    Returns:
-        the first string argument concatenated with itself 'two' times and the
-        last parameters multiplied by itself
-    """
-    return one * two, three * three
 
 
 class TestHelp(unittest.TestCase):

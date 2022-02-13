@@ -2,23 +2,8 @@ import unittest
 
 from parse_this.parsing import _get_arg_parser, _get_parseable_methods
 from parse_this.values import _NO_DEFAULT
-from test.helpers import Parseable
+from test.helpers import Parseable, parse_me_full_docstring
 from test.utils import captured_output
-
-
-def parse_me_full_docstring(one: str, two: int, three: int = 12):
-    """Could use some parsing.
-
-    Args:
-        one: some stuff shouldn't be written down
-        two: I can turn 2 syllables words into 6 syllables words
-        three: I don't like the number three
-
-    Returns:
-        the first string argument concatenated with itself 'two' times and the
-        last parameters multiplied by itself
-    """
-    return one * two, three * three
 
 
 class TestParsing(unittest.TestCase):
