@@ -305,6 +305,7 @@ class TestCore(unittest.TestCase):
         self.assertEqual(_check_types("function", {"return": int}, [], ()), [])
 
 
+# TODO(bvidal): move to help_test file
 class TestFullHelpAction(unittest.TestCase):
     def test_help_is_complete(self):
         with captured_output() as (out, _):
