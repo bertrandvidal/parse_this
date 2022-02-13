@@ -231,6 +231,10 @@ class NeedParsing(object):
     def parse_me_if_you_can(cls, one: str, two: int, three: int = 12):
         return one * two, three * three
 
+    @create_parser(name="new-name")
+    def rename_me_please(self, one: str, two: int):
+        return one * two
+
 
 @parse_class()
 class ShowMyDocstring(object):

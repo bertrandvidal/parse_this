@@ -56,7 +56,7 @@ class MethodParser(object):
             parser = _get_arg_parser(
                 func, annotations, args_and_defaults, self._delimiter_chars
             )
-            parser.get_name = lambda: self._name
+            parser.get_name = lambda: self._name or func.__name__
             self._set_function_parser(func, parser)
 
         @wraps(func)
@@ -131,8 +131,7 @@ class ClassParser(object):
         for method_name, parser in methods_to_parse.items():
             # We use the name provided in 'create_parser` or the name of the
             # decorated method
-            # TODO(bvidal): this is likely not covered by test
-            parser_name = parser.get_name() or method_name  # type: ignore[attr-defined]
+            parser_name = parser.get_name()  # type: ignore[attr-defined]
             # Make the method name compatible for the argument parsing
             if parser_name.startswith("_"):
                 if not self._parse_private:

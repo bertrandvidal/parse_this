@@ -31,6 +31,17 @@ class TestMethodParser(unittest.TestCase):
         parser = NeedParseClassDecorator.__init__.parser
         self.assertRaises(ParseThisException, parser.call, None, ["2"])
 
+    def test_create_parser_rename(self):
+        need_parsing = NeedParsing(12)
+        parser = need_parsing.could_you_parse_me.parser
+        # at this stage the '_' aren't replaced yet
+        self.assertEqual(parser.get_name(), "could_you_parse_me")
+
+    def test_create_parser_default_name(self):
+        need_parsing = NeedParsing(12)
+        parser = need_parsing.rename_me_please.parser
+        self.assertEqual(parser.get_name(), "new-name")
+
 
 class TestClassParser(unittest.TestCase):
     def test_parse_class_description(self):
