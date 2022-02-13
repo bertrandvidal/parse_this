@@ -1,10 +1,16 @@
 import logging
 import re
+from typing import Callable, List, Optional
 
 _LOG = logging.getLogger(__name__)
 
 
-def _get_default_help_message(func, args, description=None, args_help=None):
+def _get_default_help_message(
+    func: Callable,
+    args: List[str],
+    description: Optional[str] = None,
+    args_help: Optional[dict] = None,
+):
     """Create a default description for the parser and help message for the
     arguments if they are missing.
 
@@ -27,7 +33,7 @@ def _get_default_help_message(func, args, description=None, args_help=None):
     return description, args_help
 
 
-def prepare_doc(func, args, delimiter_chars):
+def prepare_doc(func: Callable, args: List[str], delimiter_chars: str):
     """From the function docstring get the arg parse description and arguments
         help message. If there is no docstring simple description and help
         message are created.
