@@ -2,7 +2,7 @@ import unittest
 
 from parse_this.parsing import _get_arg_parser, _get_parseable_methods
 from parse_this.values import _NO_DEFAULT
-from test.helpers import Parseable, ParseableWithPrivateMethod
+from test.helpers import Parseable
 from test.utils import captured_output
 
 
@@ -92,28 +92,6 @@ class TestParsing(unittest.TestCase):
             self.assertRaises(
                 SystemExit, parser.parse_args, "yes i_should_be_an_int".split()
             )
-
-
-class TestFullHelpAction(unittest.TestCase):
-    def test_help_is_complete(self):
-        with captured_output() as (out, _):
-            self.assertRaises(SystemExit, Parseable.parser.parse_args, ["-h"])
-            help_message = out.getvalue()
-        self.assertIn("parseable", help_message)
-        # Private methods and classmethods are not exposed by default
-        self.assertNotIn("private_method", help_message)
-        self.assertNotIn("cls_method", help_message)
-
-    def test_help_is_complete_with_private_method(self):
-        with captured_output() as (out, _):
-            self.assertRaises(
-                SystemExit, ParseableWithPrivateMethod.parser.parse_args, ["-h"]
-            )
-            help_message = out.getvalue()
-        self.assertIn("parseable", help_message)
-        self.assertIn("private_method", help_message)
-        # Classmethods are not exposed by default
-        self.assertNotIn("cls_method", help_message)
 
 
 if __name__ == "__main__":

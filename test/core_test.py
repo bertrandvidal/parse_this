@@ -2,8 +2,6 @@ import unittest
 
 from parse_this import create_parser
 from parse_this.exception import ParseThisException
-from test.helpers import Parseable, ParseableWithPrivateMethod
-from test.utils import captured_output
 
 
 def no_docstring():
@@ -115,29 +113,6 @@ class TestCore(unittest.TestCase):
         self.assertEqual(
             has_none_default_value.parser.call(args=["12", "--b", "yes"]), (12, "yes")
         )
-
-
-# TODO(bvidal): move to help_test file
-class TestFullHelpAction(unittest.TestCase):
-    def test_help_is_complete(self):
-        with captured_output() as (out, _):
-            self.assertRaises(SystemExit, Parseable.parser.parse_args, ["-h"])
-            help_message = out.getvalue()
-        self.assertIn("parseable", help_message)
-        # Private methods and classmethods are not exposed by default
-        self.assertNotIn("private_method", help_message)
-        self.assertNotIn("cls_method", help_message)
-
-    def test_help_is_complete_with_private_method(self):
-        with captured_output() as (out, _):
-            self.assertRaises(
-                SystemExit, ParseableWithPrivateMethod.parser.parse_args, ["-h"]
-            )
-            help_message = out.getvalue()
-        self.assertIn("parseable", help_message)
-        self.assertIn("private_method", help_message)
-        # Classmethods are not exposed by default
-        self.assertNotIn("cls_method", help_message)
 
 
 if __name__ == "__main__":
