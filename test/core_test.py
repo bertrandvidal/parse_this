@@ -2,7 +2,6 @@ import unittest
 
 from parse_this import create_parser, parse_class
 from parse_this.exception import ParseThisException
-from parse_this.help.description import _get_default_help_message, prepare_doc
 from parse_this.parsing import (
     _get_arg_parser,
     _get_parseable_methods,
@@ -147,19 +146,6 @@ def has_bool_arguments(a: bool):
 
 
 class TestCore(unittest.TestCase):
-    def test_get_default_help_message_no_docstring(self):
-        (description, _) = _get_default_help_message(no_docstring, [])
-        self.assertIsNotNone(description)
-        self.assertIn(no_docstring.__name__, description)
-
-    def test_get_default_help_message_add_default_args_help(self):
-        (_, args_help) = _get_default_help_message(with_args, ["a", "b"])
-        self.assertListEqual(sorted(list(args_help.keys())), ["a", "b"])
-        (_, args_help) = _get_default_help_message(
-            with_args, ["a", "b"], None, {"a": "I have an help message"}
-        )
-        self.assertListEqual(sorted(list(args_help.keys())), ["a", "b"])
-
     def test_get_parseable_methods(self):
         (init_parser, method_to_parser) = _get_parseable_methods(Parseable)
         self.assertIsNotNone(init_parser)
@@ -170,73 +156,6 @@ class TestCore(unittest.TestCase):
     def test_get_parseable_methods_do_not_include_classmethod(self):
         (_, method_to_parser) = _get_parseable_methods(Parseable)
         self.assertNotIn("cls_method", method_to_parser.keys())
-
-    def test_prepare_doc_blank_line_in_wrong_place(self):
-        (description, help_msg) = prepare_doc(
-            blank_line_in_wrong_place, ["one", "two"], ":"
-        )
-        self.assertEqual(description, "I put the blank line after arguments ...")
-        self.assertEqual(
-            help_msg, {"one": "this help is #1", "two": "Help message for two"}
-        )
-
-    def test_prepare_doc_full_docstring(self):
-        (description, help_msg) = prepare_doc(
-            parse_me_full_docstring, ["one", "two", "three"], ":"
-        )
-        self.assertEqual(description, "Could use some parsing.")
-        self.assertEqual(
-            help_msg,
-            {
-                "one": "some stuff shouldn't be written down",
-                "two": "I can turn 2 syllables words into 6 syllables words",
-                "three": "I don't like the number three",
-            },
-        )
-
-    def test_prepare_doc_no_docstring(self):
-        (description, help_msg) = prepare_doc(
-            parse_me_no_docstring, ["one", "two", "three"], ":"
-        )
-        self.assertEqual(description, "Argument parsing for parse_me_no_docstring")
-        self.assertEqual(
-            help_msg,
-            {
-                "one": "Help message for one",
-                "two": "Help message for two",
-                "three": "Help message for three",
-            },
-        )
-
-    def test_prepare_doc_will_you_dare(self):
-        (description, help_msg) = prepare_doc(
-            multiline_docstring, ["one", "two", "three"], ":"
-        )
-        self.assertEqual(description, "I am a sneaky function.")
-        self.assertEqual(
-            help_msg,
-            {
-                "one": "this one is a no brainer",
-                "two": "Help message for two",
-                "three": "noticed you're missing docstring for two and "
-                + "I'm multiline too!",
-            },
-        )
-
-    def test_prepare_doc_delimiter_chars(self):
-        (description, help_msg) = prepare_doc(
-            different_delimiter_chars, ["one", "two", "three"], "--"
-        )
-        self.assertEqual(description, "I am a sneaky function.")
-        self.assertEqual(
-            help_msg,
-            {
-                "one": "this one is a no brainer even with dashes",
-                "two": "Help message for two",
-                "three": "noticed you're missing docstring for two and "
-                + "I'm multiline too!",
-            },
-        )
 
     def test_get_arg_parser_bool_argument(self):
         self.assertEqual(has_bool_arguments.parser.call(args=[]), True)
