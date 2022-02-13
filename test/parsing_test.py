@@ -1,0 +1,166 @@
+import unittest
+
+from parse_this import create_parser, parse_class
+from parse_this.parsing import _get_arg_parser, _get_parseable_methods
+from parse_this.values import _NO_DEFAULT
+from test.utils import captured_output
+
+
+@parse_class()
+class Parseable(object):
+    @create_parser()
+    def __init__(self, a: int):
+        self._a = a
+
+    @create_parser()
+    def _private_method(self, b: int):
+        return self._a * b
+
+    def not_parseable(self, c: int):
+        return self._a * c
+
+    @create_parser()
+    def parseable(self, d: int):
+        return self._a * d
+
+    @classmethod
+    @create_parser()
+    def cls_method(cls, e: int):
+        return e * e
+
+
+@parse_class(parse_private=True)
+class ParseableWithPrivateMethod(object):
+    @create_parser()
+    def __init__(self, a: int):
+        self._a = a
+
+    @create_parser()
+    def _private_method(self, b: int):
+        return self._a * b
+
+    def not_parseable(self, c: int):
+        return self._a * c
+
+    @create_parser()
+    def parseable(self, d: int):
+        return self._a * d
+
+    @classmethod
+    @create_parser()
+    def cls_method(cls, e: int):
+        return e * e
+
+
+def parse_me_full_docstring(one: str, two: int, three: int = 12):
+    """Could use some parsing.
+
+    Args:
+        one: some stuff shouldn't be written down
+        two: I can turn 2 syllables words into 6 syllables words
+        three: I don't like the number three
+
+    Returns:
+        the first string argument concatenated with itself 'two' times and the
+        last parameters multiplied by itself
+    """
+    return one * two, three * three
+
+
+class TestParsing(unittest.TestCase):
+    def test_get_parseable_methods(self):
+        (init_parser, method_to_parser) = _get_parseable_methods(Parseable)
+        self.assertIsNotNone(init_parser)
+        self.assertListEqual(
+            sorted(list(method_to_parser.keys())), ["_private_method", "parseable"]
+        )
+
+    def test_get_parseable_methods_do_not_include_classmethod(self):
+        (_, method_to_parser) = _get_parseable_methods(Parseable)
+        self.assertNotIn("cls_method", method_to_parser.keys())
+
+    def test_get_arg_parser_annotation_take_precedence(self):
+        parser = _get_arg_parser(
+            parse_me_full_docstring,
+            {"one": int, "two": int, "three": int},
+            [("one", _NO_DEFAULT), ("two", _NO_DEFAULT), ("three", _NO_DEFAULT)],
+            ":",
+        )
+        namespace = parser.parse_args("1 2 3".split())
+        self.assertEqual(namespace.one, 1)
+        self.assertEqual(namespace.two, 2)
+        self.assertEqual(namespace.three, 3)
+
+    def test_get_arg_parser_with_default_value(self):
+        parser = _get_arg_parser(
+            parse_me_full_docstring,
+            {"one": str, "two": int, "three": int},
+            [("one", _NO_DEFAULT), ("two", _NO_DEFAULT), ("three", 12)],
+            ":",
+        )
+        namespace = parser.parse_args("yes 42".split())
+        self.assertEqual(namespace.one, "yes")
+        self.assertEqual(namespace.two, 42)
+        self.assertEqual(namespace.three, 12)
+
+    def test_get_arg_parser_without_default_value(self):
+        parser = _get_arg_parser(
+            parse_me_full_docstring,
+            {"one": str, "two": int, "three": int},
+            [("one", _NO_DEFAULT), ("two", _NO_DEFAULT), ("three", 12)],
+            ":",
+        )
+        namespace = parser.parse_args("no 12 --three=23".split())
+        self.assertEqual(namespace.one, "no")
+        self.assertEqual(namespace.two, 12)
+        self.assertEqual(namespace.three, 23)
+
+    def test_get_arg_parser_required_arguments(self):
+        parser = _get_arg_parser(
+            parse_me_full_docstring,
+            {"one": str, "two": int, "three": int},
+            [("one", _NO_DEFAULT), ("two", _NO_DEFAULT), ("three", 12)],
+            ":",
+        )
+        with captured_output():
+            self.assertRaises(
+                SystemExit, parser.parse_args, "we_are_missing_two".split()
+            )
+
+    def test_get_arg_parser_argument_type(self):
+        parser = _get_arg_parser(
+            parse_me_full_docstring,
+            {"one": str, "two": int, "three": int},
+            [("one", _NO_DEFAULT), ("two", _NO_DEFAULT), ("three", 12)],
+            ":",
+        )
+        with captured_output():
+            self.assertRaises(
+                SystemExit, parser.parse_args, "yes i_should_be_an_int".split()
+            )
+
+
+class TestFullHelpAction(unittest.TestCase):
+    def test_help_is_complete(self):
+        with captured_output() as (out, _):
+            self.assertRaises(SystemExit, Parseable.parser.parse_args, ["-h"])
+            help_message = out.getvalue()
+        self.assertIn("parseable", help_message)
+        # Private methods and classmethods are not exposed by default
+        self.assertNotIn("private_method", help_message)
+        self.assertNotIn("cls_method", help_message)
+
+    def test_help_is_complete_with_private_method(self):
+        with captured_output() as (out, _):
+            self.assertRaises(
+                SystemExit, ParseableWithPrivateMethod.parser.parse_args, ["-h"]
+            )
+            help_message = out.getvalue()
+        self.assertIn("parseable", help_message)
+        self.assertIn("private_method", help_message)
+        # Classmethods are not exposed by default
+        self.assertNotIn("cls_method", help_message)
+
+
+if __name__ == "__main__":
+    unittest.main()
