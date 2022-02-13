@@ -36,6 +36,7 @@ jobs:
       uses: jpetrucciani/mypy-check@master
       with:
         path: "parse_this test"
+        mypy_flags: '--config-file .mypy.ini'
     - name: test with pytest
       run: |
         pytest --cache-clear --cov=parse_this --cov-fail-under=95 --no-cov-on-fail --cov-report=xml test/
