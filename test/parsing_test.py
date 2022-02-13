@@ -1,12 +1,41 @@
 import unittest
 
+from parse_this import create_parser
+from parse_this.exception import ParseThisException
 from parse_this.parsing import _get_arg_parser, _get_parseable_methods
 from parse_this.values import _NO_DEFAULT
-from test.helpers import Parseable, parse_me_full_docstring
+from test.helpers import (
+    Parseable,
+    has_bool_arguments,
+    has_flags,
+    has_none_default_value,
+    parse_me_full_docstring,
+)
 from test.utils import captured_output
 
 
 class TestParsing(unittest.TestCase):
+    def test_get_arg_parser_bool_argument(self):
+        self.assertEqual(has_bool_arguments.parser.call(args=[]), True)
+        self.assertEqual(has_bool_arguments.parser.call(args=["--a"]), False)
+
+    def test_get_arg_parser_bool_default_value(self):
+        self.assertEqual(has_flags.parser.call(args=["12"]), (12, False))
+        self.assertEqual(has_flags.parser.call(args=["12", "--b"]), (12, True))
+
+    def test_get_arg_parser_with_none_default_value(self):
+        self.assertEqual(has_none_default_value.parser.call(args=["12"]), (12, None))
+        self.assertEqual(
+            has_none_default_value.parser.call(args=["12", "--b", "yes"]), (12, "yes")
+        )
+
+    def test_get_arg_parser_none_default_value_without_type(self):
+        with self.assertRaises(ParseThisException):
+
+            @create_parser(int)
+            def have_none_default_value(a: int, b=None):
+                pass
+
     def test_get_parseable_methods(self):
         (init_parser, method_to_parser) = _get_parseable_methods(Parseable)
         self.assertIsNotNone(init_parser)
