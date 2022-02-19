@@ -6,13 +6,36 @@ from inspect import getfullargspec
 from typing import Callable, Dict, Optional, Type
 
 from parse_this.args import _get_args_and_defaults, _get_args_to_parse
-from parse_this.call import _call_method_from_namespace, _get_parser_call_method
+from parse_this.call import _call, _call_method_from_namespace, _get_parser_call_method
 from parse_this.exception import ParseThisException
 from parse_this.help.action import FullHelpAction
 from parse_this.parsing import _get_arg_parser, _get_parseable_methods
 from parse_this.types import _check_types
 
 _LOG = logging.getLogger(__name__)
+
+
+class FunctionParser(object):
+    def __call__(
+        self, func: Callable, args: typing.List[str] = None, delimiter_chars: str = ":"
+    ):
+        """Create an ArgParser for the given function converting the command line
+           arguments and passing them to the function, return the result of the
+           function call.
+
+        Args:
+            func: the function for which the command line arguments to be parsed
+            args: a list of arguments to be parsed if None sys.argv is used
+            delimiter_chars: characters used to separate the parameters from their
+            help message in the docstring. Defaults to ':'
+        """
+        _LOG.debug("Creating parser for %s", func.__name__)
+        (func_args, _, _, defaults, _, _, annotations) = getfullargspec(func)
+        func_args = _check_types(func.__name__, annotations, func_args, defaults)
+        args_and_defaults = _get_args_and_defaults(func_args, defaults)
+        parser = _get_arg_parser(func, annotations, args_and_defaults, delimiter_chars)
+        arguments = parser.parse_args(_get_args_to_parse(args))
+        return _call(func, func_args, arguments)
 
 
 class MethodParser(object):
