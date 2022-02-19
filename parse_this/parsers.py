@@ -65,8 +65,11 @@ class MethodParser(object):
 
     _name: Optional[str]
     _delimiter_chars: str
+    _log_level: bool
 
-    def __init__(self, delimiter_chars: str = ":", name: str = None):
+    def __init__(
+        self, delimiter_chars: str = ":", name: str = None, log_level: bool = False
+    ):
         """
         Args:
             delimiter_chars: characters used to separate the parameters from their
@@ -74,9 +77,12 @@ class MethodParser(object):
             name: name that will be used for the parser when used in a class
             decorated with `parse_class`. If not provided the name of the method will
             be used
+            log_level: indicate whether or not a '--log-level' argument should be
+            handled to set the log level during the execution
         """
         self._delimiter_chars = delimiter_chars
         self._name = name
+        self._log_level = log_level
 
     def __call__(self, func: Callable):
         """Add an argument parser attribute `parser` to the decorated function.
@@ -94,7 +100,11 @@ class MethodParser(object):
             func_args = _check_types(func.__name__, annotations, func_args, defaults)
             args_and_defaults = _get_args_and_defaults(func_args, defaults)
             parser = _get_arg_parser(
-                func, annotations, args_and_defaults, self._delimiter_chars
+                func,
+                annotations,
+                args_and_defaults,
+                self._delimiter_chars,
+                self._log_level,
             )
             parser.get_name = lambda: self._name or func.__name__
             self._set_method_parser(func, parser)
