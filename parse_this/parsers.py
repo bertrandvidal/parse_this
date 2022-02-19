@@ -85,7 +85,7 @@ class MethodParser(object):
                 func, annotations, args_and_defaults, self._delimiter_chars
             )
             parser.get_name = lambda: self._name or func.__name__
-            self._set_function_parser(func, parser)
+            self._set_method_parser(func, parser)
 
         @wraps(func)
         def decorated(*args, **kwargs):
@@ -94,7 +94,7 @@ class MethodParser(object):
         return decorated
 
     @typing.no_type_check
-    def _set_function_parser(self, func: Callable, parser: ArgumentParser):
+    def _set_method_parser(self, func: Callable, parser: ArgumentParser):
         func.parser = parser
         func.parser.call = _get_parser_call_method(func)
 
