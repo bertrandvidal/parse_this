@@ -137,5 +137,7 @@ def _get_args_name_from_parser(parser: ArgumentParser):
     # Retrieve the 'action' destination of the method parser i.e. its
     # argument name. The HelpAction is ignored.
     return [
-        action.dest for action in parser._actions if not isinstance(action, _HelpAction)
+        action.dest
+        for action in parser._actions
+        if not isinstance(action, _HelpAction) and action.dest != "log_level"
     ]

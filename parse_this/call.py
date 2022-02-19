@@ -60,6 +60,10 @@ def _call(callable_obj: Callable, arg_names: List[str], namespace: Namespace):
         arg_names: name of the function arguments
         namespace: the namespace object parsed from the command line
     """
+    try:
+        logging.basicConfig(level=namespace.log_level)
+    except AttributeError:
+        pass
     arguments = {arg_name: getattr(namespace, arg_name) for arg_name in arg_names}
     return callable_obj(**arguments)
 
