@@ -324,7 +324,7 @@ As a function `parse_this` will handle the command line arguments directly.
 from parse_this import parse_this
 
 
-def concatenate_str(one, two=2):
+def concatenate_str(one: str, two: int = 2):
     """Concatenates a string with itself a given number of times.
 
     Args:
