@@ -16,6 +16,10 @@ _LOG = logging.getLogger(__name__)
 
 
 class FunctionParser(object):
+    """Parse command line arguments, transform them to the appropriate type and
+    delegate the call to a given callable.
+    """
+
     def __call__(
         self, func: Callable, args: typing.List[str] = None, delimiter_chars: str = ":"
     ):
