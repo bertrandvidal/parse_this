@@ -21,7 +21,11 @@ class FunctionParser(object):
     """
 
     def __call__(
-        self, func: Callable, args: typing.List[str] = None, delimiter_chars: str = ":"
+        self,
+        func: Callable,
+        args: typing.List[str] = None,
+        delimiter_chars: str = ":",
+        log_level: bool = False,
     ):
         """Create an ArgParser for the given function converting the command line
            arguments and passing them to the function, return the result of the
@@ -32,12 +36,16 @@ class FunctionParser(object):
             args: a list of arguments to be parsed if None sys.argv is used
             delimiter_chars: characters used to separate the parameters from their
             help message in the docstring. Defaults to ':'
+            log_level: indicate whether or not a '--log-level' argument should be
+            handled to set the log level during the execution
         """
         _LOG.debug("Creating parser for %s", func.__name__)
         (func_args, _, _, defaults, _, _, annotations) = getfullargspec(func)
         func_args = _check_types(func.__name__, annotations, func_args, defaults)
         args_and_defaults = _get_args_and_defaults(func_args, defaults)
-        parser = _get_arg_parser(func, annotations, args_and_defaults, delimiter_chars)
+        parser = _get_arg_parser(
+            func, annotations, args_and_defaults, delimiter_chars, log_level
+        )
         self._set_function_parser(func, parser)
         arguments = parser.parse_args(_get_args_to_parse(args))
         return _call(func, func_args, arguments)
