@@ -324,7 +324,7 @@ As a function `parse_this` will handle the command line arguments directly.
 from parse_this import parse_this
 
 
-def concatenate_str(one, two=2):
+def concatenate_str(one: str, two: int = 2):
     """Concatenates a string with itself a given number of times.
 
     Args:
@@ -413,8 +413,6 @@ TO DO
   * The `_get_parser_call_method` method wipes out the signature of the original method
   * Handle file arguments
   * Handle list/tuple arguments i.e. argparse's nargs
-  * Replace the `parse_this` decorator with a `FunctionParser` + remove `decorators.py` and instead define decorators
-    in the module's `__init__`
 
 
 License
