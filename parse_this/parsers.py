@@ -9,7 +9,11 @@ from parse_this.args import _get_args_and_defaults, _get_args_to_parse
 from parse_this.call import _call, _call_method_from_namespace, _get_parser_call_method
 from parse_this.exception import ParseThisException
 from parse_this.help.action import FullHelpAction
-from parse_this.parsing import _get_arg_parser, _get_parseable_methods
+from parse_this.parsing import (
+    _add_log_level_argument,
+    _get_arg_parser,
+    _get_parseable_methods,
+)
 from parse_this.types import _check_types
 
 _LOG = logging.getLogger(__name__)
@@ -21,7 +25,11 @@ class FunctionParser(object):
     """
 
     def __call__(
-        self, func: Callable, args: typing.List[str] = None, delimiter_chars: str = ":"
+        self,
+        func: Callable,
+        args: typing.List[str] = None,
+        delimiter_chars: str = ":",
+        log_level: bool = False,
     ):
         """Create an ArgParser for the given function converting the command line
            arguments and passing them to the function, return the result of the
@@ -32,12 +40,16 @@ class FunctionParser(object):
             args: a list of arguments to be parsed if None sys.argv is used
             delimiter_chars: characters used to separate the parameters from their
             help message in the docstring. Defaults to ':'
+            log_level: indicate whether or not a '--log-level' argument should be
+            handled to set the log level during the execution
         """
         _LOG.debug("Creating parser for %s", func.__name__)
         (func_args, _, _, defaults, _, _, annotations) = getfullargspec(func)
         func_args = _check_types(func.__name__, annotations, func_args, defaults)
         args_and_defaults = _get_args_and_defaults(func_args, defaults)
-        parser = _get_arg_parser(func, annotations, args_and_defaults, delimiter_chars)
+        parser = _get_arg_parser(
+            func, annotations, args_and_defaults, delimiter_chars, log_level
+        )
         self._set_function_parser(func, parser)
         arguments = parser.parse_args(_get_args_to_parse(args))
         return _call(func, func_args, arguments)
@@ -57,8 +69,11 @@ class MethodParser(object):
 
     _name: Optional[str]
     _delimiter_chars: str
+    _log_level: bool
 
-    def __init__(self, delimiter_chars: str = ":", name: str = None):
+    def __init__(
+        self, delimiter_chars: str = ":", name: str = None, log_level: bool = False
+    ):
         """
         Args:
             delimiter_chars: characters used to separate the parameters from their
@@ -66,9 +81,12 @@ class MethodParser(object):
             name: name that will be used for the parser when used in a class
             decorated with `parse_class`. If not provided the name of the method will
             be used
+            log_level: indicate whether or not a '--log-level' argument should be
+            handled to set the log level during the execution
         """
         self._delimiter_chars = delimiter_chars
         self._name = name
+        self._log_level = log_level
 
     def __call__(self, func: Callable):
         """Add an argument parser attribute `parser` to the decorated function.
@@ -86,7 +104,11 @@ class MethodParser(object):
             func_args = _check_types(func.__name__, annotations, func_args, defaults)
             args_and_defaults = _get_args_and_defaults(func_args, defaults)
             parser = _get_arg_parser(
-                func, annotations, args_and_defaults, self._delimiter_chars
+                func,
+                annotations,
+                args_and_defaults,
+                self._delimiter_chars,
+                self._log_level,
             )
             parser.get_name = lambda: self._name or func.__name__
             self._set_method_parser(func, parser)
@@ -110,8 +132,14 @@ class ClassParser(object):
     _parse_private: bool
     _description: Optional[str]
     _cls: Type = None
+    _log_level: bool
 
-    def __init__(self, description: str = None, parse_private: bool = False):
+    def __init__(
+        self,
+        description: str = None,
+        parse_private: bool = False,
+        log_level: bool = False,
+    ):
         """
 
         Args:
@@ -119,9 +147,12 @@ class ClassParser(object):
             if not specified it will be the class docstring.
             parse_private: specifies whether or not 'private' methods should be
             parsed, defaults to False
+            log_level: indicate whether or not a '--log-level' argument should be
+            handled to set the log level during the execution
         """
         self._description = description
         self._parse_private = parse_private
+        self._log_level = log_level
 
     def __call__(self, cls: Type):
         """
@@ -211,6 +242,8 @@ class ClassParser(object):
         top_level_parser.add_argument(
             "-h", "--help", action=FullHelpAction, help="Display this help message"
         )
+        if self._log_level:
+            _add_log_level_argument(top_level_parser)
         parser_to_method = self._add_sub_parsers(
             top_level_parser, methods_to_parse, cls.__name__
         )

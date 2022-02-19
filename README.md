@@ -409,7 +409,7 @@ CAVEATS
 
 TO DO
 -----
-  * Add --log-level with an optional param for `create_parser` and `parse_class`
+  * Add documentation in README on auto `--log-level` argument
   * The `_get_parser_call_method` method wipes out the signature of the original method
   * Handle file arguments
   * Handle list/tuple arguments i.e. argparse's nargs

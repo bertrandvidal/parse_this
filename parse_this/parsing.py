@@ -42,11 +42,18 @@ def _get_parseable_methods(cls: Type):
     return init_parser, methods_to_parse
 
 
+def _add_log_level_argument(parser: ArgumentParser):
+    parser.add_argument(
+        "--log-level", required=False, choices=list(logging._nameToLevel.keys())
+    )
+
+
 def _get_arg_parser(
     func: Callable,
     annotations: Dict[str, Callable],
     args_and_defaults: List[Tuple[str, Any]],
     delimiter_chars: str,
+    log_level: bool = False,
 ):
     """Return an ArgumentParser for the given function. Arguments are defined
         from the function arguments and their associated defaults.
@@ -57,12 +64,16 @@ def _get_arg_parser(
         args_and_defaults: list of 2-tuples (arg_name, arg_default)
         delimiter_chars: characters used to separate the parameters from their
         help message in the docstring
+        log_level: indicate whether or not a '--log-level' argument should be
+        handled to set the log level during the execution
     """
     _LOG.debug("Creating ArgumentParser for '%s'", func.__name__)
     (description, arg_help) = prepare_doc(
         func, [x for (x, _) in args_and_defaults], delimiter_chars
     )
     parser = ArgumentParser(description=description)
+    if log_level:
+        _add_log_level_argument(parser)
     for (arg, default) in args_and_defaults:
         help_msg = arg_help[arg]
         arg_type = annotations.get(arg)
@@ -126,5 +137,7 @@ def _get_args_name_from_parser(parser: ArgumentParser):
     # Retrieve the 'action' destination of the method parser i.e. its
     # argument name. The HelpAction is ignored.
     return [
-        action.dest for action in parser._actions if not isinstance(action, _HelpAction)
+        action.dest
+        for action in parser._actions
+        if not isinstance(action, _HelpAction) and action.dest != "log_level"
     ]
