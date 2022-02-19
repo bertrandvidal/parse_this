@@ -413,8 +413,6 @@ TO DO
   * The `_get_parser_call_method` method wipes out the signature of the original method
   * Handle file arguments
   * Handle list/tuple arguments i.e. argparse's nargs
-  * Replace the `parse_this` decorator with a `FunctionParser` + remove `decorators.py` and instead define decorators
-    in the module's `__init__`
 
 
 License
