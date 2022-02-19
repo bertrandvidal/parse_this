@@ -9,7 +9,11 @@ from parse_this.args import _get_args_and_defaults, _get_args_to_parse
 from parse_this.call import _call, _call_method_from_namespace, _get_parser_call_method
 from parse_this.exception import ParseThisException
 from parse_this.help.action import FullHelpAction
-from parse_this.parsing import _get_arg_parser, _get_parseable_methods
+from parse_this.parsing import (
+    _add_log_level_argument,
+    _get_arg_parser,
+    _get_parseable_methods,
+)
 from parse_this.types import _check_types
 
 _LOG = logging.getLogger(__name__)
@@ -128,8 +132,14 @@ class ClassParser(object):
     _parse_private: bool
     _description: Optional[str]
     _cls: Type = None
+    _log_level: bool
 
-    def __init__(self, description: str = None, parse_private: bool = False):
+    def __init__(
+        self,
+        description: str = None,
+        parse_private: bool = False,
+        log_level: bool = False,
+    ):
         """
 
         Args:
@@ -137,9 +147,12 @@ class ClassParser(object):
             if not specified it will be the class docstring.
             parse_private: specifies whether or not 'private' methods should be
             parsed, defaults to False
+            log_level: indicate whether or not a '--log-level' argument should be
+            handled to set the log level during the execution
         """
         self._description = description
         self._parse_private = parse_private
+        self._log_level = log_level
 
     def __call__(self, cls: Type):
         """
@@ -229,6 +242,8 @@ class ClassParser(object):
         top_level_parser.add_argument(
             "-h", "--help", action=FullHelpAction, help="Display this help message"
         )
+        if self._log_level:
+            _add_log_level_argument(top_level_parser)
         parser_to_method = self._add_sub_parsers(
             top_level_parser, methods_to_parse, cls.__name__
         )
