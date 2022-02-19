@@ -42,6 +42,13 @@ class TestFunctionParser(unittest.TestCase):
             help_message,
         )
 
+    def test_function_description(self):
+        parser = FunctionParser()
+        parser(different_delimiter_chars, "1 2 3".split(), delimiter_chars="--")
+        self.assertEqual(
+            "I am a sneaky function.", different_delimiter_chars.parser.description
+        )
+
 
 class TestMethodParser(unittest.TestCase):
     def test_create_parser_on_function(self):

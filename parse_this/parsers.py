@@ -34,8 +34,13 @@ class FunctionParser(object):
         func_args = _check_types(func.__name__, annotations, func_args, defaults)
         args_and_defaults = _get_args_and_defaults(func_args, defaults)
         parser = _get_arg_parser(func, annotations, args_and_defaults, delimiter_chars)
+        self.set_function_parser(func, parser)
         arguments = parser.parse_args(_get_args_to_parse(args))
         return _call(func, func_args, arguments)
+
+    @typing.no_type_check
+    def set_function_parser(self, func: Callable, parser: ArgumentParser):
+        func.parser = parser
 
 
 class MethodParser(object):
