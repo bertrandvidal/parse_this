@@ -16,6 +16,10 @@ _LOG = logging.getLogger(__name__)
 
 
 class FunctionParser(object):
+    """Parse command line arguments, transform them to the appropriate type and
+    delegate the call to a given callable.
+    """
+
     def __call__(
         self, func: Callable, args: typing.List[str] = None, delimiter_chars: str = ":"
     ):
@@ -34,8 +38,13 @@ class FunctionParser(object):
         func_args = _check_types(func.__name__, annotations, func_args, defaults)
         args_and_defaults = _get_args_and_defaults(func_args, defaults)
         parser = _get_arg_parser(func, annotations, args_and_defaults, delimiter_chars)
+        self._set_function_parser(func, parser)
         arguments = parser.parse_args(_get_args_to_parse(args))
         return _call(func, func_args, arguments)
+
+    @typing.no_type_check
+    def _set_function_parser(self, func: Callable, parser: ArgumentParser):
+        func.parser = parser
 
 
 class MethodParser(object):
@@ -80,7 +89,7 @@ class MethodParser(object):
                 func, annotations, args_and_defaults, self._delimiter_chars
             )
             parser.get_name = lambda: self._name or func.__name__
-            self._set_function_parser(func, parser)
+            self._set_method_parser(func, parser)
 
         @wraps(func)
         def decorated(*args, **kwargs):
@@ -89,7 +98,7 @@ class MethodParser(object):
         return decorated
 
     @typing.no_type_check
-    def _set_function_parser(self, func: Callable, parser: ArgumentParser):
+    def _set_method_parser(self, func: Callable, parser: ArgumentParser):
         func.parser = parser
         func.parser.call = _get_parser_call_method(func)
 
