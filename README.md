@@ -425,7 +425,7 @@ Contributing and dev
 --------------------
 
 ```sh
-python3 -m venv --clear --upgrade-deps --prompt "parse-this-39" venv && \
+python3 -m venv --clear --upgrade-deps --prompt "parse-this" venv && \
 source venv/bin/activate && \
 pip install -r requirements.txt && \
 pre-commit install && \

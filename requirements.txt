@@ -1,6 +1,7 @@
 black
 flake8
 ipython
+mypy
 pre-commit
 pytest
 pytest-cov

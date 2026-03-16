@@ -45,3 +45,7 @@ pytest-coverage.txt
 venv/
 coverage.xml
 out/
+
+# Claude Code
+.claude/memory/
+.claude/plans/
