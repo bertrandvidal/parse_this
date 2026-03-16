@@ -68,7 +68,7 @@ def _get_arg_parser(
         handled to set the log level during the execution
     """
     _LOG.debug("Creating ArgumentParser for '%s'", func.__name__)
-    (description, arg_help) = prepare_doc(
+    description, arg_help = prepare_doc(
         func, [x for (x, _) in args_and_defaults], delimiter_chars
     )
     parser = ArgumentParser(description=description)

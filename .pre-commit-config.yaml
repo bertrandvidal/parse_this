@@ -10,7 +10,7 @@ repos:
       - id: check-merge-conflict
       - id: requirements-txt-fixer
   - repo: https://github.com/psf/black
-    rev: 24.10.0
+    rev: 26.3.0
     hooks:
       - id: black
   - repo: https://github.com/PyCQA/flake8

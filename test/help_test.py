@@ -17,20 +17,20 @@ from test.utils import captured_output
 
 class TestHelp(unittest.TestCase):
     def test_get_default_help_message_no_docstring(self):
-        (description, _) = _get_default_help_message(no_docstring, [])
+        description, _ = _get_default_help_message(no_docstring, [])
         self.assertIsNotNone(description)
         self.assertIn(no_docstring.__name__, description)
 
     def test_get_default_help_message_add_default_args_help(self):
-        (_, args_help) = _get_default_help_message(with_args, ["a", "b"])
+        _, args_help = _get_default_help_message(with_args, ["a", "b"])
         self.assertListEqual(sorted(list(args_help.keys())), ["a", "b"])
-        (_, args_help) = _get_default_help_message(
+        _, args_help = _get_default_help_message(
             with_args, ["a", "b"], None, {"a": "I have an help message"}
         )
         self.assertListEqual(sorted(list(args_help.keys())), ["a", "b"])
 
     def test_prepare_doc_blank_line_in_wrong_place(self):
-        (description, help_msg) = prepare_doc(
+        description, help_msg = prepare_doc(
             blank_line_in_wrong_place, ["one", "two"], ":"
         )
         self.assertEqual(description, "I put the blank line after arguments ...")
@@ -39,7 +39,7 @@ class TestHelp(unittest.TestCase):
         )
 
     def test_prepare_doc_full_docstring(self):
-        (description, help_msg) = prepare_doc(
+        description, help_msg = prepare_doc(
             parse_me_full_docstring, ["one", "two", "three"], ":"
         )
         self.assertEqual(description, "Could use some parsing.")
@@ -53,7 +53,7 @@ class TestHelp(unittest.TestCase):
         )
 
     def test_prepare_doc_no_docstring(self):
-        (description, help_msg) = prepare_doc(
+        description, help_msg = prepare_doc(
             parse_me_no_docstring, ["one", "two", "three"], ":"
         )
         self.assertEqual(description, "Argument parsing for parse_me_no_docstring")
@@ -67,7 +67,7 @@ class TestHelp(unittest.TestCase):
         )
 
     def test_prepare_doc_will_you_dare(self):
-        (description, help_msg) = prepare_doc(
+        description, help_msg = prepare_doc(
             multiline_docstring, ["one", "two", "three"], ":"
         )
         self.assertEqual(description, "I am a sneaky function.")
@@ -82,7 +82,7 @@ class TestHelp(unittest.TestCase):
         )
 
     def test_prepare_doc_delimiter_chars(self):
-        (description, help_msg) = prepare_doc(
+        description, help_msg = prepare_doc(
             different_delimiter_chars, ["one", "two", "three"], "--"
         )
         self.assertEqual(description, "I am a sneaky function.")
