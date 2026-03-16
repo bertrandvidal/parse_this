@@ -74,7 +74,7 @@ def _get_arg_parser(
     parser = ArgumentParser(description=description)
     if log_level:
         _add_log_level_argument(parser)
-    for (arg, default) in args_and_defaults:
+    for arg, default in args_and_defaults:
         help_msg = arg_help[arg]
         arg_type = annotations.get(arg)
         if default is _NO_DEFAULT:
