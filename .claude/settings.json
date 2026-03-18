@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3:*)",
+      "Bash(python:*)",
+      "Bash(git checkout:*)",
+      "Bash(pytest:*)",
+      "Bash(pre-commit)",
+      "Bash(git stash:*)",
+      "Bash(pyenv versions:*)",
+      "Bash(pyenv shell:*)",
+      "Bash(gh run:*)",
+      "Bash(pip3 index:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(gh issue:*)",
+      "Bash(cat:*)",
+      "Bash(jq:*)",
+      "Bash(ls:*)",
+      "Bash(wc:*)"
+    ]
+  }
+}
