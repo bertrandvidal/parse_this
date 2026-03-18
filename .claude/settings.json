@@ -16,7 +16,8 @@
       "Bash(cat:*)",
       "Bash(jq:*)",
       "Bash(ls:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Bash(gh pr:*)"
     ]
   }
 }
