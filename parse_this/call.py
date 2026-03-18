@@ -1,5 +1,6 @@
 import logging
 from argparse import Namespace
+from functools import wraps
 from typing import Callable, List
 
 from parse_this.args import _get_args_to_parse
@@ -22,6 +23,7 @@ def _get_parser_call_method(func: Callable):
     func_name = func.__name__
     parser = func.parser  # type: ignore[attr-defined]
 
+    @wraps(func)
     def inner_call(instance=None, args=None):
         """This is method attached to <parser>.call.
 

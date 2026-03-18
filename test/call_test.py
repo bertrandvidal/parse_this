@@ -49,6 +49,18 @@ class TestCall(unittest.TestCase):
             _call_method_from_namespace(Parseable(12), "parseable", fake_namespace), 24
         )
 
+    def test_get_parser_call_method_preserves_name(self):
+        call_method = _get_parser_call_method(concatenate_string)
+        self.assertEqual(call_method.__name__, "concatenate_string")
+
+    def test_get_parser_call_method_preserves_doc(self):
+        call_method = _get_parser_call_method(concatenate_string)
+        self.assertEqual(call_method.__doc__, concatenate_string.__doc__)
+
+    def test_get_parser_call_method_preserves_wrapped(self):
+        call_method = _get_parser_call_method(concatenate_string)
+        self.assertIs(call_method.__wrapped__, concatenate_string)
+
 
 if __name__ == "__main__":
     unittest.main()
