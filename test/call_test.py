@@ -7,7 +7,12 @@ from parse_this.call import (
     _get_parser_call_method,
 )
 from parse_this.exception import ParseThisException
-from test.helpers import Parseable, concatenate_string, parse_me_no_docstring
+from test.helpers import (
+    Parseable,
+    concatenate_string,
+    i_am_parseable,
+    parse_me_no_docstring,
+)
 
 
 class TestCall(unittest.TestCase):
@@ -54,8 +59,8 @@ class TestCall(unittest.TestCase):
         self.assertEqual(call_method.__name__, "concatenate_string")
 
     def test_get_parser_call_method_preserves_doc(self):
-        call_method = _get_parser_call_method(concatenate_string)
-        self.assertEqual(call_method.__doc__, concatenate_string.__doc__)
+        call_method = _get_parser_call_method(i_am_parseable)
+        self.assertEqual(call_method.__doc__, i_am_parseable.__doc__)
 
     def test_get_parser_call_method_preserves_wrapped(self):
         call_method = _get_parser_call_method(concatenate_string)
