@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch
 
 from parse_this.exception import ParseThisException
 from parse_this.parsers import FunctionParser
@@ -7,8 +8,10 @@ from test.helpers import (
     NeedInitDecorator,
     NeedParseClassDecorator,
     NeedParsing,
+    ParseableWithLogLevel,
     ShowMyDocstring,
     different_delimiter_chars,
+    function_with_log_level,
     i_am_parseable,
     parse_me_full_docstring,
 )
@@ -139,6 +142,35 @@ class TestClassParser(unittest.TestCase):
         with captured_output():
             with self.assertRaises(SystemExit):
                 NeedParsing.parser.call("12 parse-me-if-you-can one 2")
+
+
+class TestLogLevel(unittest.TestCase):
+    @patch("parse_this.call.logging.basicConfig")
+    def test_function_parser_log_level(self, mock_basic_config):
+        parser = FunctionParser()
+        result = parser(
+            parse_me_full_docstring,
+            "first 2 --log-level DEBUG".split(),
+            log_level=True,
+        )
+        self.assertEqual(result, parse_me_full_docstring("first", 2))
+        mock_basic_config.assert_called_with(level="DEBUG")
+
+    @patch("parse_this.call.logging.basicConfig")
+    def test_create_parser_with_log_level(self, mock_basic_config):
+        result = function_with_log_level.parser.call(
+            args="yes 2 --log-level WARNING".split()
+        )
+        self.assertEqual(result, "yesyes")
+        mock_basic_config.assert_called_with(level="WARNING")
+
+    @patch("parse_this.call.logging.basicConfig")
+    def test_parse_class_with_log_level(self, mock_basic_config):
+        result = ParseableWithLogLevel.parser.call(
+            "12 --log-level ERROR parseable 2".split()
+        )
+        self.assertEqual(result, 24)
+        mock_basic_config.assert_called_with(level="ERROR")
 
 
 if __name__ == "__main__":

@@ -1,9 +1,15 @@
 import unittest
+from argparse import ArgumentParser
 
 from parse_this import create_parser
 from parse_this.args import _NO_DEFAULT
 from parse_this.exception import ParseThisException
-from parse_this.parsing import _get_arg_parser, _get_parseable_methods
+from parse_this.parsing import (
+    _add_log_level_argument,
+    _get_arg_parser,
+    _get_args_name_from_parser,
+    _get_parseable_methods,
+)
 from test.helpers import (
     Parseable,
     has_bool_arguments,
@@ -106,6 +112,56 @@ class TestParsing(unittest.TestCase):
             self.assertRaises(
                 SystemExit, parser.parse_args, "yes i_should_be_an_int".split()
             )
+
+    def test_add_log_level_argument(self):
+        parser = ArgumentParser()
+        _add_log_level_argument(parser)
+        namespace = parser.parse_args("--log-level DEBUG".split())
+        self.assertEqual(namespace.log_level, "DEBUG")
+
+    def test_add_log_level_argument_not_required(self):
+        parser = ArgumentParser()
+        _add_log_level_argument(parser)
+        namespace = parser.parse_args([])
+        self.assertIsNone(namespace.log_level)
+
+    def test_add_log_level_argument_invalid(self):
+        parser = ArgumentParser()
+        _add_log_level_argument(parser)
+        with captured_output():
+            with self.assertRaises(SystemExit):
+                parser.parse_args("--log-level INVALID".split())
+
+    def test_get_args_name_from_parser(self):
+        parser = _get_arg_parser(
+            parse_me_full_docstring,
+            {"one": str, "two": int, "three": int},
+            [("one", _NO_DEFAULT), ("two", _NO_DEFAULT), ("three", 12)],
+            ":",
+        )
+        args = _get_args_name_from_parser(parser)
+        self.assertEqual(args, ["one", "two", "three"])
+
+    def test_get_args_name_from_parser_excludes_help(self):
+        parser = _get_arg_parser(
+            parse_me_full_docstring,
+            {"one": str, "two": int, "three": int},
+            [("one", _NO_DEFAULT), ("two", _NO_DEFAULT), ("three", 12)],
+            ":",
+        )
+        args = _get_args_name_from_parser(parser)
+        self.assertNotIn("help", args)
+
+    def test_get_args_name_from_parser_excludes_log_level(self):
+        parser = _get_arg_parser(
+            parse_me_full_docstring,
+            {"one": str, "two": int, "three": int},
+            [("one", _NO_DEFAULT), ("two", _NO_DEFAULT), ("three", 12)],
+            ":",
+            log_level=True,
+        )
+        args = _get_args_name_from_parser(parser)
+        self.assertNotIn("log_level", args)
 
 
 if __name__ == "__main__":

@@ -410,7 +410,6 @@ CAVEATS
 TO DO
 -----
   * Add documentation in README on auto `--log-level` argument
-  * The `_get_parser_call_method` method wipes out the signature of the original method
   * Handle file arguments
   * Handle list/tuple arguments i.e. argparse's nargs
 

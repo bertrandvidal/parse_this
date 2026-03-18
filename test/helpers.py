@@ -89,6 +89,22 @@ def concatenate_string(string: str, nb_concat: int):
     return string * nb_concat
 
 
+@create_parser(log_level=True)
+def function_with_log_level(string: str, nb_concat: int):
+    return string * nb_concat
+
+
+@parse_class(log_level=True)
+class ParseableWithLogLevel(object):
+    @create_parser()
+    def __init__(self, a: int):
+        self._a = a
+
+    @create_parser()
+    def parseable(self, d: int):
+        return self._a * d
+
+
 @create_parser()
 def has_none_default_value(a: int, b: str = None):
     return a, b
