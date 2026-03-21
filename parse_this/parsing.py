@@ -1,6 +1,8 @@
+import enum
+import inspect
 import logging
 from argparse import ArgumentParser, _HelpAction
-from typing import Any, Callable, Dict, List, Tuple, Type
+from typing import Any, Callable, Dict, List, Tuple, Type, cast
 
 from parse_this.args import _NO_DEFAULT
 from parse_this.exception import ParseThisException
@@ -48,6 +50,22 @@ def _add_log_level_argument(parser: ArgumentParser):
     )
 
 
+def _is_enum_type(arg_type: Any) -> bool:
+    """Return True if arg_type is a subclass of enum.Enum."""
+    return inspect.isclass(arg_type) and issubclass(arg_type, enum.Enum)
+
+
+def _make_enum_converter(
+    enum_class: Type[enum.Enum],
+) -> Callable[[str], enum.Enum]:
+    """Return a callable that converts a string name to an enum member."""
+
+    def _convert(s: str) -> enum.Enum:
+        return enum_class[s]
+
+    return _convert
+
+
 def _get_arg_parser(
     func: Callable,
     annotations: Dict[str, Callable],
@@ -90,6 +108,21 @@ def _get_arg_parser(
                     action="store_false",
                     help="%s. Defaults to True if not specified" % help_msg,
                 )
+            elif _is_enum_type(arg_type):
+                _LOG.debug(
+                    "Adding positional enum argument %s.%s: %s",
+                    func.__name__,
+                    arg,
+                    arg_type,
+                )
+                _enum_class = cast(Type[enum.Enum], arg_type)
+                _choices: List[str] = [e.name for e in _enum_class]
+                parser.add_argument(
+                    arg,
+                    help=help_msg,
+                    type=_make_enum_converter(_enum_class),
+                    choices=_choices,
+                )
             else:
                 _LOG.debug(
                     "Adding positional argument %s.%s: %s", func.__name__, arg, arg_type
@@ -113,6 +146,23 @@ def _get_arg_parser(
                 )
                 parser.add_argument(
                     "--%s" % arg, help=help_msg, default=default, action=action
+                )
+            elif _is_enum_type(arg_type):
+                _LOG.debug(
+                    "Adding optional enum argument %s.%s: %s (default: %s)",
+                    func.__name__,
+                    arg,
+                    arg_type,
+                    default,
+                )
+                _enum_class = cast(Type[enum.Enum], arg_type)
+                _choices = [e.name for e in _enum_class]
+                parser.add_argument(
+                    "--%s" % arg,
+                    help=help_msg,
+                    default=default,
+                    type=_make_enum_converter(_enum_class),
+                    choices=_choices,
                 )
             else:
                 _LOG.debug(
