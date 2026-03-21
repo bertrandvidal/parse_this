@@ -6,9 +6,8 @@ from typing import Any, Callable, Dict, List, Tuple, Type, cast
 from parse_this.args import _NO_DEFAULT
 from parse_this.exception import ParseThisException
 from parse_this.help.description import prepare_doc
-from parse_this.helpers import (  # noqa: F401
+from parse_this.helpers import (
     _add_log_level_argument,
-    _get_args_name_from_parser,
     _is_enum_type,
     _make_enum_converter,
 )

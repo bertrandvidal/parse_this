@@ -4,12 +4,8 @@ from argparse import ArgumentParser
 from parse_this import create_parser
 from parse_this.args import _NO_DEFAULT
 from parse_this.exception import ParseThisException
-from parse_this.parsing import (
-    _add_log_level_argument,
-    _get_arg_parser,
-    _get_args_name_from_parser,
-    _get_parseable_methods,
-)
+from parse_this.helpers import _add_log_level_argument, _get_args_name_from_parser
+from parse_this.parsing import _get_arg_parser, _get_parseable_methods
 from test.helpers import (
     Color,
     Parseable,
