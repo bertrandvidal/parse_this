@@ -1,4 +1,12 @@
+import enum
+
 from parse_this import create_parser, parse_class
+
+
+class Color(enum.Enum):
+    RED = 1
+    GREEN = 2
+    BLUE = 3
 
 
 def no_docstring():
@@ -273,3 +281,13 @@ class NeedInitDecorator(object):
     @create_parser()
     def do_stuff(self, num: int, div: int = 2):
         return self._val * num / div
+
+
+@create_parser()
+def has_enum_argument(color: Color):
+    return color
+
+
+@create_parser()
+def has_enum_default(a: int, color: Color = Color.RED):
+    return a, color

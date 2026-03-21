@@ -1,6 +1,8 @@
+import enum
+import inspect
 import logging
-from argparse import ArgumentParser, _HelpAction
-from typing import Any, Callable, Dict, List, Tuple, Type
+from argparse import ArgumentParser, ArgumentTypeError, _HelpAction
+from typing import Any, Callable, Dict, List, Tuple, Type, cast
 
 from parse_this.args import _NO_DEFAULT
 from parse_this.exception import ParseThisException
@@ -48,6 +50,58 @@ def _add_log_level_argument(parser: ArgumentParser):
     )
 
 
+def _is_enum_type(arg_type: Any) -> bool:
+    """Return True if arg_type is a concrete subclass of enum.Enum.
+
+    Args:
+        arg_type: the type annotation to inspect
+
+    Note:
+        The base class enum.Enum itself is excluded because it has no members,
+        so registering it as a choices argument would produce an argument that
+        can never be satisfied.
+    """
+    return (
+        inspect.isclass(arg_type)
+        and arg_type is not enum.Enum
+        and issubclass(arg_type, enum.Enum)
+    )
+
+
+def _make_enum_converter(
+    enum_class: Type[enum.Enum],
+) -> Callable[[str], enum.Enum]:
+    """Return a callable that converts a string name to an enum member.
+
+    Args:
+        enum_class: the Enum class whose members are valid choices
+
+    Returns:
+        a callable that accepts a string name and returns the matching
+        enum member
+
+    Note:
+        The converter raises ArgumentTypeError, not ValueError, on unknown
+        names. argparse silently discards the ValueError message and falls
+        back to a generic "invalid <type> value" using the converter's
+        __name__, e.g.:
+            error: argument color: invalid _convert value: 'PURPLE'
+        ArgumentTypeError preserves the message verbatim, giving users the
+        intended diagnostic:
+            error: argument color: invalid choice: 'PURPLE'
+            (choose from RED, GREEN, BLUE)
+    """
+
+    def _convert(s: str) -> enum.Enum:
+        try:
+            return enum_class[s]
+        except KeyError:
+            valid = ", ".join(e.name for e in enum_class)
+            raise ArgumentTypeError("invalid choice: %r (choose from %s)" % (s, valid))
+
+    return _convert
+
+
 def _get_arg_parser(
     func: Callable,
     annotations: Dict[str, Callable],
@@ -90,6 +144,22 @@ def _get_arg_parser(
                     action="store_false",
                     help="%s. Defaults to True if not specified" % help_msg,
                 )
+            elif _is_enum_type(arg_type):
+                _LOG.debug(
+                    "Adding positional enum argument %s.%s: %s",
+                    func.__name__,
+                    arg,
+                    arg_type,
+                )
+                _enum_class = cast(Type[enum.Enum], arg_type)
+                _names: List[str] = [e.name for e in _enum_class]
+                parser.add_argument(
+                    arg,
+                    help=help_msg,
+                    type=_make_enum_converter(_enum_class),
+                    choices=list(_enum_class),
+                    metavar="{%s}" % ",".join(_names),
+                )
             else:
                 _LOG.debug(
                     "Adding positional argument %s.%s: %s", func.__name__, arg, arg_type
@@ -113,6 +183,24 @@ def _get_arg_parser(
                 )
                 parser.add_argument(
                     "--%s" % arg, help=help_msg, default=default, action=action
+                )
+            elif _is_enum_type(arg_type):
+                _LOG.debug(
+                    "Adding optional enum argument %s.%s: %s (default: %s)",
+                    func.__name__,
+                    arg,
+                    arg_type,
+                    default,
+                )
+                _enum_class = cast(Type[enum.Enum], arg_type)
+                _names = [e.name for e in _enum_class]
+                parser.add_argument(
+                    "--%s" % arg,
+                    help=help_msg,
+                    default=default,
+                    type=_make_enum_converter(_enum_class),
+                    choices=list(_enum_class),
+                    metavar="{%s}" % ",".join(_names),
                 )
             else:
                 _LOG.debug(
