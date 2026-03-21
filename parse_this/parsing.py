@@ -51,8 +51,17 @@ def _add_log_level_argument(parser: ArgumentParser):
 
 
 def _is_enum_type(arg_type: Any) -> bool:
-    """Return True if arg_type is a subclass of enum.Enum."""
-    return inspect.isclass(arg_type) and issubclass(arg_type, enum.Enum)
+    """Return True if arg_type is a concrete subclass of enum.Enum.
+
+    The base class enum.Enum itself is excluded because it has no members,
+    so registering it as a choices argument would produce an argument that
+    can never be satisfied.
+    """
+    return (
+        inspect.isclass(arg_type)
+        and arg_type is not enum.Enum
+        and issubclass(arg_type, enum.Enum)
+    )
 
 
 def _make_enum_converter(
