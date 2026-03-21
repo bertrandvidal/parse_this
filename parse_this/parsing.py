@@ -1,17 +1,22 @@
 import enum
-import inspect
 import logging
-from argparse import ArgumentParser, ArgumentTypeError, _HelpAction
+from argparse import ArgumentParser
 from typing import Any, Callable, Dict, List, Tuple, Type, cast
 
 from parse_this.args import _NO_DEFAULT
 from parse_this.exception import ParseThisException
 from parse_this.help.description import prepare_doc
+from parse_this.helpers import (  # noqa: F401
+    _add_log_level_argument,
+    _get_args_name_from_parser,
+    _is_enum_type,
+    _make_enum_converter,
+)
 
 _LOG = logging.getLogger(__name__)
 
 
-def _get_parseable_methods(cls: Type):
+def _get_parseable_methods(cls):
     """Return all methods of cls that are parseable i.e. have been decorated
     by '@create_parser'.
 
@@ -42,64 +47,6 @@ def _get_parseable_methods(cls: Type):
             else:
                 methods_to_parse[obj.__name__] = obj.parser
     return init_parser, methods_to_parse
-
-
-def _add_log_level_argument(parser: ArgumentParser):
-    parser.add_argument(
-        "--log-level", required=False, choices=list(logging._nameToLevel.keys())
-    )
-
-
-def _is_enum_type(arg_type: Any) -> bool:
-    """Return True if arg_type is a concrete subclass of enum.Enum.
-
-    Args:
-        arg_type: the type annotation to inspect
-
-    Note:
-        The base class enum.Enum itself is excluded because it has no members,
-        so registering it as a choices argument would produce an argument that
-        can never be satisfied.
-    """
-    return (
-        inspect.isclass(arg_type)
-        and arg_type is not enum.Enum
-        and issubclass(arg_type, enum.Enum)
-    )
-
-
-def _make_enum_converter(
-    enum_class: Type[enum.Enum],
-) -> Callable[[str], enum.Enum]:
-    """Return a callable that converts a string name to an enum member.
-
-    Args:
-        enum_class: the Enum class whose members are valid choices
-
-    Returns:
-        a callable that accepts a string name and returns the matching
-        enum member
-
-    Note:
-        The converter raises ArgumentTypeError, not ValueError, on unknown
-        names. argparse silently discards the ValueError message and falls
-        back to a generic "invalid <type> value" using the converter's
-        __name__, e.g.:
-            error: argument color: invalid _convert value: 'PURPLE'
-        ArgumentTypeError preserves the message verbatim, giving users the
-        intended diagnostic:
-            error: argument color: invalid choice: 'PURPLE'
-            (choose from RED, GREEN, BLUE)
-    """
-
-    def _convert(s: str) -> enum.Enum:
-        try:
-            return enum_class[s]
-        except KeyError:
-            valid = ", ".join(e.name for e in enum_class)
-            raise ArgumentTypeError("invalid choice: %r (choose from %s)" % (s, valid))
-
-    return _convert
 
 
 def _get_arg_parser(
@@ -133,99 +80,116 @@ def _get_arg_parser(
         arg_type = annotations.get(arg)
         if default is _NO_DEFAULT:
             arg_type = arg_type or (lambda x: x)
-            if arg_type == bool:
-                _LOG.debug(
-                    "Adding optional flag %s.%s (default: True)", func.__name__, arg
-                )
-                parser.add_argument(
-                    "--%s" % arg,
-                    default=True,
-                    required=False,
-                    action="store_false",
-                    help="%s. Defaults to True if not specified" % help_msg,
-                )
-            elif _is_enum_type(arg_type):
-                _LOG.debug(
-                    "Adding positional enum argument %s.%s: %s",
-                    func.__name__,
-                    arg,
-                    arg_type,
-                )
-                _enum_class = cast(Type[enum.Enum], arg_type)
-                _names: List[str] = [e.name for e in _enum_class]
-                parser.add_argument(
-                    arg,
-                    help=help_msg,
-                    type=_make_enum_converter(_enum_class),
-                    choices=list(_enum_class),
-                    metavar="{%s}" % ",".join(_names),
-                )
-            else:
-                _LOG.debug(
-                    "Adding positional argument %s.%s: %s", func.__name__, arg, arg_type
-                )
-                parser.add_argument(arg, help=help_msg, type=arg_type)
+            _add_required_argument(parser, func, arg, arg_type, help_msg)
         else:
-            if default is None and arg_type is None:
-                raise ParseThisException(
-                    "To use default value of 'None' you need "
-                    "to specify the type of the argument '{}' "
-                    "for the method '{}'".format(arg, func.__name__)
-                )
-            arg_type = arg_type or type(default)
-            if arg_type == bool:
-                action = "store_false" if default else "store_true"
-                _LOG.debug(
-                    "Adding optional flag %s.%s (default: %s)",
-                    func.__name__,
-                    arg,
-                    default,
-                )
-                parser.add_argument(
-                    "--%s" % arg, help=help_msg, default=default, action=action
-                )
-            elif _is_enum_type(arg_type):
-                _LOG.debug(
-                    "Adding optional enum argument %s.%s: %s (default: %s)",
-                    func.__name__,
-                    arg,
-                    arg_type,
-                    default,
-                )
-                _enum_class = cast(Type[enum.Enum], arg_type)
-                _names = [e.name for e in _enum_class]
-                parser.add_argument(
-                    "--%s" % arg,
-                    help=help_msg,
-                    default=default,
-                    type=_make_enum_converter(_enum_class),
-                    choices=list(_enum_class),
-                    metavar="{%s}" % ",".join(_names),
-                )
-            else:
-                _LOG.debug(
-                    "Adding optional argument %s.%s: %s (default: %s)",
-                    func.__name__,
-                    arg,
-                    arg_type,
-                    default,
-                )
-                parser.add_argument(
-                    "--%s" % arg, help=help_msg, default=default, type=arg_type
-                )
+            _add_optional_argument(parser, func, arg, arg_type, default, help_msg)
     return parser
 
 
-def _get_args_name_from_parser(parser: ArgumentParser):
-    """Retrieve the name of the function argument linked to the given parser.
+def _add_required_argument(
+    parser: ArgumentParser,
+    func: Callable,
+    arg: str,
+    arg_type: Any,
+    help_msg: str,
+) -> None:
+    """Add a required (positional) argument to parser for a parameter with no default.
 
     Args:
-        parser: a function parser
+        parser: the ArgumentParser to add the argument to
+        func: the function being parsed (used for logging)
+        arg: the parameter name
+        arg_type: the resolved type for the argument
+        help_msg: the help string for this argument
     """
-    # Retrieve the 'action' destination of the method parser i.e. its
-    # argument name. The HelpAction is ignored.
-    return [
-        action.dest
-        for action in parser._actions
-        if not isinstance(action, _HelpAction) and action.dest != "log_level"
-    ]
+    if arg_type == bool:
+        _LOG.debug("Adding optional flag %s.%s (default: True)", func.__name__, arg)
+        parser.add_argument(
+            "--%s" % arg,
+            default=True,
+            required=False,
+            action="store_false",
+            help="%s. Defaults to True if not specified" % help_msg,
+        )
+    elif _is_enum_type(arg_type):
+        _LOG.debug(
+            "Adding positional enum argument %s.%s: %s",
+            func.__name__,
+            arg,
+            arg_type,
+        )
+        _enum_class = cast(Type[enum.Enum], arg_type)
+        _names: List[str] = [e.name for e in _enum_class]
+        parser.add_argument(
+            arg,
+            help=help_msg,
+            type=_make_enum_converter(_enum_class),
+            choices=list(_enum_class),
+            metavar="{%s}" % ",".join(_names),
+        )
+    else:
+        _LOG.debug("Adding positional argument %s.%s: %s", func.__name__, arg, arg_type)
+        parser.add_argument(arg, help=help_msg, type=arg_type)
+
+
+def _add_optional_argument(
+    parser: ArgumentParser,
+    func: Callable,
+    arg: str,
+    arg_type: Any,
+    default: Any,
+    help_msg: str,
+) -> None:
+    """Add an optional argument to parser for a parameter that has a default value.
+
+    Args:
+        parser: the ArgumentParser to add the argument to
+        func: the function being parsed (used for logging)
+        arg: the parameter name
+        arg_type: the resolved type for the argument
+        default: the default value for this argument
+        help_msg: the help string for this argument
+    """
+    if default is None and arg_type is None:
+        raise ParseThisException(
+            "To use default value of 'None' you need "
+            "to specify the type of the argument '{}' "
+            "for the method '{}'".format(arg, func.__name__)
+        )
+    arg_type = arg_type or type(default)
+    if arg_type == bool:
+        action = "store_false" if default else "store_true"
+        _LOG.debug(
+            "Adding optional flag %s.%s (default: %s)",
+            func.__name__,
+            arg,
+            default,
+        )
+        parser.add_argument("--%s" % arg, help=help_msg, default=default, action=action)
+    elif _is_enum_type(arg_type):
+        _LOG.debug(
+            "Adding optional enum argument %s.%s: %s (default: %s)",
+            func.__name__,
+            arg,
+            arg_type,
+            default,
+        )
+        _enum_class = cast(Type[enum.Enum], arg_type)
+        _names = [e.name for e in _enum_class]
+        parser.add_argument(
+            "--%s" % arg,
+            help=help_msg,
+            default=default,
+            type=_make_enum_converter(_enum_class),
+            choices=list(_enum_class),
+            metavar="{%s}" % ",".join(_names),
+        )
+    else:
+        _LOG.debug(
+            "Adding optional argument %s.%s: %s (default: %s)",
+            func.__name__,
+            arg,
+            arg_type,
+            default,
+        )
+        parser.add_argument("--%s" % arg, help=help_msg, default=default, type=arg_type)
