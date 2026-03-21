@@ -11,8 +11,11 @@ from parse_this.parsing import (
     _get_parseable_methods,
 )
 from test.helpers import (
+    Color,
     Parseable,
     has_bool_arguments,
+    has_enum_argument,
+    has_enum_default,
     has_flags,
     has_none_default_value,
     parse_me_full_docstring,
@@ -162,6 +165,36 @@ class TestParsing(unittest.TestCase):
         )
         args = _get_args_name_from_parser(parser)
         self.assertNotIn("log_level", args)
+
+    def test_get_arg_parser_enum_positional_argument(self):
+        self.assertEqual(has_enum_argument.parser.call(args=["RED"]), Color.RED)
+
+    def test_get_arg_parser_enum_positional_invalid(self):
+        with captured_output():
+            with self.assertRaises(SystemExit):
+                has_enum_argument.parser.call(args=["PURPLE"])
+
+    def test_get_arg_parser_enum_default_value(self):
+        self.assertEqual(has_enum_default.parser.call(args=["1"]), (1, Color.RED))
+
+    def test_get_arg_parser_enum_override_default(self):
+        self.assertEqual(
+            has_enum_default.parser.call(args=["1", "--color", "GREEN"]),
+            (1, Color.GREEN),
+        )
+
+    def test_get_arg_parser_enum_choices_registered(self):
+        parser = _get_arg_parser(
+            has_enum_argument,
+            {"color": Color},
+            [("color", _NO_DEFAULT)],
+            ":",
+        )
+        # Find the action for 'color' and check its choices contain all members
+        color_action = next(
+            action for action in parser._actions if action.dest == "color"
+        )
+        self.assertEqual(color_action.choices, list(Color))
 
 
 if __name__ == "__main__":

@@ -58,10 +58,18 @@ def _is_enum_type(arg_type: Any) -> bool:
 def _make_enum_converter(
     enum_class: Type[enum.Enum],
 ) -> Callable[[str], enum.Enum]:
-    """Return a callable that converts a string name to an enum member."""
+    """Return a callable that converts a string name to an enum member.
+
+    Raises ValueError on unknown names so argparse can produce a proper error
+    message and exit with status 2.
+    """
 
     def _convert(s: str) -> enum.Enum:
-        return enum_class[s]
+        try:
+            return enum_class[s]
+        except KeyError:
+            valid = ", ".join(e.name for e in enum_class)
+            raise ValueError("invalid choice: %r (choose from %s)" % (s, valid))
 
     return _convert
 
@@ -116,12 +124,13 @@ def _get_arg_parser(
                     arg_type,
                 )
                 _enum_class = cast(Type[enum.Enum], arg_type)
-                _choices: List[str] = [e.name for e in _enum_class]
+                _names: List[str] = [e.name for e in _enum_class]
                 parser.add_argument(
                     arg,
                     help=help_msg,
                     type=_make_enum_converter(_enum_class),
-                    choices=_choices,
+                    choices=list(_enum_class),
+                    metavar="{%s}" % ",".join(_names),
                 )
             else:
                 _LOG.debug(
@@ -156,13 +165,14 @@ def _get_arg_parser(
                     default,
                 )
                 _enum_class = cast(Type[enum.Enum], arg_type)
-                _choices = [e.name for e in _enum_class]
+                _names = [e.name for e in _enum_class]
                 parser.add_argument(
                     "--%s" % arg,
                     help=help_msg,
                     default=default,
                     type=_make_enum_converter(_enum_class),
-                    choices=_choices,
+                    choices=list(_enum_class),
+                    metavar="{%s}" % ",".join(_names),
                 )
             else:
                 _LOG.debug(
