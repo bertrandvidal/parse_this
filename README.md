@@ -315,9 +315,9 @@ def paint(color: Color, canvas: str = "wall"):
 Positional enum — the argument is required and must be one of the member names:
 
 ```bash
-python script.py RED            # -> (Color.RED, 'wall')
-python script.py GREEN canvas   # -> (Color.GREEN, 'canvas')
-python script.py PURPLE         # error: invalid choice
+python script.py RED                    # -> (Color.RED, 'wall')
+python script.py GREEN --canvas fence  # -> (Color.GREEN, 'fence')
+python script.py PURPLE                # error: invalid choice
 ```
 
 Optional enum with a default — use `--color <NAME>` to override:
