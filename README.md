@@ -282,6 +282,58 @@ Here everything works as intended and the default value for `spam` is `False`
 and passing `--spam` as an argument to be parsed will assign it `True`.
 
 
+Enum arguments
+--------------
+
+Parameters annotated with an `enum.Enum` subclass are automatically turned into
+restricted choices on the command line. The member **name** (not its value) is
+used as the CLI token, and `parse_this` converts it back to the enum member
+before calling your function.
+
+```python
+import enum
+from parse_this import create_parser
+
+
+class Color(enum.Enum):
+    RED = 1
+    GREEN = 2
+    BLUE = 3
+
+
+@create_parser()
+def paint(color: Color, canvas: str = "wall"):
+    """Paint something.
+
+    Args:
+        color: the color to use
+        canvas: what to paint
+    """
+    return color, canvas
+```
+
+Positional enum — the argument is required and must be one of the member names:
+
+```bash
+python script.py RED            # -> (Color.RED, 'wall')
+python script.py GREEN canvas   # -> (Color.GREEN, 'canvas')
+python script.py PURPLE         # error: invalid choice
+```
+
+Optional enum with a default — use `--color <NAME>` to override:
+
+```python
+@create_parser()
+def spray(canvas: str, color: Color = Color.BLUE):
+    return canvas, color
+
+# spray.parser.call(args=["fence"])              -> ('fence', Color.BLUE)
+# spray.parser.call(args=["fence", "--color", "RED"]) -> ('fence', Color.RED)
+```
+
+The `--help` output shows the valid member names, e.g. `{RED,GREEN,BLUE}`.
+
+
 Decorator
 ---------
 
