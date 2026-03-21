@@ -1,7 +1,7 @@
 import enum
 import inspect
 import logging
-from argparse import ArgumentParser, _HelpAction
+from argparse import ArgumentParser, ArgumentTypeError, _HelpAction
 from typing import Any, Callable, Dict, List, Tuple, Type, cast
 
 from parse_this.args import _NO_DEFAULT
@@ -69,8 +69,13 @@ def _make_enum_converter(
 ) -> Callable[[str], enum.Enum]:
     """Return a callable that converts a string name to an enum member.
 
-    Raises ValueError on unknown names so argparse can produce a proper error
-    message and exit with status 2.
+    Raises ArgumentTypeError (not ValueError) on unknown names.
+    argparse silently discards the ValueError message and falls back to a
+    generic "invalid <type> value" using the converter's __name__, e.g.:
+        error: argument color: invalid _convert value: 'PURPLE'
+    ArgumentTypeError preserves the message verbatim, giving users the
+    intended diagnostic:
+        error: argument color: invalid choice: 'PURPLE' (choose from RED, GREEN, BLUE)
     """
 
     def _convert(s: str) -> enum.Enum:
@@ -78,7 +83,7 @@ def _make_enum_converter(
             return enum_class[s]
         except KeyError:
             valid = ", ".join(e.name for e in enum_class)
-            raise ValueError("invalid choice: %r (choose from %s)" % (s, valid))
+            raise ArgumentTypeError("invalid choice: %r (choose from %s)" % (s, valid))
 
     return _convert
 
