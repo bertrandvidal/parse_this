@@ -53,9 +53,13 @@ def _add_log_level_argument(parser: ArgumentParser):
 def _is_enum_type(arg_type: Any) -> bool:
     """Return True if arg_type is a concrete subclass of enum.Enum.
 
-    The base class enum.Enum itself is excluded because it has no members,
-    so registering it as a choices argument would produce an argument that
-    can never be satisfied.
+    Args:
+        arg_type: the type annotation to inspect
+
+    Note:
+        The base class enum.Enum itself is excluded because it has no members,
+        so registering it as a choices argument would produce an argument that
+        can never be satisfied.
     """
     return (
         inspect.isclass(arg_type)
@@ -69,13 +73,23 @@ def _make_enum_converter(
 ) -> Callable[[str], enum.Enum]:
     """Return a callable that converts a string name to an enum member.
 
-    Raises ArgumentTypeError (not ValueError) on unknown names.
-    argparse silently discards the ValueError message and falls back to a
-    generic "invalid <type> value" using the converter's __name__, e.g.:
-        error: argument color: invalid _convert value: 'PURPLE'
-    ArgumentTypeError preserves the message verbatim, giving users the
-    intended diagnostic:
-        error: argument color: invalid choice: 'PURPLE' (choose from RED, GREEN, BLUE)
+    Args:
+        enum_class: the Enum class whose members are valid choices
+
+    Returns:
+        a callable that accepts a string name and returns the matching
+        enum member
+
+    Note:
+        The converter raises ArgumentTypeError, not ValueError, on unknown
+        names. argparse silently discards the ValueError message and falls
+        back to a generic "invalid <type> value" using the converter's
+        __name__, e.g.:
+            error: argument color: invalid _convert value: 'PURPLE'
+        ArgumentTypeError preserves the message verbatim, giving users the
+        intended diagnostic:
+            error: argument color: invalid choice: 'PURPLE'
+            (choose from RED, GREEN, BLUE)
     """
 
     def _convert(s: str) -> enum.Enum:
