@@ -10,6 +10,7 @@ from test.helpers import (
     NeedParsing,
     ParseableWithLogLevel,
     ShowMyDocstring,
+    SubCmdParseError,
     different_delimiter_chars,
     function_with_log_level,
     i_am_parseable,
@@ -142,6 +143,22 @@ class TestClassParser(unittest.TestCase):
         with captured_output():
             with self.assertRaises(SystemExit):
                 NeedParsing.parser.call("12 parse-me-if-you-can one 2")
+
+    def test_subcommand_parse_error_shows_subcommand_usage_not_top_parser(self):
+        """Regression guard: a parse error caused by an unrecognized argument
+        passed to a subcommand must show the subcommand's own usage line, not
+        the top-level parser's usage (which lists all available subcommands)."""
+        with captured_output() as (_, err):
+            with self.assertRaises(SystemExit):
+                SubCmdParseError.parser.call("1 sub-cmd 2 --unknown-flag".split())
+            error_output = err.getvalue()
+        # The subcommand name must appear in the error output as a plain word,
+        # confirming the subcommand's usage line was printed.
+        self.assertIn("sub-cmd", error_output)
+        # The top-level usage line lists subcommands inside braces like
+        # "{sub-cmd}" — that must NOT appear, confirming the top-level parser
+        # did not report the error.
+        self.assertNotIn("{sub-cmd}", error_output)
 
 
 class TestLogLevel(unittest.TestCase):

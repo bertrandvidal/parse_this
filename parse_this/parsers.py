@@ -16,6 +16,37 @@ from parse_this.types import _check_types
 _LOG = logging.getLogger(__name__)
 
 
+class SubcommandAwareArgumentParser(ArgumentParser):
+    """An ArgumentParser subclass that, when unrecognized arguments are present
+    after a subcommand has been selected, reports the error using the
+    *subcommand's* parser rather than the top-level parser.
+
+    This fixes the case where argparse accumulates unrecognized tokens through
+    parse_known_args at the subparser level and then has the top-level parser
+    call error(), showing the top-level usage instead of the subcommand's.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._subparsers_action = None
+
+    def parse_args(self, args=None, namespace=None):
+        namespace, remainder = self.parse_known_args(args, namespace)
+        if remainder:
+            # If a subcommand was selected and its parser is known, delegate
+            # the error to that subparser so the subcommand's usage is shown.
+            method = getattr(namespace, "method", None)
+            if (
+                self._subparsers_action is not None
+                and method is not None
+                and method in self._subparsers_action.choices
+            ):
+                subparser = self._subparsers_action.choices[method]
+                subparser.error("unrecognized arguments: %s" % " ".join(remainder))
+            self.error("unrecognized arguments: %s" % " ".join(remainder))
+        return namespace
+
+
 class FunctionParser(object):
     """Parse command line arguments, transform them to the appropriate type and
     delegate the call to a given callable.
@@ -177,8 +208,10 @@ class ClassParser(object):
             class_name: name of the decorated class
 
         Returns:
-            a dict of registered name of the parser i.e. sub command name
-            pointing to the method real name
+            a 2-tuple of (parser_to_method, sub_parsers) where parser_to_method
+            is a dict of registered name of the parser i.e. sub command name
+            pointing to the method real name, and sub_parsers is the subparsers
+            action added to top_level_parser
         """
         description = "Accessible methods of {}".format(class_name)
         sub_parsers = top_level_parser.add_subparsers(
@@ -209,7 +242,7 @@ class ClassParser(object):
                 add_help=False,
                 description=parser.description,
             )
-        return parser_to_method
+        return parser_to_method, sub_parsers
 
     def _set_class_parser(
         self,
@@ -230,7 +263,7 @@ class ClassParser(object):
         """
         top_level_parents = [init_parser] if init_parser else []
         description = self._description or cls.__doc__
-        top_level_parser = ArgumentParser(
+        top_level_parser = SubcommandAwareArgumentParser(
             description=description,
             parents=top_level_parents,
             add_help=False,
@@ -241,9 +274,12 @@ class ClassParser(object):
         )
         if self._log_level:
             _add_log_level_argument(top_level_parser)
-        parser_to_method = self._add_sub_parsers(
+        parser_to_method, sub_parsers_action = self._add_sub_parsers(
             top_level_parser, methods_to_parse, cls.__name__
         )
+        # Store the subparsers action so SubcommandAwareArgumentParser can
+        # route unrecognized-argument errors to the correct subparser.
+        top_level_parser._subparsers_action = sub_parsers_action
         # Update the dict with the __init__ method so we can instantiate
         # the decorated class
         if init_parser:
