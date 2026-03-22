@@ -48,3 +48,4 @@ out/
 
 # Claude Code
 .claude/memory/
+.vix

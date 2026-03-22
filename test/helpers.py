@@ -291,3 +291,26 @@ def has_enum_argument(color: Color):
 @create_parser()
 def has_enum_default(a: int, color: Color = Color.RED):
     return a, color
+
+
+@parse_class()
+class SubCmdParseError(object):
+    """A class to showcase subcommand parse error reporting."""
+
+    @create_parser()
+    def __init__(self, top_arg: int):
+        """Init.
+
+        Args:
+            top_arg: top-level integer argument
+        """
+        self._top = top_arg
+
+    @create_parser()
+    def sub_cmd(self, sub_arg: int):
+        """A subcommand.
+
+        Args:
+            sub_arg: integer argument of the subcommand
+        """
+        return self._top * sub_arg
