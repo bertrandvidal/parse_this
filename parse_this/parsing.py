@@ -8,7 +8,9 @@ from parse_this.exception import ParseThisException
 from parse_this.help.description import prepare_doc
 from parse_this.helpers import (
     _add_log_level_argument,
+    _get_element_type,
     _is_enum_type,
+    _is_sequence_type,
     _make_enum_converter,
 )
 
@@ -126,6 +128,15 @@ def _add_required_argument(
             choices=list(_enum_class),
             metavar="{%s}" % ",".join(_names),
         )
+    elif _is_sequence_type(arg_type):
+        _LOG.debug(
+            "Adding positional sequence argument %s.%s: %s",
+            func.__name__,
+            arg,
+            arg_type,
+        )
+        element_type = _get_element_type(arg_type)
+        parser.add_argument(arg, help=help_msg, type=element_type, nargs="+")
     else:
         _LOG.debug("Adding positional argument %s.%s: %s", func.__name__, arg, arg_type)
         parser.add_argument(arg, help=help_msg, type=arg_type)
@@ -182,6 +193,18 @@ def _add_optional_argument(
             type=_make_enum_converter(_enum_class),
             choices=list(_enum_class),
             metavar="{%s}" % ",".join(_names),
+        )
+    elif _is_sequence_type(arg_type):
+        _LOG.debug(
+            "Adding optional sequence argument %s.%s: %s (default: %s)",
+            func.__name__,
+            arg,
+            arg_type,
+            default,
+        )
+        element_type = _get_element_type(arg_type)
+        parser.add_argument(
+            "--%s" % arg, help=help_msg, default=default, type=element_type, nargs="+"
         )
     else:
         _LOG.debug(

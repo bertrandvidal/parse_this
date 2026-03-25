@@ -13,7 +13,11 @@ from test.helpers import (
     has_enum_argument,
     has_enum_default,
     has_flags,
+    has_list_argument,
     has_none_default_value,
+    has_optional_list_argument,
+    has_optional_tuple_argument,
+    has_tuple_argument,
     parse_me_full_docstring,
 )
 from test.utils import captured_output
@@ -191,6 +195,47 @@ class TestParsing(unittest.TestCase):
             action for action in parser._actions if action.dest == "color"
         )
         self.assertEqual(color_action.choices, list(Color))
+
+
+class TestSequenceType(unittest.TestCase):
+    def test_list_positional_argument(self):
+        self.assertEqual(has_list_argument.parser.call(args=["1", "2", "3"]), 6)
+
+    def test_list_positional_single_value(self):
+        self.assertEqual(has_list_argument.parser.call(args=["5"]), 5)
+
+    def test_list_positional_empty_raises(self):
+        with captured_output():
+            with self.assertRaises(SystemExit):
+                has_list_argument.parser.call(args=[])
+
+    def test_optional_list_default(self):
+        self.assertEqual(
+            has_optional_list_argument.parser.call(args=["test"]),
+            ("test", None),
+        )
+
+    def test_optional_list_provided(self):
+        self.assertEqual(
+            has_optional_list_argument.parser.call(args=["test", "--tags", "a", "b"]),
+            ("test", ["a", "b"]),
+        )
+
+    def test_tuple_positional_argument(self):
+        result = has_tuple_argument.parser.call(args=["1.0", "2.5", "3.0"])
+        self.assertEqual(result, [1.0, 2.5, 3.0])
+
+    def test_optional_tuple_default(self):
+        self.assertEqual(
+            has_optional_tuple_argument.parser.call(args=["test"]),
+            ("test", None),
+        )
+
+    def test_optional_tuple_provided(self):
+        self.assertEqual(
+            has_optional_tuple_argument.parser.call(args=["test", "--dims", "1", "2"]),
+            ("test", [1, 2]),
+        )
 
 
 if __name__ == "__main__":

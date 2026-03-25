@@ -334,6 +334,56 @@ def spray(canvas: str, color: Color = Color.BLUE):
 The `--help` output shows the valid member names, e.g. `{RED,GREEN,BLUE}`.
 
 
+List and tuple arguments
+------------------------
+
+Parameters annotated with `list[T]` or `tuple[T, ...]` are turned into
+multi-value arguments using argparse's `nargs='+'` (one or more values).
+Each value is converted to the element type `T`.
+
+```python
+from parse_this import create_parser
+
+
+@create_parser()
+def total(values: list[int]):
+    """Sum a list of integers.
+
+    Args:
+        values: one or more integers to sum
+    """
+    return sum(values)
+```
+
+```bash
+python script.py 1 2 3    # -> 6
+python script.py 10        # -> 10
+```
+
+Optional list/tuple arguments work with `--flag`:
+
+```python
+@create_parser()
+def greet(name: str, titles: list[str] = None):
+    """Greet with optional titles.
+
+    Args:
+        name: person to greet
+        titles: optional list of titles
+    """
+    return name, titles
+```
+
+```bash
+python script.py Alice                          # -> ('Alice', None)
+python script.py Alice --titles Dr Prof         # -> ('Alice', ['Dr', 'Prof'])
+```
+
+`tuple[T, ...]` works identically -- note that argparse always returns a
+`list`, even for tuple-annotated parameters. If no element type is specified
+(bare `list` or `tuple`), values are treated as strings.
+
+
 Decorator
 ---------
 
@@ -463,7 +513,6 @@ TO DO
 -----
   * Add documentation in README on auto `--log-level` argument
   * Handle file arguments
-  * Handle list/tuple arguments i.e. argparse's nargs
 
 
 License
