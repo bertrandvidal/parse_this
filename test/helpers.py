@@ -1,4 +1,5 @@
 import enum
+from pathlib import Path
 
 from parse_this import create_parser, parse_class
 
@@ -314,3 +315,24 @@ class SubCmdParseError(object):
             sub_arg: integer argument of the subcommand
         """
         return self._top * sub_arg
+
+
+@create_parser()
+def has_path_argument(infile: Path):
+    """Read from a path.
+
+    Args:
+        infile: input file path
+    """
+    return infile
+
+
+@create_parser()
+def has_optional_path_argument(name: str, outfile: Path = None):
+    """Write to a path.
+
+    Args:
+        name: a name
+        outfile: optional output file path
+    """
+    return name, outfile

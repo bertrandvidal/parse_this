@@ -1,5 +1,6 @@
 import unittest
 from argparse import ArgumentParser
+from pathlib import Path
 
 from parse_this import create_parser
 from parse_this.args import _NO_DEFAULT
@@ -14,6 +15,8 @@ from test.helpers import (
     has_enum_default,
     has_flags,
     has_none_default_value,
+    has_optional_path_argument,
+    has_path_argument,
     parse_me_full_docstring,
 )
 from test.utils import captured_output
@@ -191,6 +194,30 @@ class TestParsing(unittest.TestCase):
             action for action in parser._actions if action.dest == "color"
         )
         self.assertEqual(color_action.choices, list(Color))
+
+
+class TestPathType(unittest.TestCase):
+    def test_path_argument_positional(self):
+        """Path annotation converts string to Path object."""
+        result = has_path_argument.parser.call(args=["/tmp/test.txt"])
+        self.assertIsInstance(result, Path)
+        self.assertEqual(result, Path("/tmp/test.txt"))
+
+    def test_optional_path_argument_default(self):
+        """Optional Path defaults to None when not provided."""
+        self.assertEqual(
+            has_optional_path_argument.parser.call(args=["test"]),
+            ("test", None),
+        )
+
+    def test_optional_path_argument_provided(self):
+        """Optional Path converts string to Path when provided."""
+        name, path = has_optional_path_argument.parser.call(
+            args=["test", "--outfile", "/tmp/out.txt"]
+        )
+        self.assertEqual(name, "test")
+        self.assertIsInstance(path, Path)
+        self.assertEqual(path, Path("/tmp/out.txt"))
 
 
 if __name__ == "__main__":

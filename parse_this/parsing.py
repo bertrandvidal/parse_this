@@ -155,7 +155,8 @@ def _add_optional_argument(
             "to specify the type of the argument '{}' "
             "for the method '{}'".format(arg, func.__name__)
         )
-    arg_type = arg_type or type(default)
+    if arg_type is None:
+        arg_type = type(default)
     if arg_type == bool:
         action = "store_false" if default else "store_true"
         _LOG.debug(

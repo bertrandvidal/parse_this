@@ -2,6 +2,7 @@ import enum
 import inspect
 import logging
 from argparse import ArgumentParser, ArgumentTypeError, _HelpAction
+from pathlib import PurePath
 from typing import Any, Callable, Type
 
 _LOG = logging.getLogger(__name__)
@@ -23,6 +24,19 @@ def _is_enum_type(arg_type: Any) -> bool:
         and arg_type is not enum.Enum
         and issubclass(arg_type, enum.Enum)
     )
+
+
+def _is_path_type(arg_type: Any) -> bool:
+    """Return True if arg_type is a class derived from pathlib.PurePath.
+
+    Args:
+        arg_type: the type annotation to inspect
+
+    Note:
+        Using PurePath as the base catches Path, PurePath, PosixPath,
+        WindowsPath, PurePosixPath, and PureWindowsPath.
+    """
+    return inspect.isclass(arg_type) and issubclass(arg_type, PurePath)
 
 
 def _make_enum_converter(
