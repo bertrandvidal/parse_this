@@ -12,10 +12,8 @@ from test.helpers import (
     has_bool_arguments,
     has_enum_argument,
     has_enum_default,
-    has_file_argument,
     has_flags,
     has_none_default_value,
-    has_optional_file_argument,
     parse_me_full_docstring,
 )
 from test.utils import captured_output
@@ -193,49 +191,6 @@ class TestParsing(unittest.TestCase):
             action for action in parser._actions if action.dest == "color"
         )
         self.assertEqual(color_action.choices, list(Color))
-
-
-class TestFileType(unittest.TestCase):
-    def test_file_argument_positional(self):
-        """FileType as a positional argument opens the file."""
-        import os
-        import tempfile
-
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False) as f:
-            f.write("hello")
-            f.flush()
-            path = f.name
-        try:
-            result = has_file_argument.parser.call(args=[path])
-            self.assertEqual(result.read(), "hello")
-            result.close()
-        finally:
-            os.unlink(path)
-
-    def test_optional_file_argument_default(self):
-        """Optional FileType defaults to None when not provided."""
-        self.assertEqual(
-            has_optional_file_argument.parser.call(args=["test"]),
-            ("test", None),
-        )
-
-    def test_optional_file_argument_provided(self):
-        """Optional FileType opens file when provided."""
-        import os
-        import tempfile
-
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False) as f:
-            path = f.name
-        try:
-            result = has_optional_file_argument.parser.call(
-                args=["test", "--outfile", path]
-            )
-            name, fobj = result
-            self.assertEqual(name, "test")
-            self.assertIsNotNone(fobj)
-            fobj.close()
-        finally:
-            os.unlink(path)
 
 
 if __name__ == "__main__":

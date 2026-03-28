@@ -1,7 +1,7 @@
 import enum
 import inspect
 import logging
-from argparse import ArgumentParser, ArgumentTypeError, FileType, _HelpAction
+from argparse import ArgumentParser, ArgumentTypeError, _HelpAction
 from typing import Any, Callable, Type
 
 _LOG = logging.getLogger(__name__)
@@ -23,15 +23,6 @@ def _is_enum_type(arg_type: Any) -> bool:
         and arg_type is not enum.Enum
         and issubclass(arg_type, enum.Enum)
     )
-
-
-def _is_file_type(arg_type: Any) -> bool:
-    """Return True if arg_type is an argparse.FileType instance.
-
-    Args:
-        arg_type: the type annotation to inspect
-    """
-    return isinstance(arg_type, FileType)
 
 
 def _make_enum_converter(

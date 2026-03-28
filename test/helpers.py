@@ -1,4 +1,3 @@
-import argparse
 import enum
 
 from parse_this import create_parser, parse_class
@@ -292,34 +291,6 @@ def has_enum_argument(color: Color):
 @create_parser()
 def has_enum_default(a: int, color: Color = Color.RED):
     return a, color
-
-
-_READ_FILE = argparse.FileType("r")
-_WRITE_FILE = argparse.FileType("w")
-
-
-@create_parser()
-def has_file_argument(infile: _READ_FILE):  # type: ignore[valid-type]
-    """Read from a file.
-
-    Args:
-        infile: input file
-    """
-    return infile
-
-
-@create_parser()
-def has_optional_file_argument(
-    name: str,
-    outfile: _WRITE_FILE = None,  # type: ignore[valid-type]
-):
-    """Write to a file.
-
-    Args:
-        name: a name
-        outfile: optional output file
-    """
-    return name, outfile
 
 
 @parse_class()
