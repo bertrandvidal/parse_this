@@ -512,7 +512,6 @@ CAVEATS
 TO DO
 -----
   * Add documentation in README on auto `--log-level` argument
-  * Handle file arguments
 
 
 License
