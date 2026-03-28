@@ -334,6 +334,52 @@ def spray(canvas: str, color: Color = Color.BLUE):
 The `--help` output shows the valid member names, e.g. `{RED,GREEN,BLUE}`.
 
 
+File path arguments
+-------------------
+
+Parameters annotated with ``pathlib.Path`` (or any subclass such as ``PurePath``,
+``PosixPath``, etc.) are automatically converted from the command-line string to
+a ``Path`` object.
+
+```python
+from pathlib import Path
+from parse_this import create_parser
+
+
+@create_parser()
+def word_count(infile: Path):
+    """Count words in a file.
+
+    Args:
+        infile: the input file to read
+    """
+    return len(infile.read_text().split())
+```
+
+```bash
+python script.py myfile.txt    # infile is Path('myfile.txt')
+```
+
+Optional path arguments with a ``None`` default work as expected:
+
+```python
+@create_parser()
+def process(name: str, logfile: Path = None):
+    """Process something.
+
+    Args:
+        name: item to process
+        logfile: optional file path to log to
+    """
+    return name, logfile
+```
+
+```bash
+python script.py foo                        # logfile is None
+python script.py foo --logfile output.log   # logfile is Path('output.log')
+```
+
+
 Log level
 ---------
 
@@ -535,7 +581,6 @@ CAVEATS
 
 TO DO
 -----
-  * Handle file arguments
   * Handle list/tuple arguments i.e. argparse's nargs
 
 

@@ -1,45 +1,53 @@
-# Plan: Handle File Arguments (`argparse.FileType`)
+# Plan: Handle File Arguments (`pathlib.Path`)
 
 ## Branch
 `handle-file-arguments`
 
 ## Context
 
-`parse_this` currently has no awareness of `argparse.FileType` as a type annotation.
-The README explicitly lists "Handle file arguments" as a TODO item. Without explicit
-support and documentation, users have no way to know the feature exists or how to use
-it correctly, and edge cases (e.g. `FileType` as an optional argument with a `None`
-default) are untested and potentially broken.
+`parse_this` currently has no awareness of file path types. The README explicitly
+lists "Handle file arguments" as a TODO item. Rather than requiring users to know
+about `argparse.FileType`, parameters annotated with `pathlib.Path` (or any
+`PurePath` subclass) are detected and passed through to argparse, which calls
+`Path(string_arg)` to convert CLI strings to Path objects automatically.
+
+## Revision History
+
+The initial implementation used `argparse.FileType` instances as type annotations.
+This was reverted in favour of `pathlib.Path` detection, which is more Pythonic
+and doesn't require users to know about argparse internals.
 
 ## Architecture
 
-- **New helper `_is_file_type(arg_type)`** in `parse_this/helpers.py` — mirrors the
-  existing `_is_enum_type` pattern.
+- **New helper `_is_path_type(arg_type)`** in `parse_this/helpers.py` — mirrors the
+  existing `_is_enum_type` pattern, checking `issubclass(arg_type, PurePath)`.
 - **Guard fix in `_add_optional_argument`** (`parse_this/parsing.py`) — the
-  `arg_type = arg_type or type(default)` line would evaluate `type(None)` → `NoneType`
-  if a `FileType` instance were falsy; replaced with an explicit `_is_file_type` guard
-  to be unconditionally safe.
+  `arg_type = arg_type or type(default)` line replaced with an explicit
+  `if arg_type is None` check to prevent type fallback when an annotation is
+  provided.
 - **Test fixtures** in `test/helpers.py` + **unit tests** in `test/parsing_test.py`
   following the established enum pattern.
-- **README** updated: "Handle file arguments" TODO removed, new "File arguments"
-  section added after "Enum arguments".
+- **README** updated: "Handle file arguments" TODO removed, new "File path
+  arguments" section added after "Enum arguments".
 
 ## Files Modified
 
 | File | Change |
 |---|---|
-| `parse_this/helpers.py` | Add `_is_file_type` helper; add `FileType` to argparse imports |
-| `parse_this/parsing.py` | Import `_is_file_type`; fix `or type(default)` guard |
-| `test/helpers.py` | Add `has_file_argument` and `has_optional_file_argument` fixtures |
-| `test/parsing_test.py` | Add `TestFileType` test class |
-| `README.md` | Remove TODO bullet; add "File arguments" section |
+| `parse_this/helpers.py` | Add `_is_path_type` helper; add `PurePath` import |
+| `parse_this/parsing.py` | Fix `or type(default)` guard to `if arg_type is None` |
+| `test/helpers.py` | Add `has_path_argument` and `has_optional_path_argument` fixtures |
+| `test/parsing_test.py` | Add `TestPathType` test class |
+| `README.md` | Remove TODO bullet; add "File path arguments" section |
 | `.claude/plans/handle-file-arguments.md` | This file |
 
 ## Commit Strategy
 
-1. `docs: add plan file for handle-file-arguments`
-2. `feat: add FileType argument support with tests`
-3. `docs: document FileType file arguments, remove TODO`
+1. `docs: add plan file for handle-file-arguments` (already committed)
+2. Revert of `docs: document FileType file arguments, remove TODO`
+3. Revert of `feat: add FileType argument support with tests`
+4. `feat: add pathlib.Path argument support with tests`
+5. `docs: document Path file arguments, remove TODO`
 
 ## Verification
 
