@@ -378,6 +378,79 @@ python script.py foo                        # logfile is None
 python script.py foo --logfile output.log   # logfile is an open file handle
 ```
 
+Log level
+---------
+
+All three entry points (`parse_this`, `create_parser`, and `parse_class`) accept
+a `log_level` keyword argument. When set to `True`, an optional `--log-level`
+argument is added to the command line with choices matching the standard
+`logging` level names (`DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`, etc.).
+
+If `--log-level` is passed, `logging.basicConfig(level=...)` is called before
+your function runs, so you get immediate logging configuration without any
+boilerplate.
+
+```python
+from parse_this import create_parser
+
+
+@create_parser(log_level=True)
+def greet(name: str, count: int = 1):
+    """Greet someone.
+
+    Args:
+        name: who to greet
+        count: how many times
+    """
+    import logging
+    logging.debug("About to greet %s %d time(s)", name, count)
+    return f"Hello, {name}! " * count
+```
+
+From the command line:
+
+```bash
+python script.py Alice                           # no logging configured
+python script.py Alice --log-level DEBUG         # enables DEBUG logging
+python script.py Alice --count 3 --log-level INFO
+```
+
+The `--log-level` argument does not interfere with your function signature -- it
+is automatically excluded from the arguments passed to your function.
+
+For `parse_class`, `--log-level` is added to the top-level parser:
+
+```python
+from parse_this import create_parser, parse_class
+
+
+@parse_class(log_level=True)
+class MyApp(object):
+    """My application."""
+
+    @create_parser()
+    def __init__(self, verbose: int = 0):
+        """Init.
+
+        Args:
+            verbose: verbosity level
+        """
+        self._verbose = verbose
+
+    @create_parser()
+    def run(self, task: str):
+        """Run a task.
+
+        Args:
+            task: task name
+        """
+        return task
+```
+
+```bash
+python script.py --log-level DEBUG 0 run my-task
+```
+
 
 Decorator
 ---------
@@ -506,7 +579,6 @@ CAVEATS
 
 TO DO
 -----
-  * Add documentation in README on auto `--log-level` argument
   * Handle list/tuple arguments i.e. argparse's nargs
 
 
