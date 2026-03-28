@@ -334,50 +334,6 @@ def spray(canvas: str, color: Color = Color.BLUE):
 The `--help` output shows the valid member names, e.g. `{RED,GREEN,BLUE}`.
 
 
-File arguments
---------------
-
-Parameters annotated with an `argparse.FileType` instance are passed directly to
-argparse, which handles opening the file for you.
-
-```python
-import argparse
-from parse_this import create_parser
-
-
-@create_parser()
-def word_count(infile: argparse.FileType("r")):
-    """Count words in a file.
-
-    Args:
-        infile: the input file to read
-    """
-    return len(infile.read().split())
-```
-
-```bash
-python script.py myfile.txt    # opens myfile.txt for reading
-```
-
-Optional file arguments with a `None` default work as expected:
-
-```python
-@create_parser()
-def process(name: str, logfile: argparse.FileType("w") = None):
-    """Process something.
-
-    Args:
-        name: item to process
-        logfile: optional file to log to
-    """
-    return name, logfile
-```
-
-```bash
-python script.py foo                        # logfile is None
-python script.py foo --logfile output.log   # logfile is an open file handle
-```
-
 Log level
 ---------
 
@@ -579,6 +535,7 @@ CAVEATS
 
 TO DO
 -----
+  * Handle file arguments
   * Handle list/tuple arguments i.e. argparse's nargs
 
 
