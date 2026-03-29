@@ -600,6 +600,11 @@ pre-commit install && \
 pytest
 ```
 
+### Releasing
+Update the version of the package in `setup.py` and merge it to `main` via PR.
+The package is build, `main` is tagged with the version, a GitHub release is created and the package is uploaded on
+pypi.org using trusted publishing.
+
 [pypi_link]: https://pypi.org/project/parse-this/ "parse_this on PyPI"
 [pypi_version]: https://badge.fury.io/py/parse-this.svg "PyPI latest version"
 [python_version]: https://img.shields.io/pypi/pyversions/parse_this?style=flat-square
