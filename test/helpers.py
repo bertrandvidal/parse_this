@@ -335,6 +335,16 @@ def has_optional_tuple_argument(label: str, dims: tuple[int, ...] = None):
     return label, dims
 
 
+@create_parser()
+def has_tuple_argument_without_type(coords: tuple = None):
+    """Process coordinates.
+
+    Args:
+        coords: coordinate values
+    """
+    return coords
+
+
 @parse_class()
 class SubCmdParseError(object):
     """A class to showcase subcommand parse error reporting."""

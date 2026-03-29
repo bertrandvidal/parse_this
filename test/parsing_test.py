@@ -19,6 +19,7 @@ from test.helpers import (
     has_optional_tuple_argument,
     has_tuple_argument,
     parse_me_full_docstring,
+    has_tuple_argument_without_type,
 )
 from test.utils import captured_output
 
@@ -235,6 +236,12 @@ class TestSequenceType(unittest.TestCase):
         self.assertEqual(
             has_optional_tuple_argument.parser.call(args=["test", "--dims", "1", "2"]),
             ("test", [1, 2]),
+        )
+
+    def test_tuple_without_type(self):
+        self.assertEqual(
+            has_tuple_argument_without_type.parser.call(args=["--coords", "1", "2"]),
+            ["1", "2"],
         )
 
 
