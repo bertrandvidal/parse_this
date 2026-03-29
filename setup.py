@@ -8,7 +8,7 @@ with open(README_PATH, "r") as README_FILE:
 
 setup(
     name="parse_this",
-    version="4.0.4",
+    version="4.0.5",
     description=(
         "Makes it easy to create a command line interface for any "
         "function, method or classmethod.."
