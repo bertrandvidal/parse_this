@@ -35,11 +35,14 @@ jobs:
             VERSION=$(python setup.py --version)
             echo "PACKAGE_VERSION=$VERSION" >> $GITHUB_ENV
             echo "Extracted version: $VERSION"
+          with:
+            github_token: ${{ secrets.CI_CD_TAGGING_TOKEN }} # need to push tag to main
         - name: create tag
           run: |
             # tag the commit on top of which the PR is merged
             git tag v${PACKAGE_VERSION} ${{ github.event.pull_request.base.ref }}
             git push origin v${PACKAGE_VERSION}
+
         - name: create github release
           run: gh release create --fail-on-no-commits v${PACKAGE_VERSION} dist/
         - name: publish package
