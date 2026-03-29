@@ -14,6 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       id-token: write # needed for pypi trusted publishing
+      contents: write # needed to create tag
     steps:
         - uses: actions/checkout@v6
         - name: set up Python
@@ -32,8 +33,6 @@ jobs:
             name: python-package-distributions
             path: dist/
         - name: extract version
-          env:
-            GITHUB_TOKEN: ${{ secrets.CI_CD_TAGGING_TOKEN }} # need to push tag to main
           run: |
             pip install setuptools
             VERSION=$(python setup.py --version)
