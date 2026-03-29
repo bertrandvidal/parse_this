@@ -2,7 +2,7 @@ import enum
 import inspect
 import logging
 from argparse import ArgumentParser, ArgumentTypeError, _HelpAction
-from typing import Any, Callable, Type
+from typing import Any, Callable, Type, get_args, get_origin
 
 _LOG = logging.getLogger(__name__)
 
@@ -57,6 +57,33 @@ def _make_enum_converter(
             raise ArgumentTypeError("invalid choice: %r (choose from %s)" % (s, valid))
 
     return _convert
+
+
+def _is_sequence_type(arg_type: Any) -> bool:
+    """Return True if arg_type is list, tuple, or a generic alias like list[int].
+
+    Args:
+        arg_type: the type annotation to inspect
+    """
+    origin = get_origin(arg_type)
+    if origin is not None:
+        return origin in (list, tuple)
+    return arg_type in (list, tuple)
+
+
+def _get_element_type(arg_type: Any) -> Callable:
+    """Extract the element type from a generic list/tuple annotation.
+
+    Args:
+        arg_type: a list or tuple type annotation (e.g. list[int], tuple[str, ...])
+
+    Returns:
+        the element type, or str if no element type is specified
+    """
+    type_args = get_args(arg_type)
+    if not type_args:
+        return str
+    return type_args[0]
 
 
 def _add_log_level_argument(parser: ArgumentParser):

@@ -293,6 +293,58 @@ def has_enum_default(a: int, color: Color = Color.RED):
     return a, color
 
 
+@create_parser()
+def has_list_argument(values: list[int]):
+    """Sum a list of values.
+
+    Args:
+        values: integers to sum
+    """
+    return sum(values)
+
+
+@create_parser()
+def has_optional_list_argument(name: str, tags: list[str] = None):
+    """Tag something.
+
+    Args:
+        name: the thing to tag
+        tags: optional list of tags
+    """
+    return name, tags
+
+
+@create_parser()
+def has_tuple_argument(coords: tuple[float, ...]):
+    """Process coordinates.
+
+    Args:
+        coords: coordinate values
+    """
+    return coords
+
+
+@create_parser()
+def has_optional_tuple_argument(label: str, dims: tuple[int, ...] = None):
+    """Label dimensions.
+
+    Args:
+        label: the label
+        dims: optional dimensions
+    """
+    return label, dims
+
+
+@create_parser()
+def has_tuple_argument_without_type(coords: tuple = None):
+    """Process coordinates.
+
+    Args:
+        coords: coordinate values
+    """
+    return coords
+
+
 @parse_class()
 class SubCmdParseError(object):
     """A class to showcase subcommand parse error reporting."""
@@ -314,3 +366,13 @@ class SubCmdParseError(object):
             sub_arg: integer argument of the subcommand
         """
         return self._top * sub_arg
+
+
+@parse_class()
+class ParseMyInitOnly(object):
+    """A class to show that unrecognized arguments at the top level are
+    showing appropriate error."""
+
+    @create_parser()
+    def __init__(self):
+        pass

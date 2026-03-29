@@ -11,7 +11,7 @@ from parse_this.exception import ParseThisException
 from parse_this.help.action import FullHelpAction
 from parse_this.helpers import _add_log_level_argument
 from parse_this.parsing import _get_arg_parser, _get_parseable_methods
-from parse_this.types import _check_types
+from parse_this.type_check import _check_types
 
 _LOG = logging.getLogger(__name__)
 

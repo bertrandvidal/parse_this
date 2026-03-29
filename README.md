@@ -334,6 +334,56 @@ def spray(canvas: str, color: Color = Color.BLUE):
 The `--help` output shows the valid member names, e.g. `{RED,GREEN,BLUE}`.
 
 
+List and tuple arguments
+------------------------
+
+Parameters annotated with `list[T]` or `tuple[T, ...]` are turned into
+multi-value arguments using argparse's `nargs='+'` (one or more values).
+Each value is converted to the element type `T`.
+
+```python
+from parse_this import create_parser
+
+@create_parser()
+def total(values: list[int]):
+    """Sum a list of integers.
+
+    Args:
+        values: one or more integers to sum
+    """
+    return sum(values)
+```
+
+```bash
+python script.py 1 2 3    # -> 6
+python script.py 10       # -> 10
+```
+
+Optional list/tuple arguments work with `--flag`:
+
+```python
+from parse_this import create_parser
+
+@create_parser()
+def greet(name: str, titles: list[str] = None):
+    """Greet with optional titles.
+
+    Args:
+        name: person to greet
+        titles: optional list of titles
+    """
+    return name, titles
+```
+
+```bash
+python script.py Alice                          # -> ('Alice', None)
+python script.py Alice --titles Dr Prof         # -> ('Alice', ['Dr', 'Prof'])
+```
+
+`tuple[T, ...]` works identically -- note that argparse always returns a
+`list`, even for tuple-annotated parameters. If no element type is specified
+(bare `list` or `tuple`), values are treated as strings.
+
 Log level
 ---------
 
@@ -346,9 +396,9 @@ If `--log-level` is passed, `logging.basicConfig(level=...)` is called before
 your function runs, so you get immediate logging configuration without any
 boilerplate.
 
+
 ```python
 from parse_this import create_parser
-
 
 @create_parser(log_level=True)
 def greet(name: str, count: int = 1):
@@ -406,7 +456,6 @@ class MyApp(object):
 ```bash
 python script.py --log-level DEBUG 0 run my-task
 ```
-
 
 Decorator
 ---------
@@ -532,11 +581,6 @@ CAVEATS
 * Classmethods cannot be access from the command line in a class decorated with `parse_class`
 * When using `create_parser` on a method that has an argument with `None` as a default value it *must be* annotated.
   A `ParseThisException` will be raised otherwise.
-
-TO DO
------
-  * Handle file arguments
-  * Handle list/tuple arguments i.e. argparse's nargs
 
 
 License
