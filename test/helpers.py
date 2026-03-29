@@ -366,3 +366,13 @@ class SubCmdParseError(object):
             sub_arg: integer argument of the subcommand
         """
         return self._top * sub_arg
+
+
+@parse_class()
+class ParseMyInitOnly(object):
+    """A class to show that unrecognized arguments at the top level are
+    showing appropriate error."""
+
+    @create_parser()
+    def __init__(self):
+        pass
