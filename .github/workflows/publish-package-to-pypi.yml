@@ -3,7 +3,7 @@ name: parse_this publish package to pypi
 on:
   push:
     branches:
-      - master
+      - main
     paths:
       - setup.py
 
