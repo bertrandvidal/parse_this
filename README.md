@@ -569,7 +569,7 @@ RUNNING TESTS
 To check that everything is running fine you can run the following command after cloning the repo:
 
 ```bash
-python -m pip install --upgrade pip && python -m pip install -r requirements.txt && pytest
+python -m pip install --upgrade pip && python -m pip install -r requirements.txt --force-reinstall && pytest
 ```
 
 CAVEATS
@@ -595,10 +595,15 @@ Contributing and dev
 ```sh
 python3 -m venv --clear --upgrade-deps --prompt "parse-this" venv && \
 source venv/bin/activate && \
-pip install -r requirements.txt && \
+pip install -r requirements.txt --force-reinstall && \
 pre-commit install && \
 pytest
 ```
+
+### Releasing
+Update the version of the package in `setup.py` and merge it to `main` via PR.
+The package is build, `main` is tagged with the version, a GitHub release is created and the package is uploaded on
+pypi.org using trusted publishing.
 
 [pypi_link]: https://pypi.org/project/parse-this/ "parse_this on PyPI"
 [pypi_version]: https://badge.fury.io/py/parse-this.svg "PyPI latest version"
