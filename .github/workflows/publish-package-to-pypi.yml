@@ -4,10 +4,8 @@ on:
   push:
     branches:
       - main
-      - v*
     paths:
       - setup.py
-      - .github/workflows/publish-package-to-pypi.yml
 
 jobs:
   publish:
