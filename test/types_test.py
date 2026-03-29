@@ -1,7 +1,7 @@
 import unittest
 
 from parse_this.exception import ParseThisException
-from parse_this.types import _check_types
+from parse_this.type_check import _check_types
 
 
 class TestTypes(unittest.TestCase):

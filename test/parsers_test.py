@@ -15,6 +15,7 @@ from test.helpers import (
     function_with_log_level,
     i_am_parseable,
     parse_me_full_docstring,
+    ParseMyInitOnly,
 )
 from test.utils import captured_output
 
@@ -158,6 +159,15 @@ class TestClassParser(unittest.TestCase):
         # The top-level usage line lists subcommands inside braces like
         # "{sub-cmd}" — that must NOT appear, confirming the top-level parser
         # did not report the error.
+        self.assertNotIn("{sub-cmd}", error_output)
+
+    def test_parse_class_unrecognized_argument(self):
+        with captured_output() as (_, err):
+            with self.assertRaises(SystemExit):
+                ParseMyInitOnly.parser.call("--unknown-flag".split())
+            error_output = err.getvalue()
+        self.assertIn("unrecognized arguments", error_output)
+        self.assertIn("--unknown-flag", error_output)
         self.assertNotIn("{sub-cmd}", error_output)
 
 
