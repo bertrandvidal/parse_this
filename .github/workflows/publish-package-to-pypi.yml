@@ -38,12 +38,9 @@ jobs:
         - name: create tag
           run: |
             # tag the commit on top of which the PR is merged
-            git tag v${env.PACKAGE_VERSION} ${{ github.event.pull_request.base.ref }}
-            git push origin v${env.PACKAGE_VERSION}
+            git tag v${PACKAGE_VERSION} ${{ github.event.pull_request.base.ref }}
+            git push origin v${PACKAGE_VERSION}
         - name: create github release
-          run: gh release create --fail-on-no-commits v${env.PACKAGE_VERSION} dist/
+          run: gh release create --fail-on-no-commits v${PACKAGE_VERSION} dist/
         - name: publish package
           uses: pypa/gh-action-pypi-publish@v1.13.0
-          with:
-            user: __token__
-            password: ${{ secrets.PYPI_API_TOKEN }}
