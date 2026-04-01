@@ -25,13 +25,12 @@ classifiers = [
 
 [project.optional-dependencies]
 dev = [
-    "black",
-    "flake8",
     "ipython",
     "mypy",
     "pre-commit",
     "pytest",
     "pytest-cov",
+    "ruff",
 ]
 
 [project.urls]
@@ -49,3 +48,9 @@ show_error_codes = true
 cache_dir = ".pytest_cache"
 addopts = "--cov=parse_this --cov-fail-under=95 --no-cov-on-fail"
 testpaths = ["test"]
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+extend-ignore = ["E203"]

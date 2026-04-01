@@ -24,14 +24,10 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -e ".[dev]"
-    - name: black formatter
-      uses: psf/black@stable
-      with:
-        options: "--check --verbose"
-        src: "./parse_this ./test"
-    - name: lint with flake8
-      run: |
-        flake8 parse_this test --count --show-source --statistics
+    - name: ruff lint
+      run: ruff check parse_this test
+    - name: ruff format
+      run: ruff format --check parse_this test
     - name: type checking
       run: |
         mypy parse_this test

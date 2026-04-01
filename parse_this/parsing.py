@@ -103,7 +103,7 @@ def _add_required_argument(
         arg_type: the resolved type for the argument
         help_msg: the help string for this argument
     """
-    if arg_type == bool:
+    if arg_type is bool:
         _LOG.debug("Adding optional flag %s.%s (default: True)", func.__name__, arg)
         parser.add_argument(
             "--%s" % arg,
@@ -167,7 +167,7 @@ def _add_optional_argument(
             "for the method '{}'".format(arg, func.__name__)
         )
     arg_type = arg_type or type(default)
-    if arg_type == bool:
+    if arg_type is bool:
         action = "store_false" if default else "store_true"
         _LOG.debug(
             "Adding optional flag %s.%s (default: %s)",
