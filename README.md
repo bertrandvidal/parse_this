@@ -569,7 +569,7 @@ RUNNING TESTS
 To check that everything is running fine you can run the following command after cloning the repo:
 
 ```bash
-python -m pip install --upgrade pip && python -m pip install -r requirements.txt --force-reinstall && pytest
+python -m pip install --upgrade pip && pip install -e ".[dev]" && pytest
 ```
 
 CAVEATS
@@ -595,7 +595,7 @@ Contributing and dev
 ```sh
 python3 -m venv --clear --upgrade-deps --prompt "parse-this" venv && \
 source venv/bin/activate && \
-pip install -r requirements.txt --force-reinstall && \
+pip install -e ".[dev]" && \
 pre-commit install && \
 pytest
 ```

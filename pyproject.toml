@@ -23,6 +23,17 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "black",
+    "flake8",
+    "ipython",
+    "mypy",
+    "pre-commit",
+    "pytest",
+    "pytest-cov",
+]
+
 [project.urls]
 Homepage = "https://github.com/bertrandvidal/parse_this"
 Download = "https://pypi.python.org/pypi/parse_this"
