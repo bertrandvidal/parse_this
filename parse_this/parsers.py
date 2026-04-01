@@ -82,7 +82,7 @@ class FunctionParser(object):
         arguments = parser.parse_args(_get_args_to_parse(args))
         return _call(func, func_args, arguments)
 
-    @typing.no_type_check
+    @typing.no_type_check  # dynamically attaches .parser to callables
     def _set_function_parser(self, func: Callable, parser: ArgumentParser):
         func.parser = parser
 
@@ -138,7 +138,7 @@ class MethodParser(object):
                 self._delimiter_chars,
                 self._log_level,
             )
-            parser.get_name = lambda: self._name or func.__name__
+            parser.get_name = lambda: self._name or func.__name__  # type: ignore[attr-defined]
             self._set_method_parser(func, parser)
 
         @wraps(func)
@@ -147,7 +147,7 @@ class MethodParser(object):
 
         return decorated
 
-    @typing.no_type_check
+    @typing.no_type_check  # dynamically attaches .parser to callables
     def _set_method_parser(self, func: Callable, parser: ArgumentParser):
         func.parser = parser
         func.parser.call = _get_parser_call_method(func)
@@ -287,7 +287,7 @@ class ClassParser(object):
         self._set_parser_call_method(parser_to_method, top_level_parser)
         cls.parser = top_level_parser
 
-    @typing.no_type_check
+    @typing.no_type_check  # dynamically attaches .parser and .call to objects
     def _set_parser_call_method(
         self, parser_to_method: Dict[str, str], top_level_parser: ArgumentParser
     ):
