@@ -50,7 +50,7 @@ show_error_codes = true
 
 [tool.pytest.ini_options]
 cache_dir = ".pytest_cache"
-addopts = "--cov=parse_this --cov-fail-under=95 --no-cov-on-fail"
+addopts = "--cov=parse_this --cov-fail-under=99 --no-cov-on-fail"
 testpaths = ["test"]
 
 [tool.ruff]
