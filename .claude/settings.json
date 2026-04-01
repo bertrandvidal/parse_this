@@ -16,23 +16,27 @@
   },
   "permissions": {
     "allow": [
-      "Bash(python3:*)",
-      "Bash(python:*)",
-      "Bash(git checkout:*)",
-      "Bash(pytest:*)",
-      "Bash(pre-commit)",
-      "Bash(git stash:*)",
-      "Bash(pyenv versions:*)",
-      "Bash(pyenv shell:*)",
-      "Bash(gh run:*)",
-      "Bash(pip3 index:*)",
-      "WebFetch(domain:github.com)",
-      "Bash(gh issue:*)",
       "Bash(cat:*)",
+      "Bash(git checkout:*)",
+      "Bash(git stash:*)",
+      "Bash(gh issue:*)",
+      "Bash(gh pr:*)",
+      "Bash(gh run:*)",
       "Bash(jq:*)",
       "Bash(ls:*)",
+      "Bash(pip install:*)",
+      "Bash(pip3 index:*)",
+      "Bash(pip3 install:*)",
+      "Bash(pre-commit:*)",
+      "Bash(pyenv shell:*)",
+      "Bash(pyenv versions:*)",
+      "Bash(pytest:*)",
+      "Bash(python:*)",
+      "Bash(python3:*)",
+      "Bash(ruff:*)",
+      "Bash(source:*)",
       "Bash(wc:*)",
-      "Bash(gh pr:*)"
+      "WebFetch(domain:github.com)"
     ]
   }
 }
