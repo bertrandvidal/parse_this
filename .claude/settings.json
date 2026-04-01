@@ -1,4 +1,19 @@
 {
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pre-commit run --all-files",
+            "if": "Bash(git commit*)",
+            "statusMessage": "Running pre-commit checks..."
+          }
+        ]
+      }
+    ]
+  },
   "permissions": {
     "allow": [
       "Bash(python3:*)",
