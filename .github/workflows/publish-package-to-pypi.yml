@@ -39,8 +39,7 @@ jobs:
             echo "Extracted version: $VERSION"
         - name: create tag
           run: |
-            # tag the commit on top of which the PR is merged
-            git tag v${PACKAGE_VERSION} ${{ github.event.pull_request.base.ref }}
+            git tag v${PACKAGE_VERSION} ${{ github.sha }}
             git push origin v${PACKAGE_VERSION}
         - name: create github release
           run: gh release create --fail-on-no-commits v${PACKAGE_VERSION} dist/parse_this*.tar.gz
