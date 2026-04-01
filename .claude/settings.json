@@ -19,8 +19,9 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/scripts/run-related-tests.sh",
-            "statusMessage": "Running related tests...",
+            "command": "source venv/bin/activate 2>/dev/null; pytest --no-header -q",
+            "if": "Edit(*/parse_this/*.py)",
+            "statusMessage": "Running tests...",
             "async": true
           }
         ]
@@ -30,8 +31,9 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/scripts/run-related-tests.sh",
-            "statusMessage": "Running related tests...",
+            "command": "source venv/bin/activate 2>/dev/null; pytest --no-header -q",
+            "if": "Write(*/parse_this/*.py)",
+            "statusMessage": "Running tests...",
             "async": true
           }
         ]
