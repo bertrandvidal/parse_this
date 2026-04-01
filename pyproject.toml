@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "parse_this"
-version = "4.0.7"
+version = "4.0.8"
 description = "Makes it easy to create a command line interface for any function, method or classmethod.."
 readme = "README.md"
 license = "MIT"
