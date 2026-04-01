@@ -12,6 +12,30 @@
           }
         ]
       }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/scripts/run-related-tests.sh",
+            "statusMessage": "Running related tests...",
+            "async": true
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/scripts/run-related-tests.sh",
+            "statusMessage": "Running related tests...",
+            "async": true
+          }
+        ]
+      }
     ]
   },
   "permissions": {
