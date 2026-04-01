@@ -43,7 +43,7 @@ class TestFunctionParser(unittest.TestCase):
             help_message = out.getvalue()
         self.assertIn("this one is a no brainer even with dashes", help_message)
         self.assertIn(
-            "noticed you're missing docstring for two and I'm multiline " "too!",
+            "noticed you're missing docstring for two and I'm multiline too!",
             help_message,
         )
 

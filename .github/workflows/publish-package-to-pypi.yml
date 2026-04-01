@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - setup.py
+      - pyproject.toml
 
 jobs:
   publish:
@@ -34,8 +34,7 @@ jobs:
             path: dist/
         - name: extract version
           run: |
-            pip install setuptools
-            VERSION=$(python setup.py --version)
+            VERSION=$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")
             echo "PACKAGE_VERSION=$VERSION" >> $GITHUB_ENV
             echo "Extracted version: $VERSION"
         - name: create tag
