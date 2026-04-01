@@ -213,7 +213,7 @@ class ClassParser(object):
             pointing to the method real name, and sub_parsers is the subparsers
             action added to top_level_parser
         """
-        description = "Accessible methods of {}".format(class_name)
+        description = f"Accessible methods of {class_name}"
         sub_parsers = top_level_parser.add_subparsers(
             description=description, dest="method"
         )
@@ -319,13 +319,10 @@ class ClassParser(object):
                 # decorate we cannot instantiate the class
                 if "__init__" not in parser_to_method:
                     raise ParseThisException(
-                        (
-                            "'__init__' method is not decorated. "
-                            "Please provide an instance to "
-                            "'{}.parser.call' or decorate the "
-                            "'__init___' method with "
-                            "'create_parser'".format(self._cls.__name__)
-                        )
+                        f"'__init__' method is not decorated. "
+                        f"Please provide an instance to "
+                        f"'{self._cls.__name__}.parser.call' or decorate the "
+                        f"'__init___' method with 'create_parser'"
                     )
                 # We instantiate the class from the command line arguments
                 instance = _call_method_from_namespace(self._cls, "__init__", namespace)

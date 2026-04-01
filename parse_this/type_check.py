@@ -33,10 +33,10 @@ def _check_types(
 
     if len(types_annotations) > len(func_args):
         raise ParseThisException(
-            "Too many types provided for conversion for '{}'.".format(func_name)
+            f"Too many types provided for conversion for '{func_name}'."
         )
     if len(types_annotations) < len(func_args) - len(defaults):
         raise ParseThisException(
-            "Not enough types provided for conversion for '{}'".format(func_name)
+            f"Not enough types provided for conversion for '{func_name}'"
         )
     return func_args

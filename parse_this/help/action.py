@@ -29,6 +29,6 @@ class FullHelpAction(argparse._HelpAction):
         for subparser_action in subparsers_actions:
             # Get all subparsers and print their help
             for choice, subparser in subparser_action.choices.items():
-                print("** Command '{}' **".format(choice))
-                print("{}\n".format(subparser.format_help()))
+                print(f"** Command '{choice}' **")
+                print(f"{subparser.format_help()}\n")
         parser.exit()

@@ -162,9 +162,9 @@ def _add_optional_argument(
     """
     if default is None and arg_type is None:
         raise ParseThisException(
-            "To use default value of 'None' you need "
-            "to specify the type of the argument '{}' "
-            "for the method '{}'".format(arg, func.__name__)
+            f"To use default value of 'None' you need "
+            f"to specify the type of the argument '{arg}' "
+            f"for the method '{func.__name__}'"
         )
     arg_type = arg_type or type(default)
     if arg_type is bool:
