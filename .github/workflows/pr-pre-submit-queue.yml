@@ -34,7 +34,7 @@ jobs:
         flake8 parse_this test --count --show-source --statistics
     - name: type checking
       run: |
-        mypy --config-file .mypy.ini parse_this test
+        mypy parse_this test
     - name: test with pytest
       run: |
         pytest --cache-clear --cov=parse_this --cov-fail-under=95 --no-cov-on-fail --cov-report=xml test/

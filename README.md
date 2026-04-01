@@ -601,7 +601,7 @@ pytest
 ```
 
 ### Releasing
-Update the version of the package in `setup.py` and merge it to `main` via PR.
+Update the version of the package in `pyproject.toml` and merge it to `main` via PR.
 The package is build, `main` is tagged with the version, a GitHub release is created and the package is uploaded on
 pypi.org using trusted publishing.
 
