@@ -94,6 +94,8 @@ def _get_arg_parser(
 def _validate_literal_values(func_name: str, arg: str, values: tuple) -> None:
     """Validate that all Literal values share the same type.
 
+    The expected type is inferred from the first value in the tuple.
+
     Args:
         func_name: name of the function (for error messages)
         arg: the parameter name
