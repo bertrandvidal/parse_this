@@ -46,6 +46,17 @@ venv/
 coverage.xml
 out/
 
+# OS
+.DS_Store
+
+# IDE
+.vscode/
+*.swp
+*.swo
+
+# Merge artifacts
+*.orig
+
 # Claude Code
 .claude/memory/
 .claude/settings.local.json

@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "parse_this"
 version = "4.0.8"
-description = "Makes it easy to create a command line interface for any function, method or classmethod.."
+description = "Makes it easy to create a command line interface for any function, method or classmethod."
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.10"
@@ -36,6 +36,8 @@ dev = [
 
 [project.urls]
 Homepage = "https://github.com/bertrandvidal/parse_this"
+Repository = "https://github.com/bertrandvidal/parse_this"
+"Bug Tracker" = "https://github.com/bertrandvidal/parse_this/issues"
 Download = "https://pypi.python.org/pypi/parse_this"
 
 [tool.setuptools.packages.find]
@@ -54,6 +56,7 @@ addopts = "--cov=parse_this --cov-fail-under=99 --no-cov-on-fail"
 testpaths = ["test"]
 
 [tool.ruff]
+target-version = "py310"
 line-length = 88
 
 [tool.ruff.lint]

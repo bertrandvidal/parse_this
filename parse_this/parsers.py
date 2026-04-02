@@ -82,7 +82,7 @@ class FunctionParser(object):
         arguments = parser.parse_args(_get_args_to_parse(args))
         return _call(func, func_args, arguments)
 
-    @typing.no_type_check
+    @typing.no_type_check  # dynamically attaches .parser to callables
     def _set_function_parser(self, func: Callable, parser: ArgumentParser):
         func.parser = parser
 
@@ -138,7 +138,7 @@ class MethodParser(object):
                 self._delimiter_chars,
                 self._log_level,
             )
-            parser.get_name = lambda: self._name or func.__name__
+            parser.get_name = lambda: self._name or func.__name__  # type: ignore[attr-defined]
             self._set_method_parser(func, parser)
 
         @wraps(func)
@@ -147,7 +147,7 @@ class MethodParser(object):
 
         return decorated
 
-    @typing.no_type_check
+    @typing.no_type_check  # dynamically attaches .parser to callables
     def _set_method_parser(self, func: Callable, parser: ArgumentParser):
         func.parser = parser
         func.parser.call = _get_parser_call_method(func)
@@ -213,7 +213,7 @@ class ClassParser(object):
             pointing to the method real name, and sub_parsers is the subparsers
             action added to top_level_parser
         """
-        description = "Accessible methods of {}".format(class_name)
+        description = f"Accessible methods of {class_name}"
         sub_parsers = top_level_parser.add_subparsers(
             description=description, dest="method"
         )
@@ -287,7 +287,7 @@ class ClassParser(object):
         self._set_parser_call_method(parser_to_method, top_level_parser)
         cls.parser = top_level_parser
 
-    @typing.no_type_check
+    @typing.no_type_check  # dynamically attaches .parser and .call to objects
     def _set_parser_call_method(
         self, parser_to_method: Dict[str, str], top_level_parser: ArgumentParser
     ):
@@ -319,13 +319,10 @@ class ClassParser(object):
                 # decorate we cannot instantiate the class
                 if "__init__" not in parser_to_method:
                     raise ParseThisException(
-                        (
-                            "'__init__' method is not decorated. "
-                            "Please provide an instance to "
-                            "'{}.parser.call' or decorate the "
-                            "'__init___' method with "
-                            "'create_parser'".format(self._cls.__name__)
-                        )
+                        f"'__init__' method is not decorated. "
+                        f"Please provide an instance to "
+                        f"'{self._cls.__name__}.parser.call' or decorate the "
+                        f"'__init___' method with 'create_parser'"
                     )
                 # We instantiate the class from the command line arguments
                 instance = _call_method_from_namespace(self._cls, "__init__", namespace)

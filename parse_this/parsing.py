@@ -1,7 +1,7 @@
 import enum
 import logging
 from argparse import ArgumentParser
-from typing import Any, Callable, Dict, List, Tuple, Type, cast
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, cast
 
 from parse_this.args import _NO_DEFAULT
 from parse_this.exception import ParseThisException
@@ -17,7 +17,9 @@ from parse_this.helpers import (
 _LOG = logging.getLogger(__name__)
 
 
-def _get_parseable_methods(cls):
+def _get_parseable_methods(
+    cls: type,
+) -> Tuple[Optional[ArgumentParser], Dict[str, ArgumentParser]]:
     """Return all methods of cls that are parseable i.e. have been decorated
     by '@create_parser'.
 
@@ -56,7 +58,7 @@ def _get_arg_parser(
     args_and_defaults: List[Tuple[str, Any]],
     delimiter_chars: str,
     log_level: bool = False,
-):
+) -> ArgumentParser:
     """Return an ArgumentParser for the given function. Arguments are defined
         from the function arguments and their associated defaults.
 
@@ -162,9 +164,9 @@ def _add_optional_argument(
     """
     if default is None and arg_type is None:
         raise ParseThisException(
-            "To use default value of 'None' you need "
-            "to specify the type of the argument '{}' "
-            "for the method '{}'".format(arg, func.__name__)
+            f"To use default value of 'None' you need "
+            f"to specify the type of the argument '{arg}' "
+            f"for the method '{func.__name__}'"
         )
     arg_type = arg_type or type(default)
     if arg_type is bool:
