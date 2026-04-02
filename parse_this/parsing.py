@@ -9,7 +9,9 @@ from parse_this.help.description import prepare_doc
 from parse_this.helpers import (
     _add_log_level_argument,
     _get_element_type,
+    _get_literal_values,
     _is_enum_type,
+    _is_literal_type,
     _is_sequence_type,
     _make_enum_converter,
 )
@@ -89,6 +91,27 @@ def _get_arg_parser(
     return parser
 
 
+def _validate_literal_values(func_name: str, arg: str, values: tuple) -> None:
+    """Validate that all Literal values share the same type.
+
+    The expected type is inferred from the first value in the tuple.
+
+    Args:
+        func_name: name of the function (for error messages)
+        arg: the parameter name
+        values: the tuple of Literal values
+
+    Raises:
+        ParseThisException: if Literal values have mixed types
+    """
+    expected_type = type(values[0])
+    if not all(type(v) is expected_type for v in values):
+        raise ParseThisException(
+            f"Literal values for '{arg}' in '{func_name}' must all be the "
+            f"same type, got mixed types: {values}"
+        )
+
+
 def _add_required_argument(
     parser: ArgumentParser,
     func: Callable,
@@ -114,6 +137,17 @@ def _add_required_argument(
             action="store_false",
             help="%s. Defaults to True if not specified" % help_msg,
         )
+    elif _is_literal_type(arg_type):
+        values = _get_literal_values(arg_type)
+        _validate_literal_values(func.__name__, arg, values)
+        literal_type = type(values[0])
+        _LOG.debug(
+            "Adding positional literal argument %s.%s: %s",
+            func.__name__,
+            arg,
+            values,
+        )
+        parser.add_argument(arg, help=help_msg, type=literal_type, choices=values)
     elif _is_enum_type(arg_type):
         _LOG.debug(
             "Adding positional enum argument %s.%s: %s",
@@ -168,6 +202,30 @@ def _add_optional_argument(
             f"to specify the type of the argument '{arg}' "
             f"for the method '{func.__name__}'"
         )
+    if _is_literal_type(arg_type):
+        values = _get_literal_values(arg_type)
+        _validate_literal_values(func.__name__, arg, values)
+        literal_type = type(values[0])
+        if default is not None and default not in values:
+            raise ParseThisException(
+                f"Default value {default!r} for '{arg}' in '{func.__name__}' "
+                f"is not one of the allowed Literal values: {values}"
+            )
+        _LOG.debug(
+            "Adding optional literal argument %s.%s: %s (default: %s)",
+            func.__name__,
+            arg,
+            values,
+            default,
+        )
+        parser.add_argument(
+            "--%s" % arg,
+            help=help_msg,
+            default=default,
+            type=literal_type,
+            choices=values,
+        )
+        return
     arg_type = arg_type or type(default)
     if arg_type is bool:
         action = "store_false" if default else "store_true"
