@@ -2,7 +2,7 @@ import enum
 import inspect
 import logging
 from argparse import ArgumentParser, ArgumentTypeError, _HelpAction
-from typing import Any, Callable, Type, get_args, get_origin
+from typing import Any, Callable, Literal, Tuple, Type, get_args, get_origin
 
 _LOG = logging.getLogger(__name__)
 
@@ -84,6 +84,24 @@ def _get_element_type(arg_type: Any) -> Callable:
     if not type_args:
         return str
     return type_args[0]
+
+
+def _is_literal_type(arg_type: Any) -> bool:
+    """Return True if arg_type is a typing.Literal annotation.
+
+    Args:
+        arg_type: the type annotation to inspect
+    """
+    return get_origin(arg_type) is Literal
+
+
+def _get_literal_values(arg_type: Any) -> Tuple[Any, ...]:
+    """Return the tuple of allowed values from a Literal annotation.
+
+    Args:
+        arg_type: a Literal type annotation (e.g. Literal["a", "b"])
+    """
+    return get_args(arg_type)
 
 
 def _add_log_level_argument(parser: ArgumentParser):

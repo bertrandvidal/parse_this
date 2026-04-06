@@ -334,6 +334,41 @@ def spray(canvas: str, color: Color = Color.BLUE):
 The `--help` output shows the valid member names, e.g. `{RED,GREEN,BLUE}`.
 
 
+Literal arguments
+-----------------
+
+Parameters annotated with `typing.Literal` are turned into restricted choices on
+the command line. The allowed values are taken directly from the Literal
+annotation, and the type is preserved (e.g., `Literal[1, 2, 3]` expects
+integers).
+
+```python
+from typing import Literal
+from parse_this import create_parser
+
+
+@create_parser()
+def deploy(env: Literal["dev", "staging", "prod"], mode: Literal["full", "quick"] = "quick"):
+    """Deploy the app.
+
+    Args:
+        env: target environment
+        mode: deployment mode
+    """
+    return env, mode
+```
+
+```bash
+python script.py dev                    # -> ('dev', 'quick')
+python script.py staging --mode full    # -> ('staging', 'full')
+python script.py local                  # error: invalid choice
+```
+
+All Literal values must share the same type — mixed types like
+`Literal[1, "auto"]` will raise a `ParseThisException`. A default value that
+isn't one of the Literal choices will also raise `ParseThisException`.
+
+
 List and tuple arguments
 ------------------------
 
