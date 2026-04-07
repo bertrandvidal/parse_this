@@ -1,5 +1,10 @@
 # Plan: Shell Completion
 
+**Status:** Won't do. Shell completion of argparse-based tools requires
+`argcomplete` (a third-party dependency). parse_this aims to remain a
+zero-dependency library, so we will not pull in non-stdlib packages — even
+as an optional extra — to support this feature.
+
 ## Context
 
 Shell completion (bash/zsh/fish) greatly improves CLI UX. parse_this should generate completion scripts from its parsers. The `argcomplete` library is the standard way to add this to argparse-based tools.

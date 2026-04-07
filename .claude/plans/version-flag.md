@@ -1,5 +1,7 @@
 # Plan: --version Flag Support
 
+**Status:** Implemented (PR #46, merged).
+
 ## Context
 
 Many CLI tools support `--version`. parse_this should make it easy to add a version flag to parsers, using argparse's built-in `"version"` action.
