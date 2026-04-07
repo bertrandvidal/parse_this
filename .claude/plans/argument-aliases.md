@@ -1,5 +1,11 @@
 # Plan: Argument Aliases / Short Flags
 
+**Status:** Won't do. The proposed design requires users to import an `Alias`
+helper class from parse_this. parse_this aims to keep its public surface
+limited to the three parser entry points (`parse_this`, `create_parser`,
+`parse_class`); anything that requires users to import additional helpers is
+out of scope.
+
 ## Context
 
 CLI tools conventionally support short flags (e.g., `-v` for `--verbose`). parse_this currently only generates long-form `--arg` flags for optional arguments. Users should be able to specify aliases.

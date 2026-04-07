@@ -1,5 +1,11 @@
 # Plan: Callable Defaults (Lazy/Dynamic Defaults)
 
+**Status:** Won't do. The proposed design requires users to import a
+`LazyDefault` helper class from parse_this. parse_this aims to keep its
+public surface limited to the three parser entry points (`parse_this`,
+`create_parser`, `parse_class`); anything that requires users to import
+additional helpers is out of scope.
+
 ## Context
 
 Some CLI arguments need defaults computed at runtime (e.g., today's date, current working directory, generated UUIDs). parse_this should support callables as default values that are invoked when the argument isn't provided.

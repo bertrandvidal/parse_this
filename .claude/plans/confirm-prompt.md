@@ -1,5 +1,11 @@
 # Plan: Confirmation Prompts
 
+**Status:** Won't do. The proposed design requires users to import a
+`Confirm` helper class from parse_this. parse_this aims to keep its public
+surface limited to the three parser entry points (`parse_this`,
+`create_parser`, `parse_class`); anything that requires users to import
+additional helpers is out of scope.
+
 ## Context
 
 Destructive CLI operations often require user confirmation (e.g., "Are you sure?"). parse_this should support a `Confirm` type that generates a `--flag` to skip the prompt, and interactively asks for confirmation when the flag isn't passed.

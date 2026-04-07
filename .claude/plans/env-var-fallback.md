@@ -1,5 +1,11 @@
 # Plan: Environment Variable Fallback
 
+**Status:** Won't do. The proposed design requires users to import an `Env`
+helper class from parse_this. parse_this aims to keep its public surface
+limited to the three parser entry points (`parse_this`, `create_parser`,
+`parse_class`); anything that requires users to import additional helpers is
+out of scope.
+
 ## Context
 
 CLI tools often allow setting defaults via environment variables (e.g., `--token` falls back to `$MY_TOKEN`). parse_this should support this via annotations or a helper, so argparse defaults are read from env vars when the CLI arg isn't provided.
