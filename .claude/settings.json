@@ -62,6 +62,7 @@
       "Bash(ruff:*)",
       "Bash(source:*)",
       "Bash(wc:*)",
+      "Bash(source venv/bin/activate)",
       "WebFetch(domain:github.com)"
     ]
   }

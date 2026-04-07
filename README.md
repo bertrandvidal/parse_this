@@ -492,6 +492,84 @@ class MyApp(object):
 python script.py --log-level DEBUG 0 run my-task
 ```
 
+Version flag
+------------
+
+Both `parse_this` and `parse_class` accept an optional `version` keyword
+argument. When provided, a `--version` flag is added that prints the string and
+exits.
+
+The recommended way to source the version is via `importlib.metadata`, which
+reads from your installed package metadata (i.e. `pyproject.toml` at install
+time):
+
+```python
+from importlib.metadata import version
+from parse_this import parse_class, create_parser
+
+
+@parse_class(version=version("myapp"))
+class MyApp(object):
+    """My application."""
+
+    @create_parser()
+    def __init__(self, verbose: int = 0):
+        """Init.
+
+        Args:
+            verbose: verbosity level
+        """
+        self._verbose = verbose
+
+    @create_parser()
+    def run(self, task: str):
+        """Run a task.
+
+        Args:
+            task: task name
+        """
+        return task
+```
+
+```bash
+python script.py --version
+>>> 1.2.3
+```
+
+For functions, the same pattern works with `parse_this`:
+
+```python
+from importlib.metadata import version
+from parse_this import parse_this
+
+
+def greet(name: str):
+    return f"Hello, {name}!"
+
+
+if __name__ == "__main__":
+    print(parse_this(greet, version=version("myapp")))
+```
+
+argparse supports `%(prog)s` substitution in the version string, which expands
+to the program name:
+
+```python
+@parse_class(version=f"%(prog)s {version('myapp')}")
+class MyApp(object):
+    ...
+
+# python script.py --version
+# >>> script.py 1.2.3
+```
+
+Note: `create_parser` does not accept a `version` argument. When a method
+decorated with `create_parser` is used as a subcommand inside a `parse_class`,
+argparse's `parents` mechanism would copy the `--version` action onto every
+subcommand, producing CLIs like `python script.py 2 do-stuff --version`. Put
+`version=` on the top-level `parse_class` (or `parse_this`) instead.
+
+
 Decorator
 ---------
 

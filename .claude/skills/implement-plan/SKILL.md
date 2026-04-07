@@ -1,7 +1,7 @@
 ---
 name: implement-plan
-description: Read a plan file, create a branch, implement changes with atomic commits, iterate on feedback, then push and open a PR
-argument-hint: "plan file name (e.g. 'modernize-codebase.md')"
+description: Read a plan file, review and refine it with the user, create a branch, implement changes with atomic commits, iterate on feedback, then push and open a PR
+argument-hint: "plan file name (e.g. 'modernize-codebase.md') [--skip-review]"
 ---
 
 # Implement Plan
@@ -10,18 +10,37 @@ You are implementing a plan from a plan file. Follow these steps exactly:
 
 ## Step 1: Read and understand the plan
 
+- Parse the arguments. The first argument is the plan file name. If `--skip-review` is present, skip Step 2 entirely.
 - Read the plan file at `.claude/plans/<argument>`. If the argument doesn't include the `.claude/plans/` prefix, prepend it. If it doesn't end in `.md`, append it.
 - Understand all tasks and their dependencies.
-- Summarize the plan to the user and confirm they want to proceed.
 
-## Step 2: Set up the branch
+## Step 2: Review and refine the plan
+
+This step is **always on** unless `--skip-review` was passed. The goal is to catch design issues, ambiguities, and missing considerations BEFORE any code is written. Be **proactive and critical** — do not just summarize, actively look for problems.
+
+1. **Read the relevant code** that the plan touches, so your critique is grounded in reality, not assumptions.
+2. **Summarize** the plan's key design decisions and trade-offs (not just the task list — the *why*).
+3. **Surface concerns proactively**, including:
+   - Ambiguities or under-specified tasks
+   - Edge cases the plan doesn't address
+   - Interactions with existing code that the plan may have missed
+   - Ordering or dependency issues between tasks
+   - Missing test cases or validation
+   - Better alternatives to proposed approaches
+4. **Ask the user** how they want to proceed: discuss specific concerns, refine sections, or proceed as-is.
+5. **Discuss and iterate** with the user until they explicitly say to proceed.
+6. **Update the plan file immediately** as decisions are made. The file on disk must always reflect the current agreed-upon plan, because sub-agents and future readers may consult it. Do not batch updates to the end.
+
+Only move to Step 3 once the user has explicitly approved the plan.
+
+## Step 3: Set up the branch
 
 - Derive a branch name from the plan file name (e.g., `modernize-codebase.md` becomes `modernize-codebase`).
 - Ensure you're starting from an up-to-date `main` branch: `git checkout main && git pull`.
 - Create and switch to the new branch: `git checkout -b <branch-name>`.
 - Activate the virtualenv and install dependencies.
 
-## Step 3: Implement each task with atomic commits
+## Step 4: Implement each task with atomic commits
 
 For each task in the plan, in order:
 
@@ -36,7 +55,7 @@ For each task in the plan, in order:
 
 Do NOT bundle multiple tasks into a single commit unless they are genuinely inseparable.
 
-## Step 4: User review
+## Step 5: User review
 
 After all tasks are committed:
 
@@ -44,7 +63,7 @@ After all tasks are committed:
 - Ask the user to review the changes.
 - Wait for the user's feedback.
 
-## Step 5: Iterate on feedback
+## Step 6: Iterate on feedback
 
 If the user requests changes:
 
@@ -56,7 +75,7 @@ If the user requests changes:
 
 Repeat until the user approves.
 
-## Step 6: Push and open PR
+## Step 7: Push and open PR
 
 Once the user approves:
 

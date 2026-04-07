@@ -58,6 +58,7 @@ class FunctionParser(object):
         args: typing.List[str] = None,
         delimiter_chars: str = ":",
         log_level: bool = False,
+        version: Optional[str] = None,
     ):
         """Create an ArgParser for the given function converting the command line
            arguments and passing them to the function, return the result of the
@@ -70,6 +71,8 @@ class FunctionParser(object):
             help message in the docstring. Defaults to ':'
             log_level: indicate whether or not a '--log-level' argument should be
             handled to set the log level during the execution
+            version: optional version string to enable a '--version' flag.
+            When provided, '--version' prints this string and exits.
         """
         _LOG.debug("Creating parser for %s", func.__name__)
         func_args, _, _, defaults, _, _, annotations = getfullargspec(func)
@@ -78,6 +81,8 @@ class FunctionParser(object):
         parser = _get_arg_parser(
             func, annotations, args_and_defaults, delimiter_chars, log_level
         )
+        if version is not None:
+            parser.add_argument("--version", action="version", version=version)
         self._set_function_parser(func, parser)
         arguments = parser.parse_args(_get_args_to_parse(args))
         return _call(func, func_args, arguments)
@@ -161,12 +166,14 @@ class ClassParser(object):
     _description: Optional[str]
     _cls: Type = None
     _log_level: bool
+    _version: Optional[str]
 
     def __init__(
         self,
         description: str = None,
         parse_private: bool = False,
         log_level: bool = False,
+        version: Optional[str] = None,
     ):
         """
 
@@ -177,10 +184,14 @@ class ClassParser(object):
             parsed, defaults to False
             log_level: indicate whether or not a '--log-level' argument should be
             handled to set the log level during the execution
+            version: optional version string to enable a '--version' flag on
+            the top-level parser. When provided, '--version' prints this
+            string and exits.
         """
         self._description = description
         self._parse_private = parse_private
         self._log_level = log_level
+        self._version = version
 
     def __call__(self, cls: Type):
         """
@@ -272,6 +283,10 @@ class ClassParser(object):
         top_level_parser.add_argument(
             "-h", "--help", action=FullHelpAction, help="Display this help message"
         )
+        if self._version is not None:
+            top_level_parser.add_argument(
+                "--version", action="version", version=self._version
+            )
         if self._log_level:
             _add_log_level_argument(top_level_parser)
         parser_to_method, sub_parsers_action = self._add_sub_parsers(
