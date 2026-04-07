@@ -1,5 +1,11 @@
 # Plan: Annotated-Based Validation
 
+**Status:** Won't do. The proposed design requires users to import `Range`,
+`Pattern`, and `Constraint` helpers from parse_this. parse_this aims to keep
+its public surface limited to the three parser entry points (`parse_this`,
+`create_parser`, `parse_class`); anything that requires users to import
+additional helpers is out of scope.
+
 ## Context
 
 `typing.Annotated` (Python 3.10+) can carry metadata for argument constraints. parse_this should support validators like range checks, regex patterns, and custom predicates attached via Annotated metadata.

@@ -1,5 +1,7 @@
 # Plan: Literal Type Support
 
+**Status:** Implemented (PR #45, merged).
+
 ## Context
 
 When a function parameter is annotated with `typing.Literal["a", "b", "c"]`, parse_this should generate a `choices` argument in argparse, restricting CLI input to those values. Currently Literal annotations are treated as untyped.
