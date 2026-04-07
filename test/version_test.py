@@ -86,7 +86,14 @@ class TestFunctionParserVersion(unittest.TestCase):
             with self.assertRaises(SystemExit):
                 parse_this(add, args=["--version"], version="%(prog)s 9.9.9")
         printed = out.getvalue() + err.getvalue()
+        # argparse derives prog from sys.argv[0]; under pytest this is the
+        # pytest entrypoint. We just need to verify substitution happened
+        # (i.e. the literal "%(prog)s" was replaced) and the version is
+        # present.
+        self.assertNotIn("%(prog)s", printed)
         self.assertIn("9.9.9", printed)
+        # The prog name precedes the version string in argparse's output.
+        self.assertRegex(printed, r"\S+ 9\.9\.9")
 
 
 class TestClassParserVersion(unittest.TestCase):
