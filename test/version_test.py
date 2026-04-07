@@ -116,5 +116,5 @@ class TestClassParserVersion(unittest.TestCase):
             with self.assertRaises(SystemExit):
                 UnversionedApp.parser.call(args=["--version"])
 
-    def test_normal_call_still_works(self):
+    def test_call_without_version_still_works(self):
         self.assertEqual(VersionedApp.parser.call(args=["3", "run", "4"]), 12)
