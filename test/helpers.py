@@ -17,17 +17,6 @@ def with_args(a, b):
     pass
 
 
-def blank_line_in_wrong_place(one: int, two: int):
-    """I put the blank line after arguments ...
-
-    Args:
-        one: this help is #1
-
-        two: this once won't appear sadly
-    """
-    return one * two
-
-
 def parse_me_full_docstring(one: str, two: int, three: int = 12):
     """Could use some parsing.
 
@@ -53,21 +42,6 @@ def multiline_docstring(one: int, two: int, three: int):
     Args:
         one: this one is a no brainer
         three: noticed you're missing docstring for two and
-          I'm multiline too!
-
-    Returns:
-        the first string argument concatenated with itself 'two' times and the
-        last parameters multiplied by itself
-    """
-    return one * two, three * three
-
-
-def different_delimiter_chars(one: int, two: int, three: int):
-    """I am a sneaky function.
-
-    Args:
-        one -- this one is a no brainer even with dashes
-        three -- noticed you're missing docstring for two and
           I'm multiline too!
 
     Returns:
@@ -190,13 +164,13 @@ class Dummy(object):
     def __init__(self, a):
         self._a = a
 
-    @create_parser(delimiter_chars="--")
+    @create_parser()
     def multiply_all(self, b: int, c: int = 2):
         """Will multiply everything!
 
         Args:
-            b -- the Queen B
-            c -- a useless value
+            b: the Queen B
+            c: a useless value
 
         Returns:
             Everything multiplied

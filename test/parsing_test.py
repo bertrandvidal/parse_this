@@ -63,7 +63,7 @@ class TestParsing(unittest.TestCase):
             parse_me_full_docstring,
             {"one": int, "two": int, "three": int},
             [("one", _NO_DEFAULT), ("two", _NO_DEFAULT), ("three", _NO_DEFAULT)],
-            ":",
+            "auto",
         )
         namespace = parser.parse_args("1 2 3".split())
         self.assertEqual(namespace.one, 1)
@@ -75,7 +75,7 @@ class TestParsing(unittest.TestCase):
             parse_me_full_docstring,
             {"one": str, "two": int, "three": int},
             [("one", _NO_DEFAULT), ("two", _NO_DEFAULT), ("three", 12)],
-            ":",
+            "auto",
         )
         namespace = parser.parse_args("yes 42".split())
         self.assertEqual(namespace.one, "yes")
@@ -87,7 +87,7 @@ class TestParsing(unittest.TestCase):
             parse_me_full_docstring,
             {"one": str, "two": int, "three": int},
             [("one", _NO_DEFAULT), ("two", _NO_DEFAULT), ("three", 12)],
-            ":",
+            "auto",
         )
         namespace = parser.parse_args("no 12 --three=23".split())
         self.assertEqual(namespace.one, "no")
@@ -99,7 +99,7 @@ class TestParsing(unittest.TestCase):
             parse_me_full_docstring,
             {"one": str, "two": int, "three": int},
             [("one", _NO_DEFAULT), ("two", _NO_DEFAULT), ("three", 12)],
-            ":",
+            "auto",
         )
         with captured_output():
             self.assertRaises(
@@ -111,7 +111,7 @@ class TestParsing(unittest.TestCase):
             parse_me_full_docstring,
             {"one": str, "two": int, "three": int},
             [("one", _NO_DEFAULT), ("two", _NO_DEFAULT), ("three", 12)],
-            ":",
+            "auto",
         )
         with captured_output():
             self.assertRaises(
@@ -142,7 +142,7 @@ class TestParsing(unittest.TestCase):
             parse_me_full_docstring,
             {"one": str, "two": int, "three": int},
             [("one", _NO_DEFAULT), ("two", _NO_DEFAULT), ("three", 12)],
-            ":",
+            "auto",
         )
         args = _get_args_name_from_parser(parser)
         self.assertEqual(args, ["one", "two", "three"])
@@ -152,7 +152,7 @@ class TestParsing(unittest.TestCase):
             parse_me_full_docstring,
             {"one": str, "two": int, "three": int},
             [("one", _NO_DEFAULT), ("two", _NO_DEFAULT), ("three", 12)],
-            ":",
+            "auto",
         )
         args = _get_args_name_from_parser(parser)
         self.assertNotIn("help", args)
@@ -162,7 +162,7 @@ class TestParsing(unittest.TestCase):
             parse_me_full_docstring,
             {"one": str, "two": int, "three": int},
             [("one", _NO_DEFAULT), ("two", _NO_DEFAULT), ("three", 12)],
-            ":",
+            "auto",
             log_level=True,
         )
         args = _get_args_name_from_parser(parser)
@@ -190,7 +190,7 @@ class TestParsing(unittest.TestCase):
             has_enum_argument,
             {"color": Color},
             [("color", _NO_DEFAULT)],
-            ":",
+            "auto",
         )
         # Find the action for 'color' and check its choices contain all members
         color_action = next(

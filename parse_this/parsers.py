@@ -89,7 +89,7 @@ class FunctionParser(object):
         self,
         func: Callable,
         args: typing.List[str] = None,
-        delimiter_chars: str = ":",
+        docstring_style: str = "auto",
         log_level: bool = False,
         version: Optional[str] = None,
     ):
@@ -100,8 +100,9 @@ class FunctionParser(object):
         Args:
             func: the function for which the command line arguments to be parsed
             args: a list of arguments to be parsed if None sys.argv is used
-            delimiter_chars: characters used to separate the parameters from their
-            help message in the docstring. Defaults to ':'
+            docstring_style: which docstring style to parse for the parser
+            description and per-argument help. One of ``"auto"`` (default,
+            autodetect), ``"google"``, ``"numpy"``, ``"rest"``, ``"epytext"``.
             log_level: indicate whether or not a '--log-level' argument should be
             handled to set the log level during the execution
             version: optional version string to enable a '--version' flag.
@@ -122,7 +123,7 @@ class FunctionParser(object):
             func,
             annotations,
             args_and_defaults,
-            delimiter_chars,
+            docstring_style,
             log_level,
             varargs_name=varargs_name,
         )
@@ -147,23 +148,27 @@ class MethodParser(object):
     """
 
     _name: Optional[str]
-    _delimiter_chars: str
+    _docstring_style: str
     _log_level: bool
 
     def __init__(
-        self, delimiter_chars: str = ":", name: str = None, log_level: bool = False
+        self,
+        docstring_style: str = "auto",
+        name: str = None,
+        log_level: bool = False,
     ):
         """
         Args:
-            delimiter_chars: characters used to separate the parameters from their
-            help message in the docstring.
+            docstring_style: which docstring style to parse for the parser
+            description and per-argument help. One of ``"auto"`` (default,
+            autodetect), ``"google"``, ``"numpy"``, ``"rest"``, ``"epytext"``.
             name: name that will be used for the parser when used in a class
             decorated with `parse_class`. If not provided the name of the method will
             be used
             log_level: indicate whether or not a '--log-level' argument should be
             handled to set the log level during the execution
         """
-        self._delimiter_chars = delimiter_chars
+        self._docstring_style = docstring_style
         self._name = name
         self._log_level = log_level
 
@@ -202,7 +207,7 @@ class MethodParser(object):
                 func,
                 annotations,
                 args_and_defaults,
-                self._delimiter_chars,
+                self._docstring_style,
                 self._log_level,
                 varargs_name=varargs_name,
             )
