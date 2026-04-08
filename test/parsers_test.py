@@ -15,7 +15,6 @@ from test.helpers import (
     ParseableWithLogLevel,
     ShowMyDocstring,
     SubCmdParseError,
-    different_delimiter_chars,
     function_with_log_level,
     i_am_parseable,
     parse_me_full_docstring,
@@ -36,27 +35,6 @@ class TestFunctionParser(unittest.TestCase):
         actual = parser(parse_me_full_docstring, "first 2".split())
         expected = parse_me_full_docstring("first", 2)
         self.assertEqual(actual, expected)
-
-    def test_function_delimiter_chars(self):
-        parser = FunctionParser()
-        with captured_output() as (out, _):
-            with self.assertRaises(SystemExit):
-                parser(
-                    different_delimiter_chars, "--help".split(), delimiter_chars="--"
-                )
-            help_message = out.getvalue()
-        self.assertIn("this one is a no brainer even with dashes", help_message)
-        self.assertIn(
-            "noticed you're missing docstring for two and I'm multiline too!",
-            help_message,
-        )
-
-    def test_function_description(self):
-        parser = FunctionParser()
-        parser(different_delimiter_chars, "1 2 3".split(), delimiter_chars="--")
-        self.assertEqual(
-            "I am a sneaky function.", different_delimiter_chars.parser.description
-        )
 
 
 class TestMethodParser(unittest.TestCase):

@@ -65,7 +65,7 @@ def _get_arg_parser(
     func: Callable,
     annotations: Dict[str, Callable],
     args_and_defaults: List[Tuple[str, Any]],
-    delimiter_chars: str,
+    docstring_style: str,
     log_level: bool = False,
 ) -> ArgumentParser:
     """Return an ArgumentParser for the given function. Arguments are defined
@@ -75,14 +75,14 @@ def _get_arg_parser(
         func: function for which we want an ArgumentParser
         annotations: is a dictionary mapping parameter names to annotations
         args_and_defaults: list of 2-tuples (arg_name, arg_default)
-        delimiter_chars: characters used to separate the parameters from their
-        help message in the docstring
+        docstring_style: docstring style hint passed to ``prepare_doc``
+        ("auto", "google", "numpy", "rest", "epytext")
         log_level: indicate whether or not a '--log-level' argument should be
         handled to set the log level during the execution
     """
     _LOG.debug("Creating ArgumentParser for '%s'", func.__name__)
     description, arg_help = prepare_doc(
-        func, [x for (x, _) in args_and_defaults], delimiter_chars
+        func, [x for (x, _) in args_and_defaults], docstring_style
     )
     parser = ArgumentParser(description=description)
     if log_level:
