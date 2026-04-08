@@ -12,6 +12,9 @@ requires-python = ">=3.10"
 authors = [
     { name = "Bertrand Vidal", email = "vidal.bertrand@gmail.com" },
 ]
+dependencies = [
+    "docstring-parser>=0.16",
+]
 classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: Information Technology",
