@@ -14,6 +14,7 @@ from parse_this.helpers import (
     _is_literal_type,
     _is_sequence_type,
     _make_enum_converter,
+    _unwrap_optional,
 )
 
 _LOG = logging.getLogger(__name__)
@@ -128,6 +129,7 @@ def _add_required_argument(
         arg_type: the resolved type for the argument
         help_msg: the help string for this argument
     """
+    arg_type = _unwrap_optional(arg_type)
     if arg_type is bool:
         _LOG.debug("Adding optional flag %s.%s (default: True)", func.__name__, arg)
         parser.add_argument(
@@ -196,11 +198,12 @@ def _add_optional_argument(
         default: the default value for this argument
         help_msg: the help string for this argument
     """
+    arg_type = _unwrap_optional(arg_type)
     if default is None and arg_type is None:
         raise ParseThisException(
-            f"To use default value of 'None' you need "
-            f"to specify the type of the argument '{arg}' "
-            f"for the method '{func.__name__}'"
+            f"parameter '{arg}' of '{func.__name__}' has default None but no "
+            f"type annotation. Add an annotation, for example: "
+            f"{arg}: int | None = None"
         )
     if _is_literal_type(arg_type):
         values = _get_literal_values(arg_type)
