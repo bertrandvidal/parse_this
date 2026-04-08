@@ -61,8 +61,14 @@
       "Bash(python3:*)",
       "Bash(ruff:*)",
       "Bash(source:*)",
+      "Bash(source venv/bin/activate && *)",
+      "Bash(source venv/bin/activate && pytest:*)",
+      "Bash(source venv/bin/activate && python:*)",
+      "Bash(source venv/bin/activate && python3:*)",
+      "Bash(source venv/bin/activate && pre-commit:*)",
+      "Bash(source venv/bin/activate && pip:*)",
+      "Bash(source venv/bin/activate && pip3:*)",
       "Bash(wc:*)",
-      "Bash(source venv/bin/activate)",
       "WebFetch(domain:github.com)"
     ]
   }

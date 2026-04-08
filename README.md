@@ -941,9 +941,6 @@ Caveats and limitations
 * `parse_this` and `@create_parser` cannot be used on functions or methods
   with `*args` or `**kwargs` — the parser is built from the explicit
   parameters of the signature.
-* As a consequence, `@create_parser` cannot be stacked with any decorator
-  that alters the wrapped callable's signature (for example, anything using
-  `functools.wraps` over a wrapper that takes different parameters).
 * Inside a `@parse_class`, classmethods decorated with `@create_parser` are
   **not** exposed as subcommands.
 * Any argument whose default value is `None` must be explicitly type-annotated
