@@ -39,18 +39,6 @@ pip install parse_this
 `parse_this` depends on [`docstring-parser`][docstring_parser] for reading
 Google, NumPy, reST, and Epytext docstrings. It supports Python 3.10+.
 
-> **Breaking changes in v5.0.0**
->
-> The `delimiter_chars=` parameter has been removed from `parse_this`,
-> `@create_parser`, and `@parse_class`. Argument help is now extracted by
-> [`docstring-parser`][docstring_parser], which natively understands
-> Google, NumPy, reST, and Epytext styles. Auto-detection picks the right
-> one for each function; pass `docstring_style="google"` (or `"numpy"`,
-> `"rest"`, `"epytext"`) to force a specific style. If you previously
-> relied on a non-`:` delimiter, rewrite your docstring in any of the
-> four supported styles. See [Writing docstrings for help
-> messages](#writing-docstrings-for-help-messages).
-
 [docstring_parser]: https://pypi.org/project/docstring-parser/
 
 
