@@ -36,7 +36,22 @@ Installation
 pip install parse_this
 ```
 
-`parse_this` has no runtime dependencies and supports Python 3.10+.
+`parse_this` depends on [`docstring-parser`][docstring_parser] for reading
+Google, NumPy, reST, and Epytext docstrings. It supports Python 3.10+.
+
+> **Breaking changes in v5.0.0**
+>
+> The `delimiter_chars=` parameter has been removed from `parse_this`,
+> `@create_parser`, and `@parse_class`. Argument help is now extracted by
+> [`docstring-parser`][docstring_parser], which natively understands
+> Google, NumPy, reST, and Epytext styles. Auto-detection picks the right
+> one for each function; pass `docstring_style="google"` (or `"numpy"`,
+> `"rest"`, `"epytext"`) to force a specific style. If you previously
+> relied on a non-`:` delimiter, rewrite your docstring in any of the
+> four supported styles. See [Writing docstrings for help
+> messages](#writing-docstrings-for-help-messages).
+
+[docstring_parser]: https://pypi.org/project/docstring-parser/
 
 
 Quick start
@@ -352,14 +367,14 @@ from parse_this import create_parser
 class MyClass(object):
 
     @classmethod
-    @create_parser(delimiter_chars="--")
+    @create_parser()
     def parse_me_if_you_can(cls, an_int: int, a_string: str, default: int = 12):
         """I dare you to parse me !!!
 
         Args:
-            an_int -- int are pretty cool
-            a_string -- string aren't that nice
-            default -- guess what I got a default value
+            an_int: int are pretty cool
+            a_string: string aren't that nice
+            default: guess what I got a default value
         """
         return a_string * an_int, default * default
 
@@ -407,48 +422,94 @@ Writing docstrings for help messages
 ------------------------------------
 
 `parse_this` reads the docstring of your function/method to generate the
-description and per-argument help messages displayed by `--help`. The expected
-format is:
+parser description and per-argument help text displayed by `--help`. Parsing
+is delegated to [`docstring-parser`][docstring_parser], which natively
+understands the four mainstream Python docstring styles: **Google**,
+**NumPy**, **reStructuredText / Sphinx**, and **Epytext**.
+
+By default the style is auto-detected per function — write your docstring in
+whichever style your project already uses and it just works. If detection
+guesses wrong, pass `docstring_style="<style>"` to lock it explicitly. The
+accepted values are `"auto"` (default), `"google"`, `"numpy"`, `"rest"`,
+and `"epytext"`. The kwarg is accepted by `parse_this`, `@create_parser`,
+and (per-method) inside `@parse_class`.
+
+If you don't provide a docstring at all, `parse_this` falls back to a
+generic — and not very useful — help message.
+
+### Google style
 
 ```python
 @create_parser()
-def method(self, spam: int, ham: int):
-    """<description>
-
-      <arg_name><delimiter_chars><arg_help>
-      <arg_name><delimiter_chars><arg_help>
-    """
-    pass
-```
-
-* **description**: a free-form (possibly multiline) description of the
-  function. Used as the parser description.
-* **argument lines**: each line has the form `name<delimiter>help text`. The
-  name must match a parameter of the function. Whitespace around the delimiter
-  is allowed (`spam: help` and `spam : help` both work). Help can span multiple
-  lines (continuation lines are joined) until the next argument line, a blank
-  line, or the end of the docstring.
-
-The default delimiter is `:` (a single colon). To use a different one — for
-example `--`, which avoids ambiguity with type annotation colons — pass
-`delimiter_chars`:
-
-```python
-@create_parser(delimiter_chars="--")
-def parse_me_if_you_can(self, an_int: int, a_string: str, default: int = 12):
-    """I dare you to parse me !!!
+def greet(name: str, count: int = 1):
+    """Greet someone.
 
     Args:
-        an_int -- int are pretty cool
-        a_string -- string aren't that nice
-        default -- guess what I got a default value
+        name: who to greet
+        count: how many times to repeat the greeting
     """
     ...
 ```
 
-`delimiter_chars` is accepted by `parse_this`, `@create_parser`, and
-`@parse_class`. If you don't provide a docstring at all, a generic — and
-not very useful — help message is generated.
+### NumPy style
+
+```python
+@create_parser()
+def greet(name: str, count: int = 1):
+    """Greet someone.
+
+    Parameters
+    ----------
+    name : str
+        who to greet
+    count : int
+        how many times to repeat the greeting
+    """
+    ...
+```
+
+### reStructuredText / Sphinx style
+
+```python
+@create_parser()
+def greet(name: str, count: int = 1):
+    """Greet someone.
+
+    :param name: who to greet
+    :param count: how many times to repeat the greeting
+    """
+    ...
+```
+
+### Epytext style
+
+```python
+@create_parser()
+def greet(name: str, count: int = 1):
+    """Greet someone.
+
+    @param name: who to greet
+    @param count: how many times to repeat the greeting
+    """
+    ...
+```
+
+### Forcing a specific style
+
+```python
+@create_parser(docstring_style="numpy")
+def greet(name: str, count: int = 1):
+    """Greet someone.
+
+    Parameters
+    ----------
+    name : str
+        who to greet
+    count : int
+        how many times to repeat the greeting
+    """
+    ...
+```
 
 
 Argument types
