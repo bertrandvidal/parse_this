@@ -339,13 +339,14 @@ parsed but ignored, since the object already exists. This is mainly useful
 when the lifecycle of the object is managed by something other than the CLI.
 
 
-Classmethods
-------------
+Classmethods and staticmethods
+------------------------------
 
-Classmethods can be parsed too:
+Classmethods and staticmethods can be parsed, both on their own and as
+subcommands inside a `@parse_class`:
 
 ```python
-from parse_this import create_parser
+from parse_this import create_parser, parse_class
 
 
 class MyClass(object):
@@ -366,13 +367,40 @@ class MyClass(object):
 MyClass.parse_me_if_you_can.parser.call(MyClass)
 ```
 
+Inside a `@parse_class`, classmethods and staticmethods become first-class
+subcommands. A class whose only parseable methods are classmethods or
+staticmethods does not need a decorated `__init__` — `parse_this` dispatches
+on the class object directly:
+
+```python
+@parse_class()
+class Math(object):
+    """Simple math operations."""
+
+    @staticmethod
+    @create_parser()
+    def add(a: int, b: int):
+        """Add two integers.
+
+        Args:
+            a: first operand
+            b: second operand
+        """
+        return a + b
+
+
+print(Math.parser.call("add 3 4".split()))
+```
+
+```
+7
+```
+
 Notes:
 
-* The `@classmethod` decorator must be placed **on top** of `@create_parser`,
-  otherwise the method won't be a class method anymore.
-* A classmethod decorated with `@create_parser` inside a class decorated with
-  `@parse_class` will **not** be exposed as a subcommand. This is a known
-  limitation.
+* The `@classmethod` / `@staticmethod` decorator must be placed **on top**
+  of `@create_parser`, otherwise the method won't be a class/static method
+  anymore.
 
 
 Writing docstrings for help messages
@@ -951,8 +979,6 @@ Caveats and limitations
 * `parse_this` and `@create_parser` cannot be used on functions or methods
   with `*args` or `**kwargs` — the parser is built from the explicit
   parameters of the signature.
-* Inside a `@parse_class`, classmethods decorated with `@create_parser` are
-  **not** exposed as subcommands.
 
 
 Development
