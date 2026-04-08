@@ -29,21 +29,27 @@ def _get_parseable_methods(
     Args:
         cls: the class currently being decorated
 
-    Note:
-        classmethods will not be included as they can only be referenced once
-        the class has been defined
     Returns:
         a 2-tuple with the parser of the __init__ method if any and a dict
         of the form {'method_name': associated_parser}
+
+    Note:
+        classmethods and staticmethods stacked on top of '@create_parser' are
+        included. vars(cls) returns the classmethod/staticmethod descriptor
+        (which is neither callable nor exposes .parser directly), so we
+        unwrap via the descriptor's .__func__ attribute before the
+        callable/has-parser check.
     """
     _LOG.debug("Retrieving parseable methods for '%s'", cls.__name__)
     init_parser = None
     methods_to_parse = {}
     for name, obj in vars(cls).items():
+        # Unwrap classmethod/staticmethod descriptors to reach the underlying
+        # function that carries the .parser attribute set by @create_parser.
+        if isinstance(obj, (classmethod, staticmethod)):
+            obj = obj.__func__
         # Every callable object that has a 'parser' attribute will be
         # added as a subparser.
-        # This won't work for classmethods because reference to
-        # classmethods are only possible once the class has been defined
         if callable(obj) and hasattr(obj, "parser"):
             _LOG.debug("Found method '%s'", name)
             if name == "__init__":
