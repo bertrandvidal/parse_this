@@ -1,6 +1,8 @@
+import functools
 import unittest
 from unittest.mock import patch
 
+from parse_this import create_parser, parse_class
 from parse_this.exception import ParseThisException
 from parse_this.parsers import FunctionParser
 from test.helpers import (
@@ -169,6 +171,89 @@ class TestClassParser(unittest.TestCase):
         self.assertIn("unrecognized arguments", error_output)
         self.assertIn("--unknown-flag", error_output)
         self.assertNotIn("{sub-cmd}", error_output)
+
+
+def _passthrough_decorator(func):
+    """A decorator that wraps func in a *args/**kwargs wrapper via
+    functools.wraps — the classic pattern that used to break @create_parser
+    stacking because getfullargspec did not follow __wrapped__."""
+
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
+class TestDecoratorStacking(unittest.TestCase):
+    """@create_parser should recover the real signature when stacked on top of
+    a decorator that wraps the function in a *args/**kwargs wrapper via
+    functools.wraps. The fix uses inspect.unwrap before getfullargspec so
+    __wrapped__ is followed to the original callable."""
+
+    def test_create_parser_on_top_of_wraps_based_decorator(self):
+        @create_parser()
+        @_passthrough_decorator
+        def add(a: int, b: int = 3):
+            """Add two integers.
+
+            Args:
+                a: first number
+                b: second number
+            """
+            return a + b
+
+        # Before the fix, getfullargspec(wrapper) would report no parameters
+        # and the parser would be empty. With inspect.unwrap, the real
+        # signature is recovered and these calls succeed.
+        self.assertEqual(add.parser.call(args=["2"]), 5)
+        self.assertEqual(add.parser.call(args=["2", "--b", "4"]), 6)
+        # The stacked decorator still wraps the callable.
+        self.assertEqual(add(10, 20), 30)
+
+    def test_function_parser_on_top_of_wraps_based_decorator(self):
+        """FunctionParser (parse_this as a function) must also follow
+        __wrapped__ when the passed function is itself wrapped."""
+
+        @_passthrough_decorator
+        def multiply(a: int, b: int = 2):
+            """Multiply two integers.
+
+            Args:
+                a: first
+                b: second
+            """
+            return a * b
+
+        parser = FunctionParser()
+        self.assertEqual(parser(multiply, ["3"]), 6)
+        self.assertEqual(parser(multiply, ["3", "--b", "5"]), 15)
+
+    def test_method_on_top_of_wraps_based_decorator_inside_parse_class(self):
+        @parse_class()
+        class Calculator(object):
+            """A calculator."""
+
+            @create_parser()
+            def __init__(self, base: int):
+                """Init.
+
+                Args:
+                    base: starting value
+                """
+                self._base = base
+
+            @create_parser()
+            @_passthrough_decorator
+            def add(self, value: int):
+                """Add value to base.
+
+                Args:
+                    value: amount to add
+                """
+                return self._base + value
+
+        self.assertEqual(Calculator.parser.call("10 add 5".split()), 15)
 
 
 class TestLogLevel(unittest.TestCase):

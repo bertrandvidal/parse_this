@@ -2,7 +2,7 @@ import logging
 import typing
 from argparse import ArgumentParser
 from functools import wraps
-from inspect import getfullargspec
+from inspect import getfullargspec, unwrap
 from typing import Callable, Dict, Optional, Type
 
 from parse_this.args import _get_args_and_defaults, _get_args_to_parse
@@ -75,7 +75,10 @@ class FunctionParser(object):
             When provided, '--version' prints this string and exits.
         """
         _LOG.debug("Creating parser for %s", func.__name__)
-        func_args, _, _, defaults, _, _, annotations = getfullargspec(func)
+        # Follow __wrapped__ so @create_parser can be stacked below decorators
+        # that use functools.wraps around a *args/**kwargs wrapper.
+        wrapped = unwrap(func)
+        func_args, _, _, defaults, _, _, annotations = getfullargspec(wrapped)
         func_args = _check_types(func.__name__, annotations, func_args, defaults)
         args_and_defaults = _get_args_and_defaults(func_args, defaults)
         parser = _get_arg_parser(
@@ -133,7 +136,11 @@ class MethodParser(object):
                 func.__name__,
                 "/%s" % self._name if self._name else "",
             )
-            func_args, _, _, defaults, _, _, annotations = getfullargspec(func)
+            # Follow __wrapped__ so @create_parser can be stacked below
+            # decorators that use functools.wraps around a *args/**kwargs
+            # wrapper.
+            wrapped = unwrap(func)
+            func_args, _, _, defaults, _, _, annotations = getfullargspec(wrapped)
             func_args = _check_types(func.__name__, annotations, func_args, defaults)
             args_and_defaults = _get_args_and_defaults(func_args, defaults)
             parser = _get_arg_parser(
