@@ -47,13 +47,19 @@ def _get_parser_call_method(func: Callable) -> Callable:
             # If instance is None we are probably decorating a function not a
             # method and don't need the instance
             args_name = _get_args_name_from_parser(parser)
-            return _call(func, args_name, namespace)
+            varargs_name = getattr(parser, "_parse_this_varargs", None)
+            return _call(func, args_name, namespace, varargs_name=varargs_name)
         return _call_method_from_namespace(instance, func_name, namespace)
 
     return inner_call
 
 
-def _call(callable_obj: Callable, arg_names: List[str], namespace: Namespace) -> Any:
+def _call(
+    callable_obj: Callable,
+    arg_names: List[str],
+    namespace: Namespace,
+    varargs_name: Optional[str] = None,
+) -> Any:
     """Actually calls the callable with the namespace parsed from the command
     line.
 
@@ -61,12 +67,24 @@ def _call(callable_obj: Callable, arg_names: List[str], namespace: Namespace) ->
         callable_obj: a callable object
         arg_names: name of the function arguments
         namespace: the namespace object parsed from the command line
+        varargs_name: optional name of the *args parameter; when provided,
+        the matching entry in the arguments dict is splatted as positional
+        arguments instead of being passed as a keyword.
     """
     try:
         logging.basicConfig(level=namespace.log_level)
     except AttributeError:
         pass
     arguments = {arg_name: getattr(namespace, arg_name) for arg_name in arg_names}
+    if varargs_name is not None:
+        # When the signature has *args, the regular positional-or-keyword
+        # params before it must be passed positionally — mixing them with a
+        # splatted varargs tuple via **kwargs collides on parameter 0. arg_names
+        # is in parser-action add order, which matches signature order, so
+        # collecting non-varargs values in that order reproduces the call.
+        varargs_values = arguments.pop(varargs_name, [])
+        positional = [arguments[name] for name in arg_names if name != varargs_name]
+        return callable_obj(*positional, *varargs_values)
     return callable_obj(**arguments)
 
 
@@ -85,6 +103,7 @@ def _call_method_from_namespace(
     method = getattr(obj, method_name)
     method_parser = method.parser
     arg_names = _get_args_name_from_parser(method_parser)
+    varargs_name = getattr(method_parser, "_parse_this_varargs", None)
     if method_name == "__init__":
-        return _call(obj, arg_names, namespace)
-    return _call(method, arg_names, namespace)
+        return _call(obj, arg_names, namespace, varargs_name=varargs_name)
+    return _call(method, arg_names, namespace, varargs_name=varargs_name)

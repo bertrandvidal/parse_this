@@ -67,6 +67,7 @@ def _get_arg_parser(
     args_and_defaults: List[Tuple[str, Any]],
     delimiter_chars: str,
     log_level: bool = False,
+    varargs_name: Optional[str] = None,
 ) -> ArgumentParser:
     """Return an ArgumentParser for the given function. Arguments are defined
         from the function arguments and their associated defaults.
@@ -79,11 +80,15 @@ def _get_arg_parser(
         help message in the docstring
         log_level: indicate whether or not a '--log-level' argument should be
         handled to set the log level during the execution
+        varargs_name: optional name of a *args parameter; when provided, a
+        trailing nargs='*' positional is registered and stashed on the
+        parser for dispatch.
     """
     _LOG.debug("Creating ArgumentParser for '%s'", func.__name__)
-    description, arg_help = prepare_doc(
-        func, [x for (x, _) in args_and_defaults], delimiter_chars
-    )
+    all_arg_names = [x for (x, _) in args_and_defaults]
+    if varargs_name is not None:
+        all_arg_names.append(varargs_name)
+    description, arg_help = prepare_doc(func, all_arg_names, delimiter_chars)
     parser = ArgumentParser(description=description)
     if log_level:
         _add_log_level_argument(parser)
@@ -95,6 +100,24 @@ def _get_arg_parser(
             _add_required_argument(parser, func, arg, arg_type, help_msg)
         else:
             _add_optional_argument(parser, func, arg, arg_type, default, help_msg)
+    if varargs_name is not None:
+        # Register *args as a trailing nargs="*" positional. It must be last
+        # so argparse doesn't steal tokens from earlier positionals.
+        element_type = annotations.get(varargs_name, str)
+        _LOG.debug(
+            "Adding varargs positional %s.*%s: %s",
+            func.__name__,
+            varargs_name,
+            element_type,
+        )
+        parser.add_argument(
+            varargs_name,
+            nargs="*",
+            type=element_type,
+            help=arg_help[varargs_name],
+        )
+    # Stash the varargs name so dispatch can splat the collected list.
+    parser._parse_this_varargs = varargs_name  # type: ignore[attr-defined]
     return parser
 
 

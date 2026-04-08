@@ -9,9 +9,42 @@ from parse_this.args import _get_args_and_defaults, _get_args_to_parse
 from parse_this.call import _call, _call_method_from_namespace, _get_parser_call_method
 from parse_this.exception import ParseThisException
 from parse_this.help.action import FullHelpAction
-from parse_this.helpers import _add_log_level_argument
+from parse_this.helpers import _add_log_level_argument, _get_args_name_from_parser
 from parse_this.parsing import _get_arg_parser, _get_parseable_methods
 from parse_this.type_check import _check_types
+
+
+def _reject_varkw(func_name: str, varkw: Optional[str]) -> None:
+    """Raise ParseThisException if the function has a **kwargs parameter.
+
+    argparse has no notion of arbitrary key/value flags, so **kwargs cannot
+    be represented at the CLI. We reject it at decoration time with a clear
+    error instead of silently dropping the parameter.
+    """
+    if varkw is not None:
+        raise ParseThisException(
+            f"parameter '**{varkw}' of '{func_name}' is not supported: "
+            f"parse_this cannot build argparse flags from arbitrary keyword "
+            f"arguments. Remove the **{varkw} parameter or expose keyword "
+            f"options as explicit parameters."
+        )
+
+
+def _annotations_for_check(
+    annotations: Dict[str, Callable], varargs_name: Optional[str]
+) -> Dict[str, Callable]:
+    """Return a copy of annotations with the varargs entry removed.
+
+    _check_types compares len(annotations) against len(func_args) to verify
+    that every required argument has a type. The varargs parameter is not
+    in func_args, so its annotation would falsely inflate the left side.
+    """
+    if varargs_name is None or varargs_name not in annotations:
+        return annotations
+    filtered = dict(annotations)
+    del filtered[varargs_name]
+    return filtered
+
 
 _LOG = logging.getLogger(__name__)
 
@@ -78,17 +111,27 @@ class FunctionParser(object):
         # Follow __wrapped__ so @create_parser can be stacked below decorators
         # that use functools.wraps around a *args/**kwargs wrapper.
         wrapped = unwrap(func)
-        func_args, _, _, defaults, _, _, annotations = getfullargspec(wrapped)
-        func_args = _check_types(func.__name__, annotations, func_args, defaults)
+        func_args, varargs_name, varkw, defaults, _, _, annotations = getfullargspec(
+            wrapped
+        )
+        _reject_varkw(func.__name__, varkw)
+        check_annotations = _annotations_for_check(annotations, varargs_name)
+        func_args = _check_types(func.__name__, check_annotations, func_args, defaults)
         args_and_defaults = _get_args_and_defaults(func_args, defaults)
         parser = _get_arg_parser(
-            func, annotations, args_and_defaults, delimiter_chars, log_level
+            func,
+            annotations,
+            args_and_defaults,
+            delimiter_chars,
+            log_level,
+            varargs_name=varargs_name,
         )
         if version is not None:
             parser.add_argument("--version", action="version", version=version)
         self._set_function_parser(func, parser)
         arguments = parser.parse_args(_get_args_to_parse(args))
-        return _call(func, func_args, arguments)
+        arg_names = _get_args_name_from_parser(parser)
+        return _call(func, arg_names, arguments, varargs_name=varargs_name)
 
     @typing.no_type_check  # dynamically attaches .parser to callables
     def _set_function_parser(self, func: Callable, parser: ArgumentParser):
@@ -140,8 +183,20 @@ class MethodParser(object):
             # decorators that use functools.wraps around a *args/**kwargs
             # wrapper.
             wrapped = unwrap(func)
-            func_args, _, _, defaults, _, _, annotations = getfullargspec(wrapped)
-            func_args = _check_types(func.__name__, annotations, func_args, defaults)
+            (
+                func_args,
+                varargs_name,
+                varkw,
+                defaults,
+                _,
+                _,
+                annotations,
+            ) = getfullargspec(wrapped)
+            _reject_varkw(func.__name__, varkw)
+            check_annotations = _annotations_for_check(annotations, varargs_name)
+            func_args = _check_types(
+                func.__name__, check_annotations, func_args, defaults
+            )
             args_and_defaults = _get_args_and_defaults(func_args, defaults)
             parser = _get_arg_parser(
                 func,
@@ -149,6 +204,7 @@ class MethodParser(object):
                 args_and_defaults,
                 self._delimiter_chars,
                 self._log_level,
+                varargs_name=varargs_name,
             )
             parser.get_name = lambda: self._name or func.__name__  # type: ignore[attr-defined]
             self._set_method_parser(func, parser)
