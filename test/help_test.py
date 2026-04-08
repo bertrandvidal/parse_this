@@ -103,9 +103,10 @@ class TestFullHelpAction(unittest.TestCase):
             self.assertRaises(SystemExit, Parseable.parser.parse_args, ["-h"])
             help_message = out.getvalue()
         self.assertIn("parseable", help_message)
-        # Private methods and classmethods are not exposed by default
+        # Private methods are hidden by default
         self.assertNotIn("private_method", help_message)
-        self.assertNotIn("cls_method", help_message)
+        # Classmethods are exposed as subcommands (dashes replace underscores)
+        self.assertIn("cls-method", help_message)
 
     def test_help_is_complete_with_private_method(self):
         with captured_output() as (out, _):
@@ -115,8 +116,8 @@ class TestFullHelpAction(unittest.TestCase):
             help_message = out.getvalue()
         self.assertIn("parseable", help_message)
         self.assertIn("private_method", help_message)
-        # Classmethods are not exposed by default
-        self.assertNotIn("cls_method", help_message)
+        # Classmethods are exposed as subcommands (dashes replace underscores)
+        self.assertIn("cls-method", help_message)
 
 
 if __name__ == "__main__":
