@@ -66,14 +66,35 @@ if __name__ == "__main__":
 
 ```bash
 python greet.py World
->>> Hello, World!
+```
 
+```
+Hello, World!
+```
+
+```bash
 python greet.py World --count 3
->>> Hello, World! Hello, World! Hello, World!
+```
 
+```
+Hello, World! Hello, World! Hello, World!
+```
+
+```bash
 python greet.py --help
->>> usage: greet.py [-h] [--count COUNT] name
->>> ...
+```
+
+```
+usage: greet.py [-h] [--count COUNT] name
+
+Greet someone.
+
+positional arguments:
+  name           who to greet
+
+options:
+  -h, --help     show this help message and exit
+  --count COUNT  how many times to repeat the greeting
 ```
 
 That's it. The argument names, types, defaults, and help messages all came
@@ -120,7 +141,13 @@ if __name__ == "__main__":
     print(concatenate_str.parser.call())
 ```
 
-`python script.py yes --two 3` returns `'yesyesyes'`.
+```bash
+python script.py yes --two 3
+```
+
+```
+yesyesyes
+```
 
 The decorated function is still a regular Python callable:
 `concatenate_str("hi", 4)` works as you'd expect.
@@ -156,14 +183,22 @@ if __name__ == "__main__":
     print(parse_this(concatenate_str))
 ```
 
-`python script.py yes --two 3` returns `'yesyesyes'`, same as the decorated
-version.
+```bash
+python script.py yes --two 3
+```
+
+```
+yesyesyes
+```
 
 You can pass an explicit argument list (useful in tests):
 
 ```python
 parse_this(concatenate_str, args=["yes", "--two", "3"])
-# -> 'yesyesyes'
+```
+
+```
+'yesyesyes'
 ```
 
 
@@ -214,9 +249,25 @@ if __name__ == "__main__":
 ```
 
 ```bash
-python script.py --help            # comprehensive help including all subcommands
-python script.py 2 do-stuff 2      # foo=2, bar=2 -> 4
-python script.py 2 --ham 2 do-stuff 2 --spam 2  # 16
+python script.py --help
+```
+
+(Prints comprehensive help including all subcommands.)
+
+```bash
+python script.py 2 do-stuff 2
+```
+
+```
+4
+```
+
+```bash
+python script.py 2 --ham 2 do-stuff 2 --spam 2
+```
+
+```
+16
 ```
 
 How it works:
@@ -243,8 +294,12 @@ You can override the name explicitly with `name=`:
 @create_parser(name="run")
 def do_stuff(self, bar: int):
     ...
+```
 
-# Now invoked as: python script.py 2 run 2
+Now invoked as:
+
+```bash
+python script.py 2 run 2
 ```
 
 **Private methods** (those whose name starts with `_`) are skipped by default.
@@ -384,8 +439,14 @@ Any Python builtin type works directly: `int`, `str`, `float`, etc.
 @create_parser()
 def add(a: int, b: int):
     return a + b
+```
 
-# python script.py 2 3 -> 5
+```bash
+python script.py 2 3
+```
+
+```
+5
 ```
 
 ### `None` as a default value
@@ -404,8 +465,14 @@ def parrot(ham: str, spam: int = None):
         return ham * spam
     return ham
 
-# parrot.parser.call(args=["yes"])              -> 'yes'
-# parrot.parser.call(args=["yes", "--spam", "3"]) -> 'yesyesyes'
+
+print(parrot.parser.call(args=["yes"]))
+print(parrot.parser.call(args=["yes", "--spam", "3"]))
+```
+
+```
+yes
+yesyesyes
 ```
 
 Without the `int` annotation on `spam`, you'd see:
@@ -430,8 +497,14 @@ def parrot(ham: str, spam: bool = False):
         return ham, spam
     return ham
 
-# parrot.parser.call(args=["yes"])           -> 'yes'
-# parrot.parser.call(args=["yes", "--spam"]) -> ('yes', True)
+
+print(parrot.parser.call(args=["yes"]))
+print(parrot.parser.call(args=["yes", "--spam"]))
+```
+
+```
+yes
+('yes', True)
 ```
 
 **Without a default**, the implicit default is `True`, and the flag turns it
@@ -442,8 +515,14 @@ off:
 def parrot(ham: str, spam: bool):
     return ham, spam
 
-# parrot.parser.call(args=["yes"])           -> ('yes', True)
-# parrot.parser.call(args=["yes", "--spam"]) -> ('yes', False)
+
+print(parrot.parser.call(args=["yes"]))
+print(parrot.parser.call(args=["yes", "--spam"]))
+```
+
+```
+('yes', True)
+('yes', False)
 ```
 
 ### Enum arguments
@@ -476,9 +555,28 @@ def paint(color: Color, canvas: str = "wall"):
 ```
 
 ```bash
-python script.py RED                   # -> (Color.RED, 'wall')
-python script.py GREEN --canvas fence  # -> (Color.GREEN, 'fence')
-python script.py PURPLE                # error: invalid choice
+python script.py RED
+```
+
+```
+(<Color.RED: 1>, 'wall')
+```
+
+```bash
+python script.py GREEN --canvas fence
+```
+
+```
+(<Color.GREEN: 2>, 'fence')
+```
+
+```bash
+python script.py PURPLE
+```
+
+```
+usage: script.py [-h] [--canvas CANVAS] {RED,GREEN,BLUE}
+script.py: error: argument {RED,GREEN,BLUE}: invalid choice: 'PURPLE' (choose from RED, GREEN, BLUE)
 ```
 
 Optional enum arguments work the same way, with the default supplied as an
@@ -489,8 +587,14 @@ enum member:
 def spray(canvas: str, color: Color = Color.BLUE):
     return canvas, color
 
-# spray.parser.call(args=["fence"])                   -> ('fence', Color.BLUE)
-# spray.parser.call(args=["fence", "--color", "RED"]) -> ('fence', Color.RED)
+
+print(spray.parser.call(args=["fence"]))
+print(spray.parser.call(args=["fence", "--color", "RED"]))
+```
+
+```
+('fence', <Color.BLUE: 3>)
+('fence', <Color.RED: 1>)
 ```
 
 The `--help` output shows the valid member names, e.g. `{RED,GREEN,BLUE}`.
@@ -518,9 +622,28 @@ def deploy(env: Literal["dev", "staging", "prod"], mode: Literal["full", "quick"
 ```
 
 ```bash
-python script.py dev                  # -> ('dev', 'quick')
-python script.py staging --mode full  # -> ('staging', 'full')
-python script.py local                # error: invalid choice
+python script.py dev
+```
+
+```
+('dev', 'quick')
+```
+
+```bash
+python script.py staging --mode full
+```
+
+```
+('staging', 'full')
+```
+
+```bash
+python script.py local
+```
+
+```
+usage: script.py [-h] [--mode {full,quick}] {dev,staging,prod}
+script.py: error: argument env: invalid choice: 'local' (choose from dev, staging, prod)
 ```
 
 All values in a single `Literal` must share the same type — mixed types like
@@ -549,8 +672,19 @@ def total(values: list[int]):
 ```
 
 ```bash
-python script.py 1 2 3   # -> 6
-python script.py 10      # -> 10
+python script.py 1 2 3
+```
+
+```
+6
+```
+
+```bash
+python script.py 10
+```
+
+```
+10
 ```
 
 Optional list/tuple arguments use a `--flag`:
@@ -565,9 +699,22 @@ def greet(name: str, titles: list[str] = None):
         titles: optional list of titles
     """
     return name, titles
+```
 
-# python script.py Alice                   -> ('Alice', None)
-# python script.py Alice --titles Dr Prof  -> ('Alice', ['Dr', 'Prof'])
+```bash
+python script.py Alice
+```
+
+```
+('Alice', None)
+```
+
+```bash
+python script.py Alice --titles Dr Prof
+```
+
+```
+('Alice', ['Dr', 'Prof'])
 ```
 
 `tuple[T, ...]` works identically — note that argparse always returns a
@@ -608,9 +755,28 @@ def greet(name: str, count: int = 1):
 ```
 
 ```bash
-python script.py Alice                          # no logging configured
-python script.py Alice --log-level DEBUG        # enables DEBUG logging
+python script.py Alice
+```
+
+```
+Hello, Alice!
+```
+
+```bash
+python script.py Alice --log-level DEBUG
+```
+
+```
+DEBUG:root:About to greet Alice 1 time(s)
+Hello, Alice!
+```
+
+```bash
 python script.py Alice --count 3 --log-level INFO
+```
+
+```
+Hello, Alice! Hello, Alice! Hello, Alice!
 ```
 
 For `@parse_class`, `--log-level` is added to the **top-level** parser:
@@ -624,13 +790,8 @@ class MyApp(object):
     """My application."""
 
     @create_parser()
-    def __init__(self, verbose: int = 0):
-        """Init.
-
-        Args:
-            verbose: verbosity level
-        """
-        self._verbose = verbose
+    def __init__(self):
+        """Init."""
 
     @create_parser()
     def run(self, task: str):
@@ -643,7 +804,11 @@ class MyApp(object):
 ```
 
 ```bash
-python script.py --log-level DEBUG 0 run my-task
+python script.py --log-level DEBUG run my-task
+```
+
+```
+my-task
 ```
 
 ### `--version`
@@ -652,27 +817,17 @@ python script.py --log-level DEBUG 0 run my-task
 argument. When provided, a `--version` flag is added that prints the string
 and exits.
 
-The recommended way to source the version is `importlib.metadata.version()`,
-which reads the version from your installed package metadata (i.e. from
-`pyproject.toml` at install time):
-
 ```python
-from importlib.metadata import version
 from parse_this import parse_class, create_parser
 
 
-@parse_class(version=version("myapp"))
+@parse_class(version="1.2.3")
 class MyApp(object):
     """My application."""
 
     @create_parser()
-    def __init__(self, verbose: int = 0):
-        """Init.
-
-        Args:
-            verbose: verbosity level
-        """
-        self._verbose = verbose
+    def __init__(self):
+        """Init."""
 
     @create_parser()
     def run(self, task: str):
@@ -682,17 +837,23 @@ class MyApp(object):
             task: task name
         """
         return task
+
+
+if __name__ == "__main__":
+    print(MyApp.parser.call())
 ```
 
 ```bash
 python script.py --version
->>> 1.2.3
+```
+
+```
+1.2.3
 ```
 
 For functions, the same pattern works with `parse_this`:
 
 ```python
-from importlib.metadata import version
 from parse_this import parse_this
 
 
@@ -701,19 +862,37 @@ def greet(name: str):
 
 
 if __name__ == "__main__":
-    print(parse_this(greet, version=version("myapp")))
+    print(parse_this(greet, version="1.2.3"))
 ```
 
-argparse supports `%(prog)s` substitution in the version string, which
+The recommended way to source the version is
+`importlib.metadata.version("your-package-name")`, which reads it from your
+installed package metadata (i.e. from `pyproject.toml` at install time) so the
+literal does not need to be kept in sync by hand:
+
+```python
+from importlib.metadata import version
+
+@parse_class(version=version("your-package-name"))
+class MyApp(object):
+    ...
+```
+
+argparse also supports `%(prog)s` substitution in the version string, which
 expands to the program name:
 
 ```python
-@parse_class(version=f"%(prog)s {version('myapp')}")
+@parse_class(version="%(prog)s 1.2.3")
 class MyApp(object):
     ...
+```
 
-# python script.py --version
-# >>> script.py 1.2.3
+```bash
+python script.py --version
+```
+
+```
+script.py 1.2.3
 ```
 
 **Note:** `@create_parser` does **not** accept a `version` argument. When a
