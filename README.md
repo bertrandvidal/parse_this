@@ -3,23 +3,177 @@ parse_this
 
 [![PyPI latest version badge][pypi_version]][pypi_link] ![supported python versions][python_version] ![wheel support][wheel_support]
 
-Makes it easy to parse command line arguments for any function, method or classmethod.
+Generate a command line interface for any Python function from its signature
+and docstring — no `argparse` boilerplate.
 
-You just finished writing an awesome piece of code and now comes the boring part: adding the command line parsing to
-actually use it ...
 
-So now you need to use the awesome, but very verbose, `argparse` module. For each argument of your entry point method
-you need to add a name, a help message and/or a default value. But wait... Your parameters are correctly named, right!?
-They also have type hinting, right!? And you have an awesome docstring for that method. There is probably a way of
-creating the `ArgumentParser` easily right?
+What is parse_this?
+-------------------
 
-Yes and it's called `parse_this`!
+You wrote a function. Its parameters are named clearly, type-annotated, and
+documented in the docstring. Now you want to call it from the command line.
+Writing the corresponding `argparse` setup is busywork: every parameter needs
+an `add_argument` call with a name, a type, a help message, and a default.
 
-Usage
------
+`parse_this` reads the information that's already in your function — its
+signature and its docstring — and builds the parser for you. You decorate (or
+wrap) your function, you call it, and the right CLI just exists.
 
-`parse_this` contains a simple way to create a command line interface from an entire class. For that you will need to
-use the `parse_class` class decorator.
+`parse_this` exposes three entry points:
+
+* `parse_this(func)` — parse and call a function in one shot
+* `@create_parser` — decorator that attaches a `.parser` to a function or method
+* `@parse_class` — class decorator that builds a multi-subcommand CLI
+
+Pick the one that matches your use case (the next section gives a one-line
+summary of each), then jump to the corresponding section below.
+
+
+Installation
+------------
+
+```bash
+pip install parse_this
+```
+
+`parse_this` has no runtime dependencies and supports Python 3.10+.
+
+
+Quick start
+-----------
+
+The smallest useful example: a single function turned into a CLI.
+
+```python
+# greet.py
+from parse_this import create_parser
+
+
+@create_parser()
+def greet(name: str, count: int = 1):
+    """Greet someone.
+
+    Args:
+        name: who to greet
+        count: how many times to repeat the greeting
+    """
+    return f"Hello, {name}! " * count
+
+
+if __name__ == "__main__":
+    print(greet.parser.call())
+```
+
+```bash
+python greet.py World
+>>> Hello, World!
+
+python greet.py World --count 3
+>>> Hello, World! Hello, World! Hello, World!
+
+python greet.py --help
+>>> usage: greet.py [-h] [--count COUNT] name
+>>> ...
+```
+
+That's it. The argument names, types, defaults, and help messages all came
+from the function signature and docstring.
+
+
+The three entry points
+----------------------
+
+| Entry point | Use it when... |
+|---|---|
+| [`parse_this(func)`](#using-parse_this-as-a-function) | You want to parse `sys.argv` and call a function in a single expression, with no decoration. |
+| [`@create_parser`](#using-create_parser-as-a-decorator) | You want to attach a CLI to a function or method while still being able to call it normally from Python. |
+| [`@parse_class`](#building-a-class-based-cli-with-parse_class) | You want a multi-subcommand CLI where each subcommand maps to a method on a class. |
+
+All three share the same underlying machinery, so the rules for type
+annotations, docstring formatting, and argument types are identical across
+them. Those rules are documented once, in the [Argument types](#argument-types)
+and [Writing docstrings](#writing-docstrings-for-help-messages) sections below.
+
+
+Using `@create_parser` as a decorator
+-------------------------------------
+
+`@create_parser` adds a `.parser` attribute to the decorated function. The
+function itself is unchanged — you can still call it normally from Python.
+
+```python
+from parse_this import create_parser
+
+
+@create_parser()
+def concatenate_str(one: str, two: int = 2):
+    """Concatenates a string with itself a given number of times.
+
+    Args:
+        one: string to be concatenated with itself
+        two: number of times the string is concatenated, defaults to 2
+    """
+    return one * two
+
+
+if __name__ == "__main__":
+    print(concatenate_str.parser.call())
+```
+
+`python script.py yes --two 3` returns `'yesyesyes'`.
+
+The decorated function is still a regular Python callable:
+`concatenate_str("hi", 4)` works as you'd expect.
+
+**Limitation:** `@create_parser` cannot be stacked with other decorators that
+modify the function's signature (e.g. anything using `functools.wraps` over a
+wrapper that changes the parameters), because it inspects the signature at
+decoration time.
+
+
+Using `parse_this` as a function
+--------------------------------
+
+If you don't want to decorate the function, call `parse_this` directly. It
+parses `sys.argv` (or an explicit list of arguments), calls the function, and
+returns the result.
+
+```python
+from parse_this import parse_this
+
+
+def concatenate_str(one: str, two: int = 2):
+    """Concatenates a string with itself a given number of times.
+
+    Args:
+        one: string to be concatenated with itself
+        two: number of times the string is concatenated, defaults to 2
+    """
+    return one * two
+
+
+if __name__ == "__main__":
+    print(parse_this(concatenate_str))
+```
+
+`python script.py yes --two 3` returns `'yesyesyes'`, same as the decorated
+version.
+
+You can pass an explicit argument list (useful in tests):
+
+```python
+parse_this(concatenate_str, args=["yes", "--two", "3"])
+# -> 'yesyesyes'
+```
+
+
+Building a class-based CLI with `@parse_class`
+----------------------------------------------
+
+`@parse_class` is for CLIs with multiple subcommands. Each method decorated
+with `@create_parser` becomes a subcommand. If `__init__` is also decorated,
+its arguments become the *top-level* arguments of the CLI — the ones that come
+before the subcommand name.
 
 ```python
 # script.py
@@ -59,174 +213,186 @@ if __name__ == "__main__":
     print(ParseMePlease.parser.call())
 ```
 
-
 ```bash
-python script.py --help # Print a comprehensive help and usage message
-python script.py 2 do-stuff 2
->>> 4
-python script.py 2 --ham 2 do-stuff 2 --spam 2
->>> 16
+python script.py --help            # comprehensive help including all subcommands
+python script.py 2 do-stuff 2      # foo=2, bar=2 -> 4
+python script.py 2 --ham 2 do-stuff 2 --spam 2  # 16
 ```
 
-How does it work **TL;DR version**?
+How it works:
 
-* You need to decorate the methods you want to be usable from the command line  using `create_parser`.
-* The `__init__` method arguments and keyword arguments will be the arguments and options of the script command line *i.e.* the first arguments and options
-* The other methods will be transformed into sub-command, again mapping the command line arguments and options to the method's own arguments
-* All you have to do for this to work is:
-  * Decorate your class with `parse_class`
-  * Decorate methods with `create_parser`
-  * Document your class and method with properly formed docstring to get help and usage message
-  * Annotate all parameters with their type
-  * Call `<YourClass>.parser.call()` and you are done!
+* The class is decorated with `@parse_class`.
+* Each method is decorated with `@create_parser`.
+* If `__init__` is decorated, its arguments become the top-level CLI arguments.
+* All other decorated methods become subcommands.
+* Calling `<Class>.parser.call()` parses `sys.argv`, instantiates the class
+  from the top-level args, and dispatches the chosen subcommand.
+
+When `--help` is invoked on the top-level parser, the help for **every**
+subcommand is shown as well.
+
+### Method names
+
+By default, a method named `do_stuff` becomes the subcommand `do-stuff` —
+underscores in method names are replaced with hyphens, which is the more
+typical CLI convention.
+
+You can override the name explicitly with `name=`:
+
+```python
+@create_parser(name="run")
+def do_stuff(self, bar: int):
+    ...
+
+# Now invoked as: python script.py 2 run 2
+```
+
+**Private methods** (those whose name starts with `_`) are skipped by default.
+To include them, pass `parse_private=True` to `@parse_class`. Their leading
+and trailing underscores are stripped to form the subcommand name, so:
+
+* `_inner` becomes `inner`
+* `__str__` becomes `str`
+* `_private_helper` becomes `private-helper`
+
+Note that only **leading and trailing** underscores are stripped — internal
+underscores are still converted to hyphens.
+
+### Custom description
+
+By default, the top-level parser's description is taken from the class
+docstring. Override it with `description=`:
+
+```python
+@parse_class(description="A program for stuff and things.")
+class ParseMePlease(object):
+    ...
+```
+
+### Reusing an existing instance
+
+If you already have an instance of the class and just want `parse_this` to
+dispatch the subcommand against it, pass `instance=` to `.parser.call()`:
+
+```python
+my_obj = ParseMePlease(foo=2, ham=3)
+ParseMePlease.parser.call(instance=my_obj)
+```
+
+When `instance` is provided, the top-level (`__init__`) arguments are still
+parsed but ignored, since the object already exists. This is mainly useful
+when the lifecycle of the object is managed by something other than the CLI.
 
 
-If you feel like you may need more customization and details, please read on!
+Classmethods
+------------
 
-* If the `__init__` method is decorated it will be considered the first, or top-level, parser this means that all
-  arguments in your `__init__` will be arguments pass right after invoking you script
-  i.e. `python script.py init_arg_1 init_arg_2 etc...`
-* The description of the top-level parser is taken from the class's docstring or overwritten by the keyword
-  argument `description` of `parse_class`.
-* Each method decorated with `create_parser` will become a subparser of its own.
-* The command name of the subparser is the same as the method name with `_` replaced by `-`.
-* 'Private' methods, whose name start with an `_`, do not have a subparser by default, as this would expose them to the
-  outside. However if you want to expose them you can set the keyword argument `parse_private=True` in `parse_class`. If
-  exposed their command name will not contain the leading `-` as this would be confusing for command parsing. Special
-  methods, such as `__str__`, can be decorated as well. Their command name will be stripped of all `_`s resulting in
-  command names such as `str`.
-* When used in a `parse_class` decorated class `create_parser` can take an extra parameters `name` that will be used as
-  the sub-command name. The same modifications are made to the `name` replacing `_` with `-`
-* When calling `python script.py --help` the help message for **every** parser will be displayed making easier to find
-  what you are looking for
-
-
-Arguments and types
--------------------
-
-Both `parse_this` and `create_parser` need parameters to have type annotations. Any Python builtin type can be used.
-There is no need to provide a type for keyword arguments since it is inferred from the default value of the argument. If
-your method signature contains `arg_with_default=12` `parse_this` expect an `int` where `arg_with_default` is on the
-command line.
-
-If this is the content of `parse_me.py`:
+Classmethods can be parsed too:
 
 ```python
 from parse_this import create_parser
 
 
-class INeedParsing(object):
-    """A class that clearly needs argument parsing!"""
+class MyClass(object):
 
-    def __init__(self, an_argument):
-        self._an_arg = an_argument
-
+    @classmethod
     @create_parser(delimiter_chars="--")
-    def parse_me_if_you_can(self, an_int: int, a_string: str, an_other_int: int = 12):
+    def parse_me_if_you_can(cls, an_int: int, a_string: str, default: int = 12):
         """I dare you to parse me !!!
 
         Args:
             an_int -- int are pretty cool
             a_string -- string aren't that nice
-            an_other_int -- guess what? I got a default value
+            default -- guess what I got a default value
         """
-        return a_string * an_int, an_other_int * self._an_arg
+        return a_string * an_int, default * default
 
 
-if __name__ == "__main__":
-    need_parsing = INeedParsing(2)
-    print(INeedParsing.parse_me_if_you_can.parser.call(need_parsing))
+MyClass.parse_me_if_you_can.parser.call(MyClass)
 ```
 
-The following would be the output of the command line `python parse_me.py --help`:
+Notes:
 
-```bash
-usage: parse_me.py [-h] [--an_other_int AN_OTHER_INT] an_int a_string
-
-I dare you to parse me !!!
-
-positional arguments:
-  an_int                int are pretty cool
-  a_string              string aren't that nice
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --an_other_int AN_OTHER_INT
-                        guess what? I got a default value
-```
-
-The method `parse_me_if_you_can` expect an `int` with the name `an_int`, a `str` with the name `a_string` and
-other `int` with the name `an_other_int` and a default value of 12. So does the parser as displayed by the `--help`
-command.
-
-Note: `create_parser` cannot decorate the `__init__` method of a class unless the class is itself decorated
-with `parse_class`. A `ParseThisException` will be raised if you attempt to use the `call` method of such a parser.
+* The `@classmethod` decorator must be placed **on top** of `@create_parser`,
+  otherwise the method won't be a class method anymore.
+* A classmethod decorated with `@create_parser` inside a class decorated with
+  `@parse_class` will **not** be exposed as a subcommand. This is a known
+  limitation.
 
 
-The following would be the output of the command line `python parse_me.py 2 yes --default 4`:
+Writing docstrings for help messages
+------------------------------------
 
-```bash
-('yesyes', 8)
-```
-
-
-Help message
-------------
-
-In order to get a help message generated automatically from the method docstring
-it needs to be in the specific format described below:
+`parse_this` reads the docstring of your function/method to generate the
+description and per-argument help messages displayed by `--help`. The expected
+format is:
 
 ```python
-from parse_this import create_parser
-
-
-@create_parser(delimiter_chars="--")
+@create_parser()
 def method(self, spam: int, ham: int):
     """<description>
-      <blank_line>
+
       <arg_name><delimiter_chars><arg_help>
       <arg_name><delimiter_chars><arg_help>
     """
     pass
 ```
 
-* description: is a multiline description of the method used for the command line
-* each line of argument help have the following component:
-    * arg_name: the **same** name as the argument of the method.
-    * delimiter_chars: one or more chars that separate the argument and its help message. Using whitespaces is not
-      recommended as it could have an expected behavior with multiline help message.
-    * arg_help: is everything behind the delimiter_chars until the next argument, **a blank line** or the end of the
-      docstring.
+* **description**: a free-form (possibly multiline) description of the
+  function. Used as the parser description.
+* **argument lines**: each line has the form `name<delimiter>help text`. The
+  name must match a parameter of the function. Whitespace around the delimiter
+  is allowed (`spam: help` and `spam : help` both work). Help can span multiple
+  lines (continuation lines are joined) until the next argument line, a blank
+  line, or the end of the docstring.
 
-The `delimiter_chars` can be passed to both `parse_this` and `create_parser` as the keywords argument `delimiter_chars`.
-It defaults to `:` since this is the convention I most often use.
-
-If no docstring is specified a generic - not so useful - help message will be generated for the command line and
-arguments.
-
-
-Using None as a default value and bool as flags
------------------------------------------------
-
-Using `None` as a default value is common practice in Python but for `parse_this` and `create_parser` to work properly
-the type of the argument which defaults to `None` needs to be specified. Otherwise a `ParseThisException` will be
-raised.
+The default delimiter is `:` (a single colon). To use a different one — for
+example `--`, which avoids ambiguity with type annotation colons — pass
+`delimiter_chars`:
 
 ```python
-from parse_this import create_parser
+@create_parser(delimiter_chars="--")
+def parse_me_if_you_can(self, an_int: int, a_string: str, default: int = 12):
+    """I dare you to parse me !!!
 
-
-@create_parser()
-def parrot(ham: str, spam=None):
-    if spam is not None:
-        return ham * spam
-    return ham
-
-# Will raise ParseThisException: To use default value of 'None' you need to specify
-# the type of the argument 'spam' for the method 'parrot'
+    Args:
+        an_int -- int are pretty cool
+        a_string -- string aren't that nice
+        default -- guess what I got a default value
+    """
+    ...
 ```
 
-Specifying the type of `spam` will allow `create_parser` to work properly
+`delimiter_chars` is accepted by `parse_this`, `@create_parser`, and
+`@parse_class`. If you don't provide a docstring at all, a generic — and
+not very useful — help message is generated.
+
+
+Argument types
+--------------
+
+`parse_this` uses the type annotations on your function to convert command
+line strings into the right Python values. Annotations are required for any
+required (positional) argument; for optional arguments (those with a default),
+the type is inferred from the default value if no annotation is given.
+
+### Basic types
+
+Any Python builtin type works directly: `int`, `str`, `float`, etc.
+
+```python
+@create_parser()
+def add(a: int, b: int):
+    return a + b
+
+# python script.py 2 3 -> 5
+```
+
+### `None` as a default value
+
+Using `None` as a default is common Python style, but `parse_this` cannot
+infer a type from `None`. You **must** annotate the argument explicitly,
+otherwise a `ParseThisException` is raised at decoration time.
 
 ```python
 from parse_this import create_parser
@@ -238,57 +404,54 @@ def parrot(ham: str, spam: int = None):
         return ham * spam
     return ham
 
-# Calling function.parser.call(args="yes".split()) -> 'yes'
-# Calling function.parser.call(args="yes --spam 3".split()) -> 'yesyesyes'
+# parrot.parser.call(args=["yes"])              -> 'yes'
+# parrot.parser.call(args=["yes", "--spam", "3"]) -> 'yesyesyes'
 ```
 
-An other common practice is to use `bool`s as flags or switches. All arguments of type `bool`, either typed directly or
-inferred from the default value, will become optional arguments of the command line. A `bool` argument without default
-value will default to `True` as in the following example:
+Without the `int` annotation on `spam`, you'd see:
 
-```python
-from parse_this import create_parser
-
-@create_parser()
-def parrot(ham: str, spam: bool):
-  if spam:
-    return ham, spam
-  return ham
-
-# Calling parrot.parser.call(args="yes".split()) -> 'yes', True
-# Calling parrot.parser.call(args="yes --spam".split()) -> 'yes'
+```
+ParseThisException: To use default value of 'None' you need to specify
+the type of the argument 'spam' for the method 'parrot'
 ```
 
-Adding `--spam` to the arguments will act as a flag/switch setting `spam` to `False`. Note that `spam` as become
-optional and will be given the value `True` if `--spam` is not among the arguments to parse.
+### `bool` flags
 
+`bool` arguments — annotated explicitly or inferred from a `bool` default —
+become flags on the command line.
 
-Arguments with a boolean default value will act as a flag to change the default value:
+**With a default value**, the flag toggles the default. The most common case
+is a `False` default and a `--flag` that turns it on:
+
 ```python
-from parse_this import create_parser
-
-
 @create_parser()
 def parrot(ham: str, spam: bool = False):
     if spam:
         return ham, spam
     return ham
 
-# Calling parrot.parser.call(args="yes".split()) -> 'yes'
-# Calling parrot.parser.call(args="yes --spam".split()) -> ('yes', True)
+# parrot.parser.call(args=["yes"])           -> 'yes'
+# parrot.parser.call(args=["yes", "--spam"]) -> ('yes', True)
 ```
 
-Here everything works as intended and the default value for `spam` is `False`
-and passing `--spam` as an argument to be parsed will assign it `True`.
+**Without a default**, the implicit default is `True`, and the flag turns it
+off:
 
+```python
+@create_parser()
+def parrot(ham: str, spam: bool):
+    return ham, spam
 
-Enum arguments
---------------
+# parrot.parser.call(args=["yes"])           -> ('yes', True)
+# parrot.parser.call(args=["yes", "--spam"]) -> ('yes', False)
+```
 
-Parameters annotated with an `enum.Enum` subclass are automatically turned into
-restricted choices on the command line. The member **name** (not its value) is
-used as the CLI token, and `parse_this` converts it back to the enum member
-before calling your function.
+### Enum arguments
+
+Parameters annotated with an `enum.Enum` subclass become restricted choices on
+the command line. The member **name** (not its value) is used as the CLI
+token, and `parse_this` converts it back to the enum member before calling
+your function.
 
 ```python
 import enum
@@ -312,35 +475,31 @@ def paint(color: Color, canvas: str = "wall"):
     return color, canvas
 ```
 
-Positional enum — the argument is required and must be one of the member names:
-
 ```bash
-python script.py RED                    # -> (Color.RED, 'wall')
+python script.py RED                   # -> (Color.RED, 'wall')
 python script.py GREEN --canvas fence  # -> (Color.GREEN, 'fence')
 python script.py PURPLE                # error: invalid choice
 ```
 
-Optional enum with a default — use `--color <NAME>` to override:
+Optional enum arguments work the same way, with the default supplied as an
+enum member:
 
 ```python
 @create_parser()
 def spray(canvas: str, color: Color = Color.BLUE):
     return canvas, color
 
-# spray.parser.call(args=["fence"])              -> ('fence', Color.BLUE)
+# spray.parser.call(args=["fence"])                   -> ('fence', Color.BLUE)
 # spray.parser.call(args=["fence", "--color", "RED"]) -> ('fence', Color.RED)
 ```
 
 The `--help` output shows the valid member names, e.g. `{RED,GREEN,BLUE}`.
 
+### `Literal` arguments
 
-Literal arguments
------------------
-
-Parameters annotated with `typing.Literal` are turned into restricted choices on
-the command line. The allowed values are taken directly from the Literal
-annotation, and the type is preserved (e.g., `Literal[1, 2, 3]` expects
-integers).
+Parameters annotated with `typing.Literal` become restricted choices, with the
+allowed values taken directly from the annotation. The element type is
+preserved, so `Literal[1, 2, 3]` expects integers, not strings.
 
 ```python
 from typing import Literal
@@ -359,25 +518,25 @@ def deploy(env: Literal["dev", "staging", "prod"], mode: Literal["full", "quick"
 ```
 
 ```bash
-python script.py dev                    # -> ('dev', 'quick')
-python script.py staging --mode full    # -> ('staging', 'full')
-python script.py local                  # error: invalid choice
+python script.py dev                  # -> ('dev', 'quick')
+python script.py staging --mode full  # -> ('staging', 'full')
+python script.py local                # error: invalid choice
 ```
 
-All Literal values must share the same type — mixed types like
-`Literal[1, "auto"]` will raise a `ParseThisException`. A default value that
-isn't one of the Literal choices will also raise `ParseThisException`.
+All values in a single `Literal` must share the same type — mixed types like
+`Literal[1, "auto"]` raise a `ParseThisException` at decoration time. A
+default value that isn't one of the listed values also raises
+`ParseThisException`.
 
-
-List and tuple arguments
-------------------------
+### List and tuple arguments
 
 Parameters annotated with `list[T]` or `tuple[T, ...]` are turned into
-multi-value arguments using argparse's `nargs='+'` (one or more values).
-Each value is converted to the element type `T`.
+multi-value arguments using argparse's `nargs="+"` (one or more values). Each
+value is converted to the element type `T`.
 
 ```python
 from parse_this import create_parser
+
 
 @create_parser()
 def total(values: list[int]):
@@ -390,15 +549,13 @@ def total(values: list[int]):
 ```
 
 ```bash
-python script.py 1 2 3    # -> 6
-python script.py 10       # -> 10
+python script.py 1 2 3   # -> 6
+python script.py 10      # -> 10
 ```
 
-Optional list/tuple arguments work with `--flag`:
+Optional list/tuple arguments use a `--flag`:
 
 ```python
-from parse_this import create_parser
-
 @create_parser()
 def greet(name: str, titles: list[str] = None):
     """Greet with optional titles.
@@ -408,32 +565,34 @@ def greet(name: str, titles: list[str] = None):
         titles: optional list of titles
     """
     return name, titles
+
+# python script.py Alice                   -> ('Alice', None)
+# python script.py Alice --titles Dr Prof  -> ('Alice', ['Dr', 'Prof'])
 ```
 
-```bash
-python script.py Alice                          # -> ('Alice', None)
-python script.py Alice --titles Dr Prof         # -> ('Alice', ['Dr', 'Prof'])
-```
-
-`tuple[T, ...]` works identically -- note that argparse always returns a
-`list`, even for tuple-annotated parameters. If no element type is specified
+`tuple[T, ...]` works identically — note that argparse always returns a
+`list`, even when the annotation is a tuple. If no element type is specified
 (bare `list` or `tuple`), values are treated as strings.
 
-Log level
----------
 
-All three entry points (`parse_this`, `create_parser`, and `parse_class`) accept
-a `log_level` keyword argument. When set to `True`, an optional `--log-level`
-argument is added to the command line with choices matching the standard
-`logging` level names (`DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`, etc.).
+Optional features
+-----------------
+
+### `--log-level`
+
+All three entry points accept a `log_level=True` keyword argument. When set,
+an optional `--log-level` argument is added to the command line, with choices
+matching the standard `logging` level names (`DEBUG`, `INFO`, `WARNING`,
+`ERROR`, `CRITICAL`, etc.).
 
 If `--log-level` is passed, `logging.basicConfig(level=...)` is called before
-your function runs, so you get immediate logging configuration without any
-boilerplate.
-
+your function runs. The `--log-level` argument is automatically excluded from
+the arguments passed to your function — you don't need to declare it in your
+signature.
 
 ```python
 from parse_this import create_parser
+
 
 @create_parser(log_level=True)
 def greet(name: str, count: int = 1):
@@ -448,18 +607,13 @@ def greet(name: str, count: int = 1):
     return f"Hello, {name}! " * count
 ```
 
-From the command line:
-
 ```bash
-python script.py Alice                           # no logging configured
-python script.py Alice --log-level DEBUG         # enables DEBUG logging
+python script.py Alice                          # no logging configured
+python script.py Alice --log-level DEBUG        # enables DEBUG logging
 python script.py Alice --count 3 --log-level INFO
 ```
 
-The `--log-level` argument does not interfere with your function signature -- it
-is automatically excluded from the arguments passed to your function.
-
-For `parse_class`, `--log-level` is added to the top-level parser:
+For `@parse_class`, `--log-level` is added to the **top-level** parser:
 
 ```python
 from parse_this import create_parser, parse_class
@@ -492,16 +646,15 @@ class MyApp(object):
 python script.py --log-level DEBUG 0 run my-task
 ```
 
-Version flag
-------------
+### `--version`
 
-Both `parse_this` and `parse_class` accept an optional `version` keyword
-argument. When provided, a `--version` flag is added that prints the string and
-exits.
+`parse_this` and `@parse_class` accept an optional `version=` keyword
+argument. When provided, a `--version` flag is added that prints the string
+and exits.
 
-The recommended way to source the version is via `importlib.metadata`, which
-reads from your installed package metadata (i.e. `pyproject.toml` at install
-time):
+The recommended way to source the version is `importlib.metadata.version()`,
+which reads the version from your installed package metadata (i.e. from
+`pyproject.toml` at install time):
 
 ```python
 from importlib.metadata import version
@@ -551,8 +704,8 @@ if __name__ == "__main__":
     print(parse_this(greet, version=version("myapp")))
 ```
 
-argparse supports `%(prog)s` substitution in the version string, which expands
-to the program name:
+argparse supports `%(prog)s` substitution in the version string, which
+expands to the program name:
 
 ```python
 @parse_class(version=f"%(prog)s {version('myapp')}")
@@ -563,147 +716,65 @@ class MyApp(object):
 # >>> script.py 1.2.3
 ```
 
-Note: `create_parser` does not accept a `version` argument. When a method
-decorated with `create_parser` is used as a subcommand inside a `parse_class`,
-argparse's `parents` mechanism would copy the `--version` action onto every
-subcommand, producing CLIs like `python script.py 2 do-stuff --version`. Put
-`version=` on the top-level `parse_class` (or `parse_this`) instead.
+**Note:** `@create_parser` does **not** accept a `version` argument. When a
+method decorated with `@create_parser` is used as a subcommand inside a
+`@parse_class`, argparse's `parents` mechanism would copy the `--version`
+action onto every subcommand, producing CLIs like
+`python script.py 2 do-stuff --version`. Put `version=` on the top-level
+`@parse_class` (or `parse_this`) instead.
 
 
-Decorator
----------
+Errors
+------
 
-As a decorator `create_parser` will create an argument parser for the decorated function. A `parser` attribute will be
-added to the method and can be used to parse the command line argument.
-
-```python
-from parse_this import create_parser
-
-
-@create_parser()
-def concatenate_str(one: str, two: int = 2):
-    """Concatenates a string with itself a given number of times.
-
-    Args:
-        one: string to be concatenated with itself
-        two: number of times the string is concatenated, defaults to 2
-    """
-    return one * two
-
-
-if __name__ == "__main__":
-    print(concatenate_str.parser.call())
-```
-
-Calling this script from the command line, `python script.py yes --two 3` will return `'yesyesyes'` as expected and all
-the parsing has been done for you.
-
-Note that the function can still be called as any other function from any python file. Also it is **not** possible to
-stack `create_parser` with any decorator that would modify the signature of the decorated function e.g.
-using `functools.wraps`.
-
-
-Function
---------
-
-As a function `parse_this` will handle the command line arguments directly.
+`parse_this` raises a single exception type, `ParseThisException`, which is a
+subclass of `Exception`. You can import it from the package directly:
 
 ```python
-from parse_this import parse_this
-
-
-def concatenate_str(one: str, two: int = 2):
-    """Concatenates a string with itself a given number of times.
-
-    Args:
-        one: string to be concatenated with itself
-        two: number of times the string is concatenated, defaults to 2
-    """
-    return one * two
-
-
-if __name__ == "__main__":
-    print(parse_this(concatenate_str))
+from parse_this import ParseThisException
 ```
 
-Calling this script with the same command line arguments `yes --two 3` will also return `'yesyesyes'` as expected.
+It is raised in the following situations, all of them at decoration time —
+that is, when the script is loaded, not when the CLI is invoked:
+
+* **A required argument has no type annotation.** Required (positional)
+  arguments must have an annotation; the type cannot be inferred from
+  anything else.
+* **An optional argument has `None` as a default value but no annotation.**
+  See the [`None` as a default](#none-as-a-default-value) section.
+* **A `Literal` annotation has values of mixed types** (e.g.
+  `Literal[1, "auto"]`). All values must share the same type.
+* **A `Literal` argument's default is not one of the listed values**, e.g.
+  `mode: Literal["a", "b"] = "c"`.
+* **`@create_parser` is used on `__init__` outside of a `@parse_class`.**
+  Decorating `__init__` only makes sense as part of a class-based CLI; the
+  exception is raised when you try to invoke
+  `<Class>.__init__.parser.call()` directly.
+
+Argparse's own errors (invalid choices, missing required args, type
+conversion failures) are raised by argparse itself and not wrapped — they
+behave the same as in any other argparse-based CLI.
 
 
-Classmethods
-------------
-
-In a similar fashion you can parse command line arguments for classmethods:
-
-```python
-from parse_this import create_parser
-
-
-class MyClass(object):
-
-    @classmethod
-    @create_parser(delimiter_chars="--")
-    def parse_me_if_you_can(cls, an_int: int, a_string: str, default: int = 12):
-        """I dare you to parse me !!!
-
-        Args:
-            an_int -- int are pretty cool
-            a_string -- string aren't that nice
-            default -- guess what I got a default value
-        """
-        return a_string * an_int, default * default
-
-
-MyClass.parse_me_if_you_can.parser.call(MyClass)
-```
-
-The output will be the same as using `create_parser` on a regular method.
-
-**Notes**:
-
-* The `classmethod` decorator is placed **on top** of the `create_parser` decorator in order for the method to still be
-  a considered a class method.
-* A `classmethod` decorated with `create_parser` in a class decorated with `parse_class` will not be accessible through
-  the class command line.
-
-
-Installing `parse_this`
+Caveats and limitations
 -----------------------
 
-`parse_this` can be installed using the following command:
-
-```bash
-pip install parse_this
-```
-
-
-RUNNING TESTS
--------------
-
-To check that everything is running fine you can run the following command after cloning the repo:
-
-```bash
-python -m pip install --upgrade pip && pip install -e ".[dev]" && pytest
-```
-
-CAVEATS
--------
-
-* `parse_this` and `create_parser` are not able to be used on methods with `*args` and `**kwargs`
-* A subsequent effect of the previous caveat is that `create_parser` cannot be stacked with other decorator that would
-  alter the callable's signature
-* Classmethods cannot be access from the command line in a class decorated with `parse_class`
-* When using `create_parser` on a method that has an argument with `None` as a default value it *must be* annotated.
-  A `ParseThisException` will be raised otherwise.
+* `parse_this` and `@create_parser` cannot be used on functions or methods
+  with `*args` or `**kwargs` — the parser is built from the explicit
+  parameters of the signature.
+* As a consequence, `@create_parser` cannot be stacked with any decorator
+  that alters the wrapped callable's signature (for example, anything using
+  `functools.wraps` over a wrapper that takes different parameters).
+* Inside a `@parse_class`, classmethods decorated with `@create_parser` are
+  **not** exposed as subcommands.
+* Any argument whose default value is `None` must be explicitly type-annotated
+  or `parse_this` raises a `ParseThisException`.
 
 
-License
--------
+Development
+-----------
 
-`parse_this` is released under the MIT Licence. See the bundled LICENSE file for details.
-
-
-Contributing and dev
---------------------
+To set up a development environment:
 
 ```sh
 python3 -m venv --clear --upgrade-deps --prompt "parse-this" venv && \
@@ -713,13 +784,25 @@ pre-commit install && \
 pytest
 ```
 
+Run the test suite at any time with `pytest`. The project uses `ruff` and
+`mypy` via `pre-commit`, so you don't need to invoke them manually.
+
 ### Releasing
-Update the version of the package in `pyproject.toml` and merge it to `main` via PR.
-The package is build, `main` is tagged with the version, a GitHub release is created and the package is uploaded on
-pypi.org using trusted publishing.
+
+Update the version of the package in `pyproject.toml` and merge it to `main`
+via PR. The package is built, `main` is tagged with the version, a GitHub
+release is created, and the package is uploaded to pypi.org via trusted
+publishing.
+
+
+License
+-------
+
+`parse_this` is released under the MIT Licence. See the bundled LICENSE file
+for details.
+
 
 [pypi_link]: https://pypi.org/project/parse-this/ "parse_this on PyPI"
 [pypi_version]: https://badge.fury.io/py/parse-this.svg "PyPI latest version"
 [python_version]: https://img.shields.io/pypi/pyversions/parse_this?style=flat-square
 [wheel_support]: https://img.shields.io/pypi/wheel/parse_this?style=flat-square
-[inspect_signature]: https://docs.python.org/dev/library/inspect.html#inspect.signature
