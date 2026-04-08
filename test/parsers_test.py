@@ -203,9 +203,6 @@ class TestDecoratorStacking(unittest.TestCase):
             """
             return a + b
 
-        # Before the fix, getfullargspec(wrapper) would report no parameters
-        # and the parser would be empty. With inspect.unwrap, the real
-        # signature is recovered and these calls succeed.
         self.assertEqual(add.parser.call(args=["2"]), 5)
         self.assertEqual(add.parser.call(args=["2", "--b", "4"]), 6)
         # The stacked decorator still wraps the callable.
