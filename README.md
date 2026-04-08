@@ -756,6 +756,42 @@ python script.py Alice --titles Dr Prof
 `list`, even when the annotation is a tuple. If no element type is specified
 (bare `list` or `tuple`), values are treated as strings.
 
+### Variadic positional arguments (`*args`)
+
+Functions with `*args` are supported: the variadic parameter becomes a
+trailing positional argument using argparse's `nargs="*"` (zero or more
+values). The element type comes from the annotation (or defaults to
+`str`):
+
+```python
+from parse_this import create_parser
+
+
+@create_parser()
+def total(*nums: int):
+    """Sum integers.
+
+    Args:
+        nums: integers to sum
+    """
+    return sum(nums)
+```
+
+```bash
+python script.py 1 2 3
+```
+
+```
+6
+```
+
+`*args` composes with regular positional and optional parameters as long
+as optional parameters appear **before** `*args` in the signature (Python
+keyword-only parameters, which appear after `*args`, are not currently
+exposed to the parser). `**kwargs` is rejected at decoration time with a
+`ParseThisException`, since argparse has no notion of arbitrary key/value
+flags.
+
 
 Optional features
 -----------------
@@ -967,6 +1003,10 @@ that is, when the script is loaded, not when the CLI is invoked:
   Decorating `__init__` only makes sense as part of a class-based CLI; the
   exception is raised when you try to invoke
   `<Class>.__init__.parser.call()` directly.
+* **The decorated function has a `**kwargs` parameter.** `parse_this`
+  cannot build argparse flags from arbitrary keyword arguments — either
+  remove the `**kwargs` parameter or expose specific options as explicit
+  parameters.
 
 Argparse's own errors (invalid choices, missing required args, type
 conversion failures) are raised by argparse itself and not wrapped — they
@@ -976,9 +1016,9 @@ behave the same as in any other argparse-based CLI.
 Caveats and limitations
 -----------------------
 
-* `parse_this` and `@create_parser` cannot be used on functions or methods
-  with `*args` or `**kwargs` — the parser is built from the explicit
-  parameters of the signature.
+* Keyword-only parameters (arguments declared after `*args`) are not
+  exposed to the parser. Place optional flags before `*args` in the
+  signature.
 
 
 Development
