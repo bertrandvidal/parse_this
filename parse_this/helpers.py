@@ -1,10 +1,48 @@
 import enum
 import inspect
 import logging
+import types
+import typing
 from argparse import ArgumentParser, ArgumentTypeError, _HelpAction
 from typing import Any, Callable, Literal, Tuple, Type, get_args, get_origin
 
+from parse_this.exception import ParseThisException
+
 _LOG = logging.getLogger(__name__)
+
+# typing.Optional[T] and Union[T, None] both resolve to typing.Union.
+# PEP 604 'T | None' resolves to types.UnionType (different origin).
+_UNION_ORIGINS: Tuple[Any, ...] = (typing.Union, types.UnionType)
+
+
+def _unwrap_optional(arg_type: Any) -> Any:
+    """Unwrap Optional[T] / Union[T, None] / PEP 604 'T | None' to T.
+
+    Args:
+        arg_type: the type annotation to inspect
+
+    Returns:
+        the single non-None arm of a Union annotation when exactly one arm is
+        non-None; the original arg_type otherwise.
+
+    Raises:
+        ParseThisException: if arg_type is a Union with more than one non-None
+        arm (e.g. Union[int, str]) — parse_this cannot pick a single converter.
+    """
+    origin = get_origin(arg_type)
+    if origin not in _UNION_ORIGINS:
+        return arg_type
+    non_none = tuple(a for a in get_args(arg_type) if a is not type(None))
+    if len(non_none) > 1:
+        raise ParseThisException(
+            f"Union type {arg_type!r} with multiple non-None arms is not "
+            f"supported: parse_this cannot pick which converter to use. "
+            f"Use a single concrete type or Optional[T] (i.e. Union[T, None])."
+        )
+    # Python collapses Union[None] and Union[T] so a reachable Union with
+    # an all-None arms list is impossible — non_none always has exactly one
+    # element when we get here.
+    return non_none[0]
 
 
 def _is_enum_type(arg_type: Any) -> bool:

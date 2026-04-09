@@ -452,15 +452,17 @@ python script.py 2 3
 ### `None` as a default value
 
 Using `None` as a default is common Python style, but `parse_this` cannot
-infer a type from `None`. You **must** annotate the argument explicitly,
-otherwise a `ParseThisException` is raised at decoration time.
+infer a type from `None`. You **must** annotate the argument, otherwise a
+`ParseThisException` is raised at decoration time. Any of the idiomatic
+"optional" annotations work — a concrete type, `Optional[T]`, `Union[T, None]`,
+or PEP 604 `T | None`:
 
 ```python
 from parse_this import create_parser
 
 
 @create_parser()
-def parrot(ham: str, spam: int = None):
+def parrot(ham: str, spam: int | None = None):
     if spam is not None:
         return ham * spam
     return ham
@@ -475,12 +477,17 @@ yes
 yesyesyes
 ```
 
-Without the `int` annotation on `spam`, you'd see:
+Without the annotation on `spam`, you'd see:
 
 ```
-ParseThisException: To use default value of 'None' you need to specify
-the type of the argument 'spam' for the method 'parrot'
+ParseThisException: parameter 'spam' of 'parrot' has default None but no
+type annotation. Add an annotation, for example: spam: int | None = None
 ```
+
+`Optional[T]` / `T | None` is unwrapped to `T` before the argument is
+registered, so the resulting CLI is identical to using `int = None` — the
+only difference is that the `Optional` form is the type-checker-approved
+way to express "this argument may be None."
 
 ### `bool` flags
 
@@ -921,6 +928,9 @@ that is, when the script is loaded, not when the CLI is invoked:
   anything else.
 * **An optional argument has `None` as a default value but no annotation.**
   See the [`None` as a default](#none-as-a-default-value) section.
+* **A `Union` annotation has more than one non-`None` arm** (e.g.
+  `Union[int, str]`). `parse_this` cannot pick which converter to use — use
+  a single concrete type or `Optional[T]`.
 * **A `Literal` annotation has values of mixed types** (e.g.
   `Literal[1, "auto"]`). All values must share the same type.
 * **A `Literal` argument's default is not one of the listed values**, e.g.
@@ -943,8 +953,6 @@ Caveats and limitations
   parameters of the signature.
 * Inside a `@parse_class`, classmethods decorated with `@create_parser` are
   **not** exposed as subcommands.
-* Any argument whose default value is `None` must be explicitly type-annotated
-  or `parse_this` raises a `ParseThisException`.
 
 
 Development
