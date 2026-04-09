@@ -336,19 +336,28 @@ class ClassParser(object):
             """
             parser = self._cls.parser
             namespace = parser.parse_args(_get_args_to_parse(args))
+            method_name = parser_to_method[namespace.method]
             if instance is None:
-                # If the __init__ method is not part of the method to
-                # decorate we cannot instantiate the class
-                if "__init__" not in parser_to_method:
+                if "__init__" in parser_to_method:
+                    # Instantiate the class from the command line arguments
+                    instance = _call_method_from_namespace(
+                        self._cls, "__init__", namespace
+                    )
+                elif isinstance(
+                    vars(self._cls).get(method_name), (classmethod, staticmethod)
+                ):
+                    # No decorated __init__. classmethods and staticmethods
+                    # don't need an instance — dispatch on the class itself.
+                    instance = self._cls
+                else:
                     raise ParseThisException(
                         f"'__init__' method is not decorated. "
                         f"Please provide an instance to "
-                        f"'{self._cls.__name__}.parser.call' or decorate the "
-                        f"'__init___' method with 'create_parser'"
+                        f"'{self._cls.__name__}.parser.call', decorate the "
+                        f"'__init__' method with 'create_parser', or expose "
+                        f"only 'classmethod'/'staticmethod' subcommands so "
+                        f"no instance is required."
                     )
-                # We instantiate the class from the command line arguments
-                instance = _call_method_from_namespace(self._cls, "__init__", namespace)
-            method_name = parser_to_method[namespace.method]
             return _call_method_from_namespace(instance, method_name, namespace)
 
         return inner_call

@@ -376,3 +376,73 @@ class ParseMyInitOnly(object):
     @create_parser()
     def __init__(self):
         pass
+
+
+@parse_class()
+class ClassAndStaticMethods(object):
+    """A class exposing a classmethod and a staticmethod as subcommands."""
+
+    @create_parser()
+    def __init__(self, base: int):
+        """Init.
+
+        Args:
+            base: starting value
+        """
+        self._base = base
+
+    @classmethod
+    @create_parser()
+    def cls_name_upper(cls, suffix: str):
+        """Return the upper-cased class name with a suffix.
+
+        Args:
+            suffix: text appended to the class name
+        """
+        return cls.__name__.upper() + suffix
+
+    @staticmethod
+    @create_parser()
+    def static_add(a: int, b: int):
+        """Add two integers.
+
+        Args:
+            a: first
+            b: second
+        """
+        return a + b
+
+    @create_parser()
+    def times(self, factor: int):
+        """Multiply base by factor.
+
+        Args:
+            factor: value to multiply
+        """
+        return self._base * factor
+
+
+@parse_class()
+class OnlyClassMethods(object):
+    """A class with only classmethods and staticmethods — no decorated
+    __init__, so it must be dispatchable without an instance."""
+
+    @classmethod
+    @create_parser()
+    def described(cls, label: str):
+        """Return 'label: <cls name>'.
+
+        Args:
+            label: label to prepend
+        """
+        return f"{label}: {cls.__name__}"
+
+    @staticmethod
+    @create_parser()
+    def square(n: int):
+        """Return n squared.
+
+        Args:
+            n: number to square
+        """
+        return n * n

@@ -50,12 +50,13 @@ class TestParsing(unittest.TestCase):
         init_parser, method_to_parser = _get_parseable_methods(Parseable)
         self.assertIsNotNone(init_parser)
         self.assertListEqual(
-            sorted(list(method_to_parser.keys())), ["_private_method", "parseable"]
+            sorted(list(method_to_parser.keys())),
+            ["_private_method", "cls_method", "parseable"],
         )
 
-    def test_get_parseable_methods_do_not_include_classmethod(self):
+    def test_get_parseable_methods_includes_classmethod(self):
         _, method_to_parser = _get_parseable_methods(Parseable)
-        self.assertNotIn("cls_method", method_to_parser.keys())
+        self.assertIn("cls_method", method_to_parser.keys())
 
     def test_get_arg_parser_annotation_take_precedence(self):
         parser = _get_arg_parser(
