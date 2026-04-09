@@ -409,8 +409,10 @@ class ClassParser(object):
                     raise ParseThisException(
                         f"'__init__' method is not decorated. "
                         f"Please provide an instance to "
-                        f"'{self._cls.__name__}.parser.call' or decorate the "
-                        f"'__init___' method with 'create_parser'"
+                        f"'{self._cls.__name__}.parser.call', decorate the "
+                        f"'__init__' method with 'create_parser', or expose "
+                        f"only 'classmethod'/'staticmethod' subcommands so "
+                        f"no instance is required."
                     )
             return _call_method_from_namespace(instance, method_name, namespace)
 
