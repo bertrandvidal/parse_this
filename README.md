@@ -346,7 +346,7 @@ Classmethods and staticmethods can be parsed, both on their own and as
 subcommands inside a `@parse_class`:
 
 ```python
-from parse_this import create_parser, parse_class
+from parse_this import create_parser
 
 
 class MyClass(object):
