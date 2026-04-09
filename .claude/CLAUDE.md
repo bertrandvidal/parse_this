@@ -5,7 +5,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Quick Reference
 
 * Read the README and follow its instructions
-* All work requiring dependencies must be done inside a virtualenv, source once and maintain that context
 * This repo uses `pre-commit` (ruff, mypy) - you don't need to lint, format, or type-check manually
 
 ## Commands
