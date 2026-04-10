@@ -44,4 +44,4 @@ jobs:
         - name: create github release
           run: gh release create --fail-on-no-commits v${PACKAGE_VERSION} dist/parse_this*.tar.gz
         - name: publish package
-          uses: pypa/gh-action-pypi-publish@v1.13.0
+          uses: pypa/gh-action-pypi-publish@v1.14.0
