@@ -14,6 +14,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 * **Single test file:** `pytest test/parsers_test.py`
 * **Single test:** `pytest test/parsers_test.py::TestClassName::test_name`
 * **With coverage:** `pytest --cov=parse_this`
+* **Coverage gate:** `pytest` fails under 99% coverage (`--cov-fail-under=99` in `pyproject.toml`). New code must be tested or the suite breaks.
 
 ## Architecture
 
@@ -22,7 +23,7 @@ The public API (`parse_this/__init__.py`) exposes three entry points backed by c
 - `create_parser` (MethodParser) - decorator adding `.parser` attribute to methods
 - `parse_class` (ClassParser) - class decorator creating a top-level parser with subcommands from decorated methods
 
-Processing pipeline: **signature inspection (`types.py`) -> arg/default extraction (`args.py`) -> parser construction (`parsing.py`) -> call dispatch (`call.py`)**. Docstring parsing for help messages lives in `help/`.
+Processing pipeline: **signature inspection (`type_check.py`) -> arg/default extraction (`args.py`) -> parser construction (`parsing.py`) -> call dispatch (`call.py`)**. Docstring parsing for help messages lives in `help/`.
 
 Key pattern: `MethodParser` attaches a `.parser` to decorated functions. `ClassParser` collects these and assembles them into a parent parser with subcommands (method names with `_` replaced by `-`).
 
