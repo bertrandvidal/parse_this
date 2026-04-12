@@ -439,63 +439,19 @@ def greet(name: str, count: int = 1):
     ...
 ```
 
-### NumPy style
+The other supported styles are:
 
-```python
-@create_parser()
-def greet(name: str, count: int = 1):
-    """Greet someone.
-
-    Parameters
-    ----------
-    name : str
-        who to greet
-    count : int
-        how many times to repeat the greeting
-    """
-    ...
-```
-
-### reStructuredText / Sphinx style
-
-```python
-@create_parser()
-def greet(name: str, count: int = 1):
-    """Greet someone.
-
-    :param name: who to greet
-    :param count: how many times to repeat the greeting
-    """
-    ...
-```
-
-### Epytext style
-
-```python
-@create_parser()
-def greet(name: str, count: int = 1):
-    """Greet someone.
-
-    @param name: who to greet
-    @param count: how many times to repeat the greeting
-    """
-    ...
-```
+* [**NumPy style**](https://numpydoc.readthedocs.io/en/latest/format.html)
+* [**reStructuredText / Sphinx style**](https://www.sphinx-doc.org/en/master/usage/restructuredtext/field-lists.html)
+* [**Epytext style**](https://epydoc.sourceforge.net/manual-epytext.html)
 
 ### Forcing a specific style
+
+If auto-detection guesses wrong, lock the style explicitly:
 
 ```python
 @create_parser(docstring_style="numpy")
 def greet(name: str, count: int = 1):
-    """Greet someone.
-
-    Parameters
-    ----------
-    name : str
-        who to greet
-    count : int
-        how many times to repeat the greeting
-    """
     ...
 ```
 
