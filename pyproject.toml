@@ -4,13 +4,16 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "parse_this"
-version = "5.0.0"
+version = "4.0.8"
 description = "Makes it easy to create a command line interface for any function, method or classmethod."
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.10"
 authors = [
     { name = "Bertrand Vidal", email = "vidal.bertrand@gmail.com" },
+]
+dependencies = [
+    "docstring-parser>=0.16",
 ]
 classifiers = [
     "Intended Audience :: Developers",

@@ -1,8 +1,22 @@
 import logging
-import re
 from typing import Callable, Dict, List, Optional, Tuple
 
+from docstring_parser import DocstringStyle, ParseError, parse
+
+from parse_this.exception import ParseThisException
+
 _LOG = logging.getLogger(__name__)
+
+# Public-facing names map to docstring_parser's enum. ``"auto"`` defers
+# detection to docstring_parser, which sniffs Google/NumPy/reST/Epytext
+# from the docstring's structure.
+_STYLE_MAP: Dict[str, DocstringStyle] = {
+    "auto": DocstringStyle.AUTO,
+    "google": DocstringStyle.GOOGLE,
+    "numpy": DocstringStyle.NUMPYDOC,
+    "rest": DocstringStyle.REST,
+    "epytext": DocstringStyle.EPYDOC,
+}
 
 
 def _get_default_help_message(
@@ -33,8 +47,18 @@ def _get_default_help_message(
     return description, args_help
 
 
+def _collapse_whitespace(text: str) -> str:
+    """Collapse runs of whitespace (including newlines) into single spaces.
+
+    docstring_parser preserves multiline parameter descriptions with
+    embedded newlines. argparse's ``help`` field expects a single line, so
+    flatten any continuation lines into one space-joined string.
+    """
+    return " ".join(text.split())
+
+
 def prepare_doc(
-    func: Callable, args: List[str], delimiter_chars: str
+    func: Callable, args: List[str], style: str = "auto"
 ) -> Tuple[str, Dict[str, str]]:
     """From the function docstring get the arg parse description and arguments
         help message. If there is no docstring simple description and help
@@ -43,8 +67,8 @@ def prepare_doc(
     Args:
         func: the function that needs argument parsing
         args: name of the function arguments
-        delimiter_chars: characters used to separate the parameters from their
-        help message in the docstring
+        style: docstring style hint. One of ``"auto"`` (default,
+        autodetect), ``"google"``, ``"numpy"``, ``"rest"``, ``"epytext"``.
 
     Returns:
         A tuple containing the description to be used in the argument parser and
@@ -54,34 +78,25 @@ def prepare_doc(
     _LOG.debug("Preparing doc for '%s'", func.__name__)
     if not func.__doc__:
         return _get_default_help_message(func, args)
-    description = []
-    args_help = {}
-    fill_description = True
-    arg_name = None
-    arg_doc_regex = re.compile(
-        r"(?P<arg_name>\w+)\s*%s\s*(?P<help_msg>.+)" % delimiter_chars
-    )
-    for line in func.__doc__.splitlines():
-        line = line.strip()
-        if line and fill_description:
-            description.append(line)
-        elif line:
-            arg_match = arg_doc_regex.match(line)
-            try:
-                arg_name = arg_match.groupdict()["arg_name"].strip()
-                args_help[arg_name] = arg_match.groupdict()["help_msg"].strip()
-            except AttributeError:
-                # The line didn't match the pattern we've hit a
-                # multiline argument docstring so we add it to the
-                # previous argument help message
-                if arg_name is not None:
-                    args_help[arg_name] = " ".join([args_help[arg_name], line])
-        else:
-            # The first empty line we encountered means we are done with
-            # the description. The first empty line we encounter after
-            # filling the argument help means we are done with argument
-            # parsing.
-            if not fill_description and args_help:
-                break
-            fill_description = False
-    return _get_default_help_message(func, args, " ".join(description), args_help)
+    try:
+        ds_style = _STYLE_MAP[style]
+    except KeyError:
+        raise ParseThisException(
+            f"Unknown docstring_style {style!r}. Expected one of {sorted(_STYLE_MAP)}."
+        )
+    try:
+        parsed = parse(func.__doc__, style=ds_style)
+    except ParseError:
+        # Malformed docstring that no style understood — fall back to
+        # auto-generated defaults rather than crashing decoration.
+        return _get_default_help_message(func, args)
+    description_parts = [
+        part for part in (parsed.short_description, parsed.long_description) if part
+    ]
+    description = _collapse_whitespace(" ".join(description_parts)) or None
+    args_help = {
+        param.arg_name: _collapse_whitespace(param.description)
+        for param in parsed.params
+        if param.description
+    }
+    return _get_default_help_message(func, args, description, args_help)
