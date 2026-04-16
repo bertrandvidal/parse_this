@@ -30,7 +30,7 @@ classifiers = [
 [project.optional-dependencies]
 dev = [
     "ipython",
-    "mypy",
+    "ty",
     "pre-commit",
     "pytest",
     "pytest-cov",
@@ -48,10 +48,6 @@ include = ["parse_this*"]
 
 [tool.setuptools.package-data]
 parse_this = ["py.typed"]
-
-[tool.mypy]
-no_strict_optional = true
-show_error_codes = true
 
 [tool.pytest.ini_options]
 cache_dir = ".pytest_cache"

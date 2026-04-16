@@ -42,7 +42,7 @@ class TestParsing(unittest.TestCase):
     def test_get_arg_parser_none_default_value_without_type(self):
         with self.assertRaises(ParseThisException):
 
-            @create_parser(int)
+            @create_parser(int)  # ty: ignore[invalid-argument-type]
             def have_none_default_value(a: int, b=None):
                 pass
 

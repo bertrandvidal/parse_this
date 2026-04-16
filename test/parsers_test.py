@@ -70,9 +70,9 @@ class TestMethodParser(unittest.TestCase):
 
 class TestClassParser(unittest.TestCase):
     def test_parse_class_description(self):
-        self.assertEqual(NeedParsing.parser.description, "Hello World")
+        self.assertEqual(NeedParsing.parser.description, "Hello World")  # ty:ignore[unresolved-attribute]
         self.assertEqual(
-            ShowMyDocstring.parser.description, "This should be the parser description"
+            ShowMyDocstring.parser.description, "This should be the parser description"  # ty:ignore[unresolved-attribute]
         )
 
     def test_parse_class_add_parser(self):
@@ -81,26 +81,26 @@ class TestClassParser(unittest.TestCase):
         self.assertTrue(hasattr(ShowMyDocstring, "parser"))
 
     def test_parse_class_subparsers(self):
-        parser = NeedParsing.parser
+        parser = NeedParsing.parser  # ty:ignore[unresolved-attribute]
         self.assertEqual(parser.call("12 multiply-self-arg 2".split()), 24)
         self.assertEqual(
             parser.call("12 could-you-parse-me yes 2 --three 4".split()), ("yesyes", 16)
         )
 
     def test_parse_class_expose_private_method(self):
-        parser = NeedParsing.parser
+        parser = NeedParsing.parser  # ty:ignore[unresolved-attribute]
         self.assertEqual(parser.call("12 private-method 2".split()), 24)
 
     def test_parse_class_expose_special_method(self):
-        parser = NeedParsing.parser
+        parser = NeedParsing.parser  # ty:ignore[unresolved-attribute]
         self.assertEqual(parser.call("12 str".split()), "12")
 
     def test_parse_class_do_not_expose_private_methods(self):
         with captured_output():
             with self.assertRaises(SystemExit):
-                ShowMyDocstring.parser.parse_args("will-not-appear 12".split())
+                ShowMyDocstring.parser.parse_args("will-not-appear 12".split())  # ty:ignore[unresolved-attribute]
             with self.assertRaises(SystemExit):
-                ShowMyDocstring.parser.parse_args("str".split())
+                ShowMyDocstring.parser.parse_args("str".split())  # ty:ignore[unresolved-attribute]
 
     def test_parse_class_method_is_still_parseable(self):
         need_parsing = NeedParsing(12)
@@ -111,15 +111,15 @@ class TestClassParser(unittest.TestCase):
 
     def test_parse_class_init_need_decoration(self):
         with self.assertRaises(ParseThisException):
-            NeedInitDecorator.parser.call("do-stuff 12".split())
+            NeedInitDecorator.parser.call("do-stuff 12".split())  # ty:ignore[unresolved-attribute]
 
     def test_parse_class_need_init_decorator_with_instance(self):
         instance = NeedInitDecorator(2)
         self.assertEqual(
-            NeedInitDecorator.parser.call("do-stuff 12".split(), instance), 12
+            NeedInitDecorator.parser.call("do-stuff 12".split(), instance), 12  # ty:ignore[unresolved-attribute]
         )
         self.assertEqual(
-            NeedInitDecorator.parser.call("do-stuff 12 --div 3".split(), instance), 8
+            NeedInitDecorator.parser.call("do-stuff 12 --div 3".split(), instance), 8  # ty:ignore[unresolved-attribute]
         )
 
     def test_parse_class_classmethod_is_sub_command(self):
@@ -127,34 +127,34 @@ class TestClassParser(unittest.TestCase):
         # is exposed as a subcommand. The classmethod's cls is bound at
         # descriptor resolution time, not from the __init__'d instance, so
         # it runs exactly as if called through the class itself.
-        result = NeedParsing.parser.call("12 parse-me-if-you-can one 2".split())
+        result = NeedParsing.parser.call("12 parse-me-if-you-can one 2".split())  # ty:ignore[unresolved-attribute]
         self.assertEqual(result, ("oneone", 144))
 
     def test_parse_class_classmethod_with_cls_access(self):
         # The classmethod can access cls — verify we get the real class,
         # not a surrogate.
-        result = ClassAndStaticMethods.parser.call("5 cls-name-upper !".split())
+        result = ClassAndStaticMethods.parser.call("5 cls-name-upper !".split())  # ty:ignore[unresolved-attribute]
         self.assertEqual(result, "CLASSANDSTATICMETHODS!")
 
     def test_parse_class_staticmethod_is_sub_command(self):
-        result = ClassAndStaticMethods.parser.call("5 static-add 3 4".split())
+        result = ClassAndStaticMethods.parser.call("5 static-add 3 4".split())  # ty:ignore[unresolved-attribute]
         self.assertEqual(result, 7)
 
     def test_parse_class_instance_method_still_works(self):
         # Make sure that adding classmethod/staticmethod support didn't
         # break instance methods in the same class.
-        result = ClassAndStaticMethods.parser.call("5 times 6".split())
+        result = ClassAndStaticMethods.parser.call("5 times 6".split())  # ty:ignore[unresolved-attribute]
         self.assertEqual(result, 30)
 
     def test_parse_class_no_init_classmethod_dispatch(self):
         # A class with no decorated __init__ can still dispatch its
         # classmethods because classmethods don't need an instance — the
         # class object itself is used for dispatch.
-        result = OnlyClassMethods.parser.call("described hello".split())
+        result = OnlyClassMethods.parser.call("described hello".split())  # ty:ignore[unresolved-attribute]
         self.assertEqual(result, "hello: OnlyClassMethods")
 
     def test_parse_class_no_init_staticmethod_dispatch(self):
-        result = OnlyClassMethods.parser.call("square 9".split())
+        result = OnlyClassMethods.parser.call("square 9".split())  # ty:ignore[unresolved-attribute]
         self.assertEqual(result, 81)
 
     def test_subcommand_parse_error_shows_subcommand_usage_not_top_parser(self):
@@ -163,7 +163,7 @@ class TestClassParser(unittest.TestCase):
         the top-level parser's usage (which lists all available subcommands)."""
         with captured_output() as (_, err):
             with self.assertRaises(SystemExit):
-                SubCmdParseError.parser.call("1 sub-cmd 2 --unknown-flag".split())
+                SubCmdParseError.parser.call("1 sub-cmd 2 --unknown-flag".split())  # ty:ignore[unresolved-attribute]
             error_output = err.getvalue()
         # The subcommand name must appear in the error output as a plain word,
         # confirming the subcommand's usage line was printed.
@@ -176,7 +176,7 @@ class TestClassParser(unittest.TestCase):
     def test_parse_class_unrecognized_argument(self):
         with captured_output() as (_, err):
             with self.assertRaises(SystemExit):
-                ParseMyInitOnly.parser.call("--unknown-flag".split())
+                ParseMyInitOnly.parser.call("--unknown-flag".split())  # ty:ignore[unresolved-attribute]
             error_output = err.getvalue()
         self.assertIn("unrecognized arguments", error_output)
         self.assertIn("--unknown-flag", error_output)
@@ -260,7 +260,7 @@ class TestDecoratorStacking(unittest.TestCase):
                 """
                 return self._base + value
 
-        self.assertEqual(Calculator.parser.call("10 add 5".split()), 15)
+        self.assertEqual(Calculator.parser.call("10 add 5".split()), 15)  # ty:ignore[unresolved-attribute]
 
 
 class TestLogLevel(unittest.TestCase):
@@ -285,7 +285,7 @@ class TestLogLevel(unittest.TestCase):
 
     @patch("parse_this.call.logging.basicConfig")
     def test_parse_class_with_log_level(self, mock_basic_config):
-        result = ParseableWithLogLevel.parser.call(
+        result = ParseableWithLogLevel.parser.call(  # ty:ignore[unresolved-attribute]
             "12 --log-level ERROR parseable 2".split()
         )
         self.assertEqual(result, 24)

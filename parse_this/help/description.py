@@ -39,7 +39,7 @@ def _get_default_help_message(
         a tuple (arg_parse_description, complete_args_help)
     """
     if description is None:
-        description = "Argument parsing for %s" % func.__name__
+        description = "Argument parsing for %s" % func.__name__  # ty: ignore[unresolved-attribute]
     args_help = args_help or {}
     # If an argument is missing a help message we create a simple one
     for argument in [arg_name for arg_name in args if arg_name not in args_help]:
@@ -75,7 +75,7 @@ def prepare_doc(
         a dict indexed on the callable argument name and their associated help
         message
     """
-    _LOG.debug("Preparing doc for '%s'", func.__name__)
+    _LOG.debug("Preparing doc for '%s'", func.__name__)  # ty: ignore[unresolved-attribute]
     if not func.__doc__:
         return _get_default_help_message(func, args)
     try:

@@ -129,5 +129,5 @@ class TestLiteralErrors(unittest.TestCase):
         with self.assertRaises(ParseThisException):
 
             @create_parser()
-            def bad_default(val: Literal["a", "b"] = "c"):  # type: ignore[assignment]
+            def bad_default(val: Literal["a", "b"] = "c"):  # ty: ignore[invalid-parameter-default]
                 return val

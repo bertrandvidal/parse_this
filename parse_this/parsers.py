@@ -55,7 +55,7 @@ class FunctionParser(object):
     def __call__(
         self,
         func: Callable,
-        args: typing.List[str] = None,
+        args: typing.Optional[typing.Sequence[str]] = None,
         docstring_style: str = "auto",
         log_level: bool = False,
         version: Optional[str] = None,
@@ -75,12 +75,12 @@ class FunctionParser(object):
             version: optional version string to enable a '--version' flag.
             When provided, '--version' prints this string and exits.
         """
-        _LOG.debug("Creating parser for %s", func.__name__)
+        _LOG.debug("Creating parser for %s", func.__name__)  # ty: ignore[unresolved-attribute]
         # Follow __wrapped__ so @create_parser can be stacked below decorators
         # that use functools.wraps around a *args/**kwargs wrapper.
         wrapped = unwrap(func)
         func_args, _, _, defaults, _, _, annotations = getfullargspec(wrapped)
-        func_args = _check_types(func.__name__, annotations, func_args, defaults)
+        func_args = _check_types(func.__name__, annotations, func_args, defaults)  # ty: ignore[unresolved-attribute]
         args_and_defaults = _get_args_and_defaults(func_args, defaults)
         parser = _get_arg_parser(
             func, annotations, args_and_defaults, docstring_style, log_level
@@ -111,7 +111,7 @@ class MethodParser(object):
     def __init__(
         self,
         docstring_style: str = "auto",
-        name: str = None,
+        name: Optional[str] = None,
         log_level: bool = False,
     ):
         """
@@ -138,7 +138,7 @@ class MethodParser(object):
         if not hasattr(func, "parser"):
             _LOG.debug(
                 "Creating parser for '%s'%s",
-                func.__name__,
+                func.__name__,  # ty: ignore[unresolved-attribute]
                 "/%s" % self._name if self._name else "",
             )
             # Follow __wrapped__ so @create_parser can be stacked below
@@ -146,7 +146,7 @@ class MethodParser(object):
             # wrapper.
             wrapped = unwrap(func)
             func_args, _, _, defaults, _, _, annotations = getfullargspec(wrapped)
-            func_args = _check_types(func.__name__, annotations, func_args, defaults)
+            func_args = _check_types(func.__name__, annotations, func_args, defaults)  # ty: ignore[unresolved-attribute]
             args_and_defaults = _get_args_and_defaults(func_args, defaults)
             parser = _get_arg_parser(
                 func,
@@ -155,7 +155,7 @@ class MethodParser(object):
                 self._docstring_style,
                 self._log_level,
             )
-            parser.get_name = lambda: self._name or func.__name__  # type: ignore[attr-defined]
+            parser.get_name = lambda: self._name or func.__name__  # ty: ignore[unresolved-attribute]
             self._set_method_parser(func, parser)
 
         @wraps(func)
@@ -176,13 +176,13 @@ class ClassParser(object):
 
     _parse_private: bool
     _description: Optional[str]
-    _cls: Type = None
+    _cls: Optional[Type] = None
     _log_level: bool
     _version: Optional[str]
 
     def __init__(
         self,
-        description: str = None,
+        description: Optional[str] = None,
         parse_private: bool = False,
         log_level: bool = False,
         version: Optional[str] = None,
@@ -247,7 +247,7 @@ class ClassParser(object):
         for method_name, parser in methods_to_parse.items():
             # We use the name provided in 'create_parser` or the name of the
             # decorated method
-            parser_name = parser.get_name()  # type: ignore[attr-defined]
+            parser_name = parser.get_name()  # ty: ignore[unresolved-attribute]
             # Make the method name compatible for the argument parsing
             if parser_name.startswith("_"):
                 if not self._parse_private:
@@ -269,7 +269,7 @@ class ClassParser(object):
 
     def _set_class_parser(
         self,
-        init_parser: ArgumentParser,
+        init_parser: Optional[ArgumentParser],
         methods_to_parse: Dict[str, ArgumentParser],
         cls: Type,
     ):
@@ -312,7 +312,7 @@ class ClassParser(object):
         if init_parser:
             parser_to_method["__init__"] = "__init__"
         self._set_parser_call_method(parser_to_method, top_level_parser)
-        cls.parser = top_level_parser
+        cls.parser = top_level_parser  # ty: ignore[unresolved-attribute]
 
     @typing.no_type_check  # dynamically attaches .parser and .call to objects
     def _set_parser_call_method(
@@ -320,7 +320,7 @@ class ClassParser(object):
     ):
         top_level_parser.call = self._get_parser_call_method(parser_to_method)
 
-    def _get_parser_call_method(self, parser_to_method: Dict[str, Callable]):
+    def _get_parser_call_method(self, parser_to_method: Dict[str, str]):
         """Return the parser special method 'call' that handles sub-command
             calling.
 
@@ -339,7 +339,7 @@ class ClassParser(object):
                     the default, and __init__ is decorated the object will be
                     instantiated on the fly from the command line arguments
             """
-            parser = self._cls.parser
+            parser = self._cls.parser  # ty: ignore[unresolved-attribute]
             namespace = parser.parse_args(_get_args_to_parse(args))
             method_name = parser_to_method[namespace.method]
             if instance is None:
@@ -358,7 +358,7 @@ class ClassParser(object):
                     raise ParseThisException(
                         f"'__init__' method is not decorated. "
                         f"Please provide an instance to "
-                        f"'{self._cls.__name__}.parser.call', decorate the "
+                        f"'{self._cls.__name__}.parser.call', decorate the "  # ty: ignore[unresolved-attribute]
                         f"'__init__' method with 'create_parser', or expose "
                         f"only 'classmethod'/'staticmethod' subcommands so "
                         f"no instance is required."

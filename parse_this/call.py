@@ -20,8 +20,8 @@ def _get_parser_call_method(func: Callable) -> Callable:
         ParseThisException if the decorated method is __init__, __init__ can
         only be decorated in a class decorated by parse_class
     """
-    func_name = func.__name__
-    parser = func.parser  # type: ignore[attr-defined]
+    func_name = func.__name__  # ty: ignore[unresolved-attribute]
+    parser = func.parser  # ty: ignore[unresolved-attribute]
 
     @wraps(func)
     def inner_call(instance: Any = None, args: Optional[List[str]] = None) -> Any:

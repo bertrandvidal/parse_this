@@ -1,5 +1,5 @@
 import unittest
-from collections import namedtuple
+from argparse import Namespace
 
 from parse_this.call import (
     _call,
@@ -33,22 +33,19 @@ class TestCall(unittest.TestCase):
         self.assertEqual(call_method(args="yes 2".split()), "yesyes")
 
     def test_call_on_parse_me_no_docstring(self):
-        Namespace = namedtuple("Namespace", ["one", "two", "three"])
-        fake_namespace = Namespace(**{"one": 2, "two": 12, "three": 3})
+        fake_namespace = Namespace(one=2, two=12, three=3)
         self.assertEqual(
             _call(parse_me_no_docstring, ["one", "two", "three"], fake_namespace),
             (24, 9),
         )
 
     def test_call_method_from_namespace_create_instance(self):
-        Namespace = namedtuple("Namespace", ["a"])
         fake_namespace = Namespace(a=2)
         parseable = _call_method_from_namespace(Parseable, "__init__", fake_namespace)
         self.assertIsInstance(parseable, Parseable)
         self.assertEqual(parseable._a, 2)
 
     def test_call_method_from_namespace_execution(self):
-        Namespace = namedtuple("Namespace", ["d"])
         fake_namespace = Namespace(d=2)
         self.assertEqual(
             _call_method_from_namespace(Parseable(12), "parseable", fake_namespace), 24
@@ -56,7 +53,7 @@ class TestCall(unittest.TestCase):
 
     def test_get_parser_call_method_preserves_name(self):
         call_method = _get_parser_call_method(concatenate_string)
-        self.assertEqual(call_method.__name__, "concatenate_string")
+        self.assertEqual(call_method.__name__, "concatenate_string")  # ty: ignore[unresolved-attribute]
 
     def test_get_parser_call_method_preserves_doc(self):
         call_method = _get_parser_call_method(i_am_parseable)
@@ -64,7 +61,7 @@ class TestCall(unittest.TestCase):
 
     def test_get_parser_call_method_preserves_wrapped(self):
         call_method = _get_parser_call_method(concatenate_string)
-        self.assertIs(call_method.__wrapped__, concatenate_string)
+        self.assertIs(call_method.__wrapped__, concatenate_string)  # ty: ignore[unresolved-attribute]
 
 
 if __name__ == "__main__":

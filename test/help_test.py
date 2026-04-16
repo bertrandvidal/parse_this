@@ -74,7 +74,7 @@ class TestHelp(unittest.TestCase):
 class TestFullHelpAction(unittest.TestCase):
     def test_help_is_complete(self):
         with captured_output() as (out, _):
-            self.assertRaises(SystemExit, Parseable.parser.parse_args, ["-h"])
+            self.assertRaises(SystemExit, Parseable.parser.parse_args, ["-h"])  # ty:ignore[unresolved-attribute]
             help_message = out.getvalue()
         self.assertIn("parseable", help_message)
         # Private methods are hidden by default
@@ -85,7 +85,7 @@ class TestFullHelpAction(unittest.TestCase):
     def test_help_is_complete_with_private_method(self):
         with captured_output() as (out, _):
             self.assertRaises(
-                SystemExit, ParseableWithPrivateMethod.parser.parse_args, ["-h"]
+                SystemExit, ParseableWithPrivateMethod.parser.parse_args, ["-h"]  # ty:ignore[unresolved-attribute]
             )
             help_message = out.getvalue()
         self.assertIn("parseable", help_message)
