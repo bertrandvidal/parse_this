@@ -5,6 +5,8 @@ from functools import wraps
 from inspect import getfullargspec, unwrap
 from typing import Callable, Dict, Optional, Type
 
+from parse_this._protocols import _Named
+
 from parse_this.args import _get_args_and_defaults, _get_args_to_parse
 from parse_this.call import _call, _call_method_from_namespace, _get_parser_call_method
 from parse_this.exception import ParseThisException
@@ -54,7 +56,7 @@ class FunctionParser(object):
 
     def __call__(
         self,
-        func: Callable,
+        func: _Named,
         args: typing.Optional[typing.Sequence[str]] = None,
         docstring_style: str = "auto",
         log_level: bool = False,
@@ -75,12 +77,12 @@ class FunctionParser(object):
             version: optional version string to enable a '--version' flag.
             When provided, '--version' prints this string and exits.
         """
-        _LOG.debug("Creating parser for %s", func.__name__)  # ty: ignore[unresolved-attribute]
+        _LOG.debug("Creating parser for %s", func.__name__)
         # Follow __wrapped__ so @create_parser can be stacked below decorators
         # that use functools.wraps around a *args/**kwargs wrapper.
         wrapped = unwrap(func)
         func_args, _, _, defaults, _, _, annotations = getfullargspec(wrapped)
-        func_args = _check_types(func.__name__, annotations, func_args, defaults)  # ty: ignore[unresolved-attribute]
+        func_args = _check_types(func.__name__, annotations, func_args, defaults)
         args_and_defaults = _get_args_and_defaults(func_args, defaults)
         parser = _get_arg_parser(
             func, annotations, args_and_defaults, docstring_style, log_level
@@ -129,7 +131,7 @@ class MethodParser(object):
         self._name = name
         self._log_level = log_level
 
-    def __call__(self, func: Callable):
+    def __call__(self, func: _Named):
         """Add an argument parser attribute `parser` to the decorated function.
 
         Args:
@@ -138,7 +140,7 @@ class MethodParser(object):
         if not hasattr(func, "parser"):
             _LOG.debug(
                 "Creating parser for '%s'%s",
-                func.__name__,  # ty: ignore[unresolved-attribute]
+                func.__name__,
                 "/%s" % self._name if self._name else "",
             )
             # Follow __wrapped__ so @create_parser can be stacked below
@@ -146,7 +148,7 @@ class MethodParser(object):
             # wrapper.
             wrapped = unwrap(func)
             func_args, _, _, defaults, _, _, annotations = getfullargspec(wrapped)
-            func_args = _check_types(func.__name__, annotations, func_args, defaults)  # ty: ignore[unresolved-attribute]
+            func_args = _check_types(func.__name__, annotations, func_args, defaults)
             args_and_defaults = _get_args_and_defaults(func_args, defaults)
             parser = _get_arg_parser(
                 func,

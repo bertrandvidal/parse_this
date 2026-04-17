@@ -1,8 +1,9 @@
 import logging
-from typing import Callable, Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from docstring_parser import DocstringStyle, ParseError, parse
 
+from parse_this._protocols import _Named
 from parse_this.exception import ParseThisException
 
 _LOG = logging.getLogger(__name__)
@@ -20,7 +21,7 @@ _STYLE_MAP: Dict[str, DocstringStyle] = {
 
 
 def _get_default_help_message(
-    func: Callable,
+    func: _Named,
     args: List[str],
     description: Optional[str] = None,
     args_help: Optional[Dict[str, str]] = None,
@@ -39,7 +40,7 @@ def _get_default_help_message(
         a tuple (arg_parse_description, complete_args_help)
     """
     if description is None:
-        description = "Argument parsing for %s" % func.__name__  # ty: ignore[unresolved-attribute]
+        description = "Argument parsing for %s" % func.__name__
     args_help = args_help or {}
     # If an argument is missing a help message we create a simple one
     for argument in [arg_name for arg_name in args if arg_name not in args_help]:
@@ -58,7 +59,7 @@ def _collapse_whitespace(text: str) -> str:
 
 
 def prepare_doc(
-    func: Callable, args: List[str], style: str = "auto"
+    func: _Named, args: List[str], style: str = "auto"
 ) -> Tuple[str, Dict[str, str]]:
     """From the function docstring get the arg parse description and arguments
         help message. If there is no docstring simple description and help
@@ -75,7 +76,7 @@ def prepare_doc(
         a dict indexed on the callable argument name and their associated help
         message
     """
-    _LOG.debug("Preparing doc for '%s'", func.__name__)  # ty: ignore[unresolved-attribute]
+    _LOG.debug("Preparing doc for '%s'", func.__name__)
     if not func.__doc__:
         return _get_default_help_message(func, args)
     try:

@@ -3,6 +3,7 @@ from argparse import Namespace
 from functools import wraps
 from typing import Any, Callable, List, Optional
 
+from parse_this._protocols import _ParsedCallable
 from parse_this.args import _get_args_to_parse
 from parse_this.exception import ParseThisException
 from parse_this.helpers import _get_args_name_from_parser
@@ -10,7 +11,7 @@ from parse_this.helpers import _get_args_name_from_parser
 _LOG = logging.getLogger(__name__)
 
 
-def _get_parser_call_method(func: Callable) -> Callable:
+def _get_parser_call_method(func: _ParsedCallable) -> Callable:
     """Returns the method that is linked to the 'call' method of the parser
 
     Args:
@@ -20,8 +21,8 @@ def _get_parser_call_method(func: Callable) -> Callable:
         ParseThisException if the decorated method is __init__, __init__ can
         only be decorated in a class decorated by parse_class
     """
-    func_name = func.__name__  # ty: ignore[unresolved-attribute]
-    parser = func.parser  # ty: ignore[unresolved-attribute]
+    func_name = func.__name__
+    parser = func.parser
 
     @wraps(func)
     def inner_call(instance: Any = None, args: Optional[List[str]] = None) -> Any:

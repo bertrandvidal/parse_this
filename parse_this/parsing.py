@@ -3,6 +3,7 @@ import logging
 from argparse import ArgumentParser
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, cast
 
+from parse_this._protocols import _Named
 from parse_this.args import _NO_DEFAULT
 from parse_this.exception import ParseThisException
 from parse_this.help.description import prepare_doc
@@ -62,7 +63,7 @@ def _get_parseable_methods(
 
 
 def _get_arg_parser(
-    func: Callable,
+    func: _Named,
     annotations: Dict[str, Callable],
     args_and_defaults: List[Tuple[str, Any]],
     docstring_style: str,
@@ -80,7 +81,7 @@ def _get_arg_parser(
         log_level: indicate whether or not a '--log-level' argument should be
         handled to set the log level during the execution
     """
-    _LOG.debug("Creating ArgumentParser for '%s'", func.__name__)  # ty: ignore[unresolved-attribute]
+    _LOG.debug("Creating ArgumentParser for '%s'", func.__name__)
     description, arg_help = prepare_doc(
         func, [x for (x, _) in args_and_defaults], docstring_style
     )
@@ -121,7 +122,7 @@ def _validate_literal_values(func_name: str, arg: str, values: tuple) -> None:
 
 def _add_required_argument(
     parser: ArgumentParser,
-    func: Callable,
+    func: _Named,
     arg: str,
     arg_type: Any,
     help_msg: str,
@@ -137,7 +138,7 @@ def _add_required_argument(
     """
     arg_type = _unwrap_optional(arg_type)
     if arg_type is bool:
-        _LOG.debug("Adding optional flag %s.%s (default: True)", func.__name__, arg)  # ty: ignore[unresolved-attribute]
+        _LOG.debug("Adding optional flag %s.%s (default: True)", func.__name__, arg)
         parser.add_argument(
             "--%s" % arg,
             default=True,
@@ -147,11 +148,11 @@ def _add_required_argument(
         )
     elif _is_literal_type(arg_type):
         values = _get_literal_values(arg_type)
-        _validate_literal_values(func.__name__, arg, values)  # ty: ignore[unresolved-attribute]
+        _validate_literal_values(func.__name__, arg, values)
         literal_type = type(values[0])
         _LOG.debug(
             "Adding positional literal argument %s.%s: %s",
-            func.__name__,  # ty: ignore[unresolved-attribute]
+            func.__name__,
             arg,
             values,
         )
@@ -159,7 +160,7 @@ def _add_required_argument(
     elif _is_enum_type(arg_type):
         _LOG.debug(
             "Adding positional enum argument %s.%s: %s",
-            func.__name__,  # ty: ignore[unresolved-attribute]
+            func.__name__,
             arg,
             arg_type,
         )
@@ -175,20 +176,20 @@ def _add_required_argument(
     elif _is_sequence_type(arg_type):
         _LOG.debug(
             "Adding positional sequence argument %s.%s: %s",
-            func.__name__,  # ty: ignore[unresolved-attribute]
+            func.__name__,
             arg,
             arg_type,
         )
         element_type = _get_element_type(arg_type)
         parser.add_argument(arg, help=help_msg, type=element_type, nargs="+")
     else:
-        _LOG.debug("Adding positional argument %s.%s: %s", func.__name__, arg, arg_type)  # ty: ignore[unresolved-attribute]
+        _LOG.debug("Adding positional argument %s.%s: %s", func.__name__, arg, arg_type)
         parser.add_argument(arg, help=help_msg, type=arg_type)
 
 
 def _add_optional_argument(
     parser: ArgumentParser,
-    func: Callable,
+    func: _Named,
     arg: str,
     arg_type: Any,
     default: Any,
@@ -207,22 +208,22 @@ def _add_optional_argument(
     arg_type = _unwrap_optional(arg_type)
     if default is None and arg_type is None:
         raise ParseThisException(
-            f"parameter '{arg}' of '{func.__name__}' has default None but no "  # ty: ignore[unresolved-attribute]
+            f"parameter '{arg}' of '{func.__name__}' has default None but no "
             f"type annotation. Add an annotation, for example: "
             f"{arg}: int | None = None"
         )
     if _is_literal_type(arg_type):
         values = _get_literal_values(arg_type)
-        _validate_literal_values(func.__name__, arg, values)  # ty: ignore[unresolved-attribute]
+        _validate_literal_values(func.__name__, arg, values)
         literal_type = type(values[0])
         if default is not None and default not in values:
             raise ParseThisException(
-                f"Default value {default!r} for '{arg}' in '{func.__name__}' "  # ty: ignore[unresolved-attribute]
+                f"Default value {default!r} for '{arg}' in '{func.__name__}' "
                 f"is not one of the allowed Literal values: {values}"
             )
         _LOG.debug(
             "Adding optional literal argument %s.%s: %s (default: %s)",
-            func.__name__,  # ty: ignore[unresolved-attribute]
+            func.__name__,
             arg,
             values,
             default,
@@ -240,7 +241,7 @@ def _add_optional_argument(
         action = "store_false" if default else "store_true"
         _LOG.debug(
             "Adding optional flag %s.%s (default: %s)",
-            func.__name__,  # ty: ignore[unresolved-attribute]
+            func.__name__,
             arg,
             default,
         )
@@ -248,7 +249,7 @@ def _add_optional_argument(
     elif _is_enum_type(arg_type):
         _LOG.debug(
             "Adding optional enum argument %s.%s: %s (default: %s)",
-            func.__name__,  # ty: ignore[unresolved-attribute]
+            func.__name__,
             arg,
             arg_type,
             default,
@@ -266,7 +267,7 @@ def _add_optional_argument(
     elif _is_sequence_type(arg_type):
         _LOG.debug(
             "Adding optional sequence argument %s.%s: %s (default: %s)",
-            func.__name__,  # ty: ignore[unresolved-attribute]
+            func.__name__,
             arg,
             arg_type,
             default,
@@ -278,7 +279,7 @@ def _add_optional_argument(
     else:
         _LOG.debug(
             "Adding optional argument %s.%s: %s (default: %s)",
-            func.__name__,  # ty: ignore[unresolved-attribute]
+            func.__name__,
             arg,
             arg_type,
             default,
