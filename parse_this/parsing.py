@@ -3,6 +3,7 @@ import logging
 from argparse import ArgumentParser
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, cast
 
+from parse_this._protocols import _Named
 from parse_this.args import _NO_DEFAULT
 from parse_this.exception import ParseThisException
 from parse_this.help.description import prepare_doc
@@ -62,7 +63,7 @@ def _get_parseable_methods(
 
 
 def _get_arg_parser(
-    func: Callable,
+    func: _Named,
     annotations: Dict[str, Callable],
     args_and_defaults: List[Tuple[str, Any]],
     docstring_style: str,
@@ -121,7 +122,7 @@ def _validate_literal_values(func_name: str, arg: str, values: tuple) -> None:
 
 def _add_required_argument(
     parser: ArgumentParser,
-    func: Callable,
+    func: _Named,
     arg: str,
     arg_type: Any,
     help_msg: str,
@@ -188,7 +189,7 @@ def _add_required_argument(
 
 def _add_optional_argument(
     parser: ArgumentParser,
-    func: Callable,
+    func: _Named,
     arg: str,
     arg_type: Any,
     default: Any,

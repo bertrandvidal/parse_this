@@ -1,8 +1,9 @@
 import logging
-from typing import Callable, Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from docstring_parser import DocstringStyle, ParseError, parse
 
+from parse_this._protocols import _Named
 from parse_this.exception import ParseThisException
 
 _LOG = logging.getLogger(__name__)
@@ -20,7 +21,7 @@ _STYLE_MAP: Dict[str, DocstringStyle] = {
 
 
 def _get_default_help_message(
-    func: Callable,
+    func: _Named,
     args: List[str],
     description: Optional[str] = None,
     args_help: Optional[Dict[str, str]] = None,
@@ -58,7 +59,7 @@ def _collapse_whitespace(text: str) -> str:
 
 
 def prepare_doc(
-    func: Callable, args: List[str], style: str = "auto"
+    func: _Named, args: List[str], style: str = "auto"
 ) -> Tuple[str, Dict[str, str]]:
     """From the function docstring get the arg parse description and arguments
         help message. If there is no docstring simple description and help

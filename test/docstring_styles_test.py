@@ -219,8 +219,8 @@ class TestDocstringStyleKwargFlow(unittest.TestCase):
         self.assertEqual(add_actions["n"].help, "value to add")
         self.assertEqual(mul_actions["n"].help, "value to multiply")
         # End-to-end dispatch using the top-level class parser.
-        self.assertEqual(Mixed.parser.call("10 add 5".split()), 15)
-        self.assertEqual(Mixed.parser.call("10 mul 5".split()), 50)
+        self.assertEqual(Mixed.parser.call("10 add 5".split()), 15)  # ty:ignore[unresolved-attribute]
+        self.assertEqual(Mixed.parser.call("10 mul 5".split()), 50)  # ty:ignore[unresolved-attribute]
 
 
 if __name__ == "__main__":

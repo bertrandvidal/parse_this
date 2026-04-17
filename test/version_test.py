@@ -100,7 +100,7 @@ class TestClassParserVersion(unittest.TestCase):
     def test_version_flag_prints_and_exits(self):
         with captured_output() as (out, err):
             with self.assertRaises(SystemExit) as ctx:
-                VersionedApp.parser.call(args=["--version"])
+                VersionedApp.parser.call(args=["--version"])  # ty:ignore[unresolved-attribute]
         self.assertEqual(ctx.exception.code, 0)
         printed = out.getvalue() + err.getvalue()
         self.assertIn("myapp 2.0.1", printed)
@@ -108,13 +108,13 @@ class TestClassParserVersion(unittest.TestCase):
     def test_version_in_help(self):
         with captured_output() as (out, _):
             with self.assertRaises(SystemExit):
-                VersionedApp.parser.call(args=["--help"])
+                VersionedApp.parser.call(args=["--help"])  # ty:ignore[unresolved-attribute]
         self.assertIn("--version", out.getvalue())
 
     def test_no_version_flag_when_omitted(self):
         with captured_output():
             with self.assertRaises(SystemExit):
-                UnversionedApp.parser.call(args=["--version"])
+                UnversionedApp.parser.call(args=["--version"])  # ty:ignore[unresolved-attribute]
 
     def test_call_without_version_still_works(self):
-        self.assertEqual(VersionedApp.parser.call(args=["3", "run", "4"]), 12)
+        self.assertEqual(VersionedApp.parser.call(args=["3", "run", "4"]), 12)  # ty:ignore[unresolved-attribute]

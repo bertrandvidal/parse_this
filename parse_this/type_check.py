@@ -1,4 +1,4 @@
-from typing import Callable, Dict, List, Tuple
+from typing import Callable, Dict, List, Optional, Tuple
 
 from parse_this.exception import ParseThisException
 
@@ -7,7 +7,7 @@ def _check_types(
     func_name: str,
     annotations: Dict[str, Callable],
     func_args: List[str],
-    defaults: Tuple,
+    defaults: Optional[Tuple],
 ):
     """Make sure that enough types were given to ensure conversion. Also remove
        potential 'self'/'cls' from the function arguments.

@@ -1,4 +1,5 @@
 import enum
+from typing import Optional
 
 from parse_this import create_parser, parse_class
 
@@ -88,7 +89,7 @@ class ParseableWithLogLevel(object):
 
 
 @create_parser()
-def has_none_default_value(a: int, b: str = None):
+def has_none_default_value(a: int, b: Optional[str] = None):
     return a, b
 
 
@@ -278,7 +279,7 @@ def has_list_argument(values: list[int]):
 
 
 @create_parser()
-def has_optional_list_argument(name: str, tags: list[str] = None):
+def has_optional_list_argument(name: str, tags: Optional[list[str]] = None):
     """Tag something.
 
     Args:
@@ -299,7 +300,7 @@ def has_tuple_argument(coords: tuple[float, ...]):
 
 
 @create_parser()
-def has_optional_tuple_argument(label: str, dims: tuple[int, ...] = None):
+def has_optional_tuple_argument(label: str, dims: Optional[tuple[int, ...]] = None):
     """Label dimensions.
 
     Args:
@@ -310,7 +311,7 @@ def has_optional_tuple_argument(label: str, dims: tuple[int, ...] = None):
 
 
 @create_parser()
-def has_tuple_argument_without_type(coords: tuple = None):
+def has_tuple_argument_without_type(coords: Optional[tuple] = None):
     """Process coordinates.
 
     Args:

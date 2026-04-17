@@ -1,7 +1,7 @@
 import logging
 import sys
 from itertools import zip_longest
-from typing import Any, List, Optional, Tuple
+from typing import Any, List, Optional, Sequence, Tuple
 
 _NO_DEFAULT = object()
 
@@ -26,7 +26,7 @@ def _get_args_and_defaults(args: List[str], defaults: Optional[Tuple[Any, ...]] 
     return args_and_defaults[::-1]
 
 
-def _get_args_to_parse(args: List[str], cli_arguments: Optional[List[str]] = None):
+def _get_args_to_parse(args: Optional[Sequence[str]], cli_arguments: Optional[Sequence[str]] = None):
     """Return the given arguments if it is not None else sys.argv if it contains
         something, an empty list otherwise.
 
