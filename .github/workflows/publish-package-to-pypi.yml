@@ -16,9 +16,9 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
     steps:
-        - uses: actions/checkout@v6
+        - uses: actions/checkout@v7
         - name: set up Python
-          uses: actions/setup-python@v6
+          uses: actions/setup-python@v7
           with:
             python-version: "3.x"
         - name: install dependencies
@@ -44,4 +44,4 @@ jobs:
         - name: create github release
           run: gh release create --fail-on-no-commits v${PACKAGE_VERSION} dist/parse_this*.tar.gz
         - name: publish package
-          uses: pypa/gh-action-pypi-publish@v1.14.0
+          uses: pypa/gh-action-pypi-publish@v1.14.1
